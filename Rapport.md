@@ -69,6 +69,57 @@ https://www.youtube.com/watch?v=eyjSXgOm5Fg
 
 ---
 
+### Documentation Multithreading en C++
+
+---
+
+https://www.udemy.com/course/learn-modern-cplusplus-concurrency/learn/lecture/22341398#overview
+
+
+
+---
+
+### Documentation Avancée de C++
+
+---
+
+https://www.udemy.com/course/learn-intermediate-modern-c/learn/lecture/16369306#overview
+
+---
+
+### Documentation Design Pattern en C++
+
+---
+
+https://www.udemy.com/course/patterns-cplusplus/learn/lecture/7736406#overview
+
+
+
+---
+
+## Organisation architecture MVC avec SFML
+
+
+
+Voici une structure typique pour un jeu d’échecs ou un autre projet avec **SFML + MVC**:
+
+````bash
+/YaltaChess
+│── /src
+│   ├── Model.h
+│   ├── Model.cpp
+│   ├── View.h
+│   ├── View.cpp
+│   ├── Controller.h
+│   ├── Controller.cpp
+│   ├── main.cpp
+│── /assets
+│   ├── pieces.png
+│── CMakeLists.txt  (Si tu utilises CMake)
+````
+
+
+
 
 
 
