@@ -134,9 +134,54 @@ Voici une structure typique pour un jeu d’échecs ou un autre projet avec **SF
 
 Je vais élaborer un premier diagramme UML. Il sera certainement modifié ou amélioré au-fur-et-à-mesure de l'avancement du jeu.
 
+Ce premier diagramme inclut:
+
+**Le modèle MVC** avec `Game`, `Board`, `GUI`, et `Controller`.
+
+**Les pièces d’échecs** sous forme de classes avec héritage de `Piece`.
+
+**L'IA basée sur MinMax**, avec la gestion du multi-threading à intégrer dans `MinMaxAI`.
+
+**Les joueurs (humains et IA)**, avec des méthodes pour exécuter et valider les mouvements.
 
 
 
+
+
+Voici comment les responsabilités sont réparties:
+
+**Modèle (Model) :**
+
+C'est la logique métier et la gestion des données.
+
+- **`Jeu`** : Gère le déroulement de la partie, les règles et la gestion des joueurs.
+- **`Echiquier`** : Représente l'échiquier et gère les positions des pièces.
+- **`Piece`** (et ses sous-classes `King`, `Queen`, `Bishop`, etc.) : Définit le comportement des pièces.
+
+
+
+**Vue (View) :**
+
+C'est l'interface utilisateur (affichage du plateau et interaction avec les joueurs).
+
+- **`GUI`** : Gère l'affichage graphique du jeu et la saisie des joueurs.
+
+
+
+**Contrôleur (Controller) :**
+
+Il sert d’intermédiaire entre la Vue et le Modèle.
+
+- **`Controller`** : Traite les entrées des joueurs, met à jour le modèle et rafraîchit la vue.
+
+
+
+**Interactions entre ces composants :**
+
+1. `GUI` reçoit une action de l'utilisateur (`getPlayerInput()`).
+2. `Controller` interprète l'action et demande à `Game` de la traiter (`processMove()`).
+3. `Game` vérifie la validité du mouvement avec `Board` et met à jour l’état du jeu.
+4. `Controller` met à jour la `GUI` (`updateView()`).
 
 
 
