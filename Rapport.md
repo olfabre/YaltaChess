@@ -6,7 +6,13 @@ Développement d'un jeu d'Échec Yalta dans le cadre de mon parcours en Master I
 
 ---
 
-## Technologies utilisées
+## Etape 1: recherche informations
+
+
+
+
+
+### Technologies utilisées
 
 Pour ce projet, je vais implémenter l'architecture **MVC** avec **SFML** en **C++** qui sera un excellent choix pour notre jeu d'échecs. SFML offre de bonnes performances graphiques tout en restant simple à utiliser.
 
@@ -33,7 +39,7 @@ Initialement, l'architecture **MVC (modèle - Vue - Contrôleur)**  dans SFML se
 
 
 
-### Documentation SFML
+#### Documentation SFML
 
 ---
 
@@ -69,7 +75,7 @@ https://www.youtube.com/watch?v=eyjSXgOm5Fg
 
 ---
 
-### Documentation Multithreading en C++
+#### Documentation Multithreading en C++
 
 ---
 
@@ -79,7 +85,7 @@ https://www.udemy.com/course/learn-modern-cplusplus-concurrency/learn/lecture/22
 
 ---
 
-### Documentation Avancée de C++
+#### Documentation Avancée de C++
 
 ---
 
@@ -87,7 +93,7 @@ https://www.udemy.com/course/learn-intermediate-modern-c/learn/lecture/16369306#
 
 ---
 
-### Documentation Design Pattern en C++
+#### Documentation Design Pattern en C++
 
 ---
 
@@ -97,7 +103,7 @@ https://www.udemy.com/course/patterns-cplusplus/learn/lecture/7736406#overview
 
 ---
 
-## Organisation architecture MVC avec SFML
+### Organisation architecture MVC avec SFML
 
 
 
@@ -118,6 +124,15 @@ Voici une structure typique pour un jeu d’échecs ou un autre projet avec **SF
 │── CMakeLists.txt  (Si tu utilises CMake)
 ````
 
+---
+
+
+
+## Etape 2 - Diagramme UML
+
+
+
+Je vais élaborer un premier diagramme UML. Il sera certainement modifié ou amélioré au-fur-et-à-mesure de l'avancement du jeu.
 
 
 
@@ -141,6 +156,7 @@ Voici une structure typique pour un jeu d’échecs ou un autre projet avec **SF
 
 
 
+Consigne enseignant:
 
 Design pattern, programmation parallèle, Algo avancées, appel récursif. Jeux d'echec à 3 joueurs, interface graphique, avec une intelligence artificielle, qui décide le meilleur coup à faire.
 
@@ -152,8 +168,3 @@ Intelligence artificielle:
 
 Le min-max: est multi threadé
 
-
-
-
-
-### 
