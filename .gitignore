@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+.idea/modules.xml
+.idea/vcs.xml
+.idea/YaltaChess.iml
