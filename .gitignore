@@ -33,3 +33,10 @@
 .idea/modules.xml
 .idea/vcs.xml
 .idea/YaltaChess.iml
+
+build
+out
+.cache
+.idea
+.vs
+.vscode
