@@ -49,6 +49,8 @@ L'installation de SFML 3 s'est bien passée.
 
 ## Étape 3: tester SFML
 
+
+
 J'ai crée un fichier `CMakePresets.json`
 
 Ce fichier sert à **simplifier la configuration de ton projet avec CMake** en définissant des paramètres prédéfinis. Il permet de centraliser les options importantes pour que tu n'aies pas à les taper manuellement à chaque fois.
@@ -76,7 +78,9 @@ Ce fichier sert à **simplifier la configuration de ton projet avec CMake** en d
 - 🐞 **`CMAKE_BUILD_TYPE`** : Ici, le mode `Debug` est activé, ce qui inclut des informations utiles pour déboguer ton code (comme les symboles de débogage).
   
 
-j'ai crée un fichier `CMakeLists.txt`
+j'ai crée un dossier `main` où je vais placer le code principal
+
+Dans ce dossier, j'ai crée un fichier `CMakeLists.txt`
 
 Ce fichier est **le cœur de ton projet** sous CMake. Il décrit comment ton projet doit être configuré, compilé et lié.
 
@@ -133,20 +137,45 @@ target_compile_features(main PRIVATE cxx_std_17)
 -  **`target_link_libraries`** indique que ton exécutable doit être lié avec **SFML** (le module graphique).
 -  **`target_compile_features`** précise que ton code utilise les fonctionnalités du standard **C++17**.
 
-j'ai crée un fichier 
+
+
+
+
+J'ai crée un fichier `main.cpp` ou le contneu sera provisoir 
+
+```cpp
+#include <SFML/Graphics.hpp>
+
+int main()
+{
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "YaltaChess");
+    window.setFramerateLimit(144);
+
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                window.close();
+            }
+        }
+
+        window.clear();
+        window.display();
+    }
+}
+```
 
 
 
 
 
-
-
-
-
-### Commandes pour compiler mon projet
+### Commandes pour compiler mon code principal
 
 ```bash
-cmake -B build
+cmake -B build // par defaut mais dans mon cas, c'est la ligne du bas
+cmake -B build_main -S main
 ```
 
 La commande initiale (`cmake -B build`) **génère les fichiers de configuration** (Makefiles, cache, etc.) et télécharge les dépendances (comme SFML via `FetchContent`). C'est normal que ce soit plus long la première fois.
@@ -154,10 +183,90 @@ La commande initiale (`cmake -B build`) **génère les fichiers de configuration
 
 
 ```bash
-cmake --build buil
+cmake --build build // par defaut mais dans mon cas, c'est la ligne du bas
+cmake --build build_main
 ```
 
 La commande suivante (`cmake --build build`) **compile tout le projet**, y compris les dépendances. C'est aussi plus long au premier passage. Cette commande **ne recompilera que les fichiers modifiés**, rendant la compilation beaucoup plus rapide.(builds "incrémentiels" )
+
+
+
+
+
+j'ai crée un dossier `tests` où je vais placer le code pour tester 
+
+J'ai créer un fichier `testSFML3.cpp`
+
+```cpp
+#include <SFML/Graphics.hpp>
+
+int main()
+{
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "CMake Test SFML");
+    window.setFramerateLimit(144);
+
+    while (window.isOpen())
+    {
+        while (const std::optional event = window.pollEvent())
+        {
+            if (event->is<sf::Event::Closed>())
+            {
+                window.close();
+            }
+        }
+
+        window.clear();
+        window.display();
+    }
+}
+```
+
+j'ai créé un fichier `CMakeLists.txt`
+
+```txt
+cmake_minimum_required(VERSION 3.25.2)
+project(TestSFML LANGUAGES CXX)
+
+include(FetchContent)
+FetchContent_Declare(SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0)
+FetchContent_MakeAvailable(SFML)
+
+add_executable(testSFML3 testSFML3.cpp)
+target_link_libraries(testSFML3 PRIVATE sfml-graphics)
+target_compile_features(testSFML3 PRIVATE cxx_std_17)
+```
+
+
+
+
+
+
+
+### Commandes pour lancer le code de test SFML
+
+
+
+```bash
+cmake -B build_test -S tests   
+```
+
+Génèration des fichiers de configuration
+
+```bash
+cmake --build build_test
+```
+
+Compilation de tout le projet
+
+```bash
+./build_test/testSFML3
+```
+
+Lancement du test
+
+
 
 
 
