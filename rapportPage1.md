@@ -84,7 +84,7 @@ Dans ce dossier, j'ai crée un fichier `CMakeLists.txt`
 
 Ce fichier est **le cœur de ton projet** sous CMake. Il décrit comment ton projet doit être configuré, compilé et lié.
 
-```txt
+```cmake
 cmake_minimum_required(VERSION 3.25.2)
 project(CMakeSFMLProject LANGUAGES CXX)
 
@@ -101,7 +101,7 @@ target_link_libraries(main PRIVATE sfml-graphics)
 target_compile_features(main PRIVATE cxx_std_17)
 ```
 
-```txt
+```cmake
 cmake_minimum_required(VERSION 3.25.2)
 project(CMakeSFMLProject LANGUAGES CXX) 
 ```
@@ -109,14 +109,14 @@ project(CMakeSFMLProject LANGUAGES CXX)
 - Spécifie la version minimale de CMake requise.
 - Définit le nom de ton projet (`CMakeSFMLProject`) et précise que c'est un projet en **C++**.
 
-```txt
+```cmake
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ```
 
 - Change l'emplacement des exécutables générés.
 - Ici, les exécutables seront placés dans le dossier `/build/bin`.
 
-```txt
+```cmake
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
@@ -127,7 +127,7 @@ FetchContent_MakeAvailable(SFML)
 - **`FetchContent`** est une méthode puissante qui télécharge et configure automatiquement des bibliothèques externes.
 - Ici, il télécharge et configure la bibliothèque **SFML** (version 3.0.0) directement depuis GitHub.
 
-```txt
+```cmake
 add_executable(main main.cpp)
 target_link_libraries(main PRIVATE sfml-graphics)
 target_compile_features(main PRIVATE cxx_std_17)
@@ -223,7 +223,7 @@ int main()
 
 j'ai créé un fichier `CMakeLists.txt`
 
-```txt
+```cmake
 cmake_minimum_required(VERSION 3.25.2)
 project(TestSFML LANGUAGES CXX)
 
@@ -270,5 +270,370 @@ Lancement du test
 
 
 
+### Étape 4: mise en place de la structure MVC
 
 
+
+Voici ma structure optimisée avec SFML 3 pour bien démarrer mon projet. 
+
+Cette base inclut les bonnes pratiques et une architecture claire:
+
+- **Séparation claire** : Chaque composant respecte bien le pattern MVC.
+- **Lisibilité** : Les classes sont courtes et claires.
+- **Extensibilité** : Cette structure permet d'ajouter facilement des entités, des scènes ou d'autres fonctionnalités.
+-  **Optimisation SFML 3** : Utilisation de `std::optional` pour améliorer la gestion d'événements.
+
+```bash
+/YaltaChess
+│ 
+│── /main
+│   ├── CMakeLists.txt
+│   ├── Model.h
+│   ├── Model.cpp
+│   ├── View.h
+│   ├── View.cpp
+│   ├── Controller.h
+│   ├── Controller.cpp
+│   └── main.cpp
+│── /build_main   <-- (sera créé lors de la compilation)
+```
+
+
+
+1 fichier `/main/Model.h`
+
+```cpp
+#ifndef MODEL_H
+#define MODEL_H
+
+#include <SFML/Graphics.hpp>
+
+class Model {
+public:
+    Model();  
+    void update();  
+};
+
+#endif // MODEL_H
+```
+
+
+
+
+
+1 fichier `/main/Model.cpp`
+
+```cpp
+#include "Model.h"
+
+Model::Model() {
+    // Initialisation des données
+}
+
+void Model::update() {
+    // Logique métier et gestion des données
+}
+```
+
+
+
+
+
+1 fichier `/main/View.h`
+
+```cpp
+#ifndef VIEW_H
+#define VIEW_H
+
+#include <SFML/Graphics.hpp>
+
+class View {
+public:
+    View(sf::RenderWindow& window);
+    void render();
+private:
+    sf::RenderWindow& m_window;
+};
+
+#endif // VIEW_H
+```
+
+
+
+
+
+1 fichier `/main/View.cpp`
+
+```cpp
+#include "View.h"
+
+View::View(sf::RenderWindow& window) : m_window(window) {}
+
+void View::render() {
+    m_window.clear(sf::Color::Black);  // Couleur de fond par défaut
+    // Dessine les éléments graphiques ici
+    m_window.display();
+}
+```
+
+
+
+
+
+1 fichier `/main/Controller.h`
+
+```cpp
+#ifndef CONTROLLER_H
+#define CONTROLLER_H
+
+#include <SFML/Graphics.hpp>
+#include "Model.h"
+#include "View.h"
+
+class Controller {
+public:
+    Controller(Model& model, View& view);
+    void processEvents(sf::RenderWindow& window);
+private:
+    Model& m_model;
+    View& m_view;
+};
+
+#endif // CONTROLLER_H
+```
+
+
+
+
+
+1 fichier `/main/Controller.cpp`
+
+```cpp
+#include "Controller.h"
+
+Controller::Controller(Model& model, View& view) : m_model(model), m_view(view) {}
+
+void Controller::processEvents(sf::RenderWindow& window) {
+    while (const std::optional event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
+            window.close();
+        }
+    }
+}
+```
+
+
+
+
+
+1 fichier `/main/main.cpp`
+
+```cpp
+#include <SFML/Graphics.hpp>
+#include "Model.h"
+#include "View.h"
+#include "Controller.h"
+
+int main() {
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "SFML MVC Example");
+    window.setFramerateLimit(144);
+
+    Model model;
+    View view(window);
+    Controller controller(model, view);
+
+    while (window.isOpen()) {
+        controller.processEvents(window);  // Gestion des événements
+        model.update();                    // Mise à jour des données
+        view.render();                     // Rendu graphique
+    }
+
+    return 0;
+}
+```
+
+
+
+
+
+Je dois aussi modifier le fichier ` /main/CMakeLists.txt`
+
+```cmake
+cmake_minimum_required(VERSION 3.25.2)
+project(SFML_MVC_YaltaChess LANGUAGES CXX)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+include(FetchContent)
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0
+)
+FetchContent_MakeAvailable(SFML)
+
+# Inclusion de tous les fichiers du dossier actuel (car CMakeLists.txt est dans /main)
+file(GLOB_RECURSE SRC_FILES ./*.cpp)
+
+# Création de l'exécutable avec tous les fichiers sources
+add_executable(SFML_MVC_YaltaChess ${SRC_FILES})
+
+# Ajout des bibliothèques SFML
+target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml-system)
+
+# Standard C++17
+target_compile_features(SFML_MVC_YaltaChess PRIVATE cxx_std_17)
+
+# Inclusion des répertoires pour les headers
+target_include_directories(SFML_MVC_YaltaChess PRIVATE ${CMAKE_SOURCE_DIR}/main)
+
+```
+
+#### **1. Définition de la version de CMake**
+
+```cmake
+cmake_minimum_required(VERSION 3.25.2)
+```
+
+- Cette ligne indique la version minimale de CMake requise.
+   → **`VERSION 3.25.2`** est nécessaire car SFML 3 utilise des fonctionnalités modernes de CMake.
+
+
+
+#### **2. Nom du projet**
+
+```cmake
+project(SFML_MVC_YaltaChess LANGUAGES CXX)
+```
+
+- Définit le nom du projet (`SFML_MVC_YaltaChess`).
+- **`LANGUAGES CXX`** indique que ton projet est en C++.
+
+
+
+#### **3. Définir le répertoire de sortie des exécutables**
+
+```cmake
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+```
+
+- Cette ligne précise que l'exécutable sera généré dans le dossier `/bin` à l'intérieur du répertoire de build (`build_main`).
+   → Cela permet de garder une structure propre avec un exécutable bien séparé des fichiers de compilation.
+
+
+
+#### **4. Gestion de la bibliothèque SFML via `FetchContent`**
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0
+)
+FetchContent_MakeAvailable(SFML)
+```
+
+- **`include(FetchContent)`** : Active le module `FetchContent` qui permet de télécharger et de configurer des bibliothèques directement depuis GitHub.
+- **`FetchContent_Declare()`** : Indique à CMake d'aller chercher SFML 3 sur le dépôt GitHub officiel.
+-  **`GIT_TAG 3.0.0`** : Utilise la version 3.0.0 de SFML (la plus récente).
+- **`FetchContent_MakeAvailable(SFML)`** : Télécharge et configure automatiquement SFML dans ton projet.
+
+
+
+#### **5. Inclusion des fichiers sources**
+
+```cmake
+file(GLOB_RECURSE SRC_FILES ./*.cpp)
+```
+
+- Cette commande recherche **récursivement** tous les fichiers `.cpp` dans le répertoire `/main` (car ton `CMakeLists.txt` est dans `/main`).
+   → Cela permet d'ajouter automatiquement tous tes fichiers sources sans les lister manuellement.
+   → **Exemple :** Si tu ajoutes `Piece.cpp`, il sera automatiquement inclus.
+
+
+
+#### **6. Création de l'exécutable**
+
+```cmake
+add_executable(SFML_MVC_YaltaChess ${SRC_FILES})
+```
+
+- Cette ligne crée l'exécutable nommé **`SFML_MVC_YaltaChess`** en utilisant tous les fichiers contenus dans la variable `${SRC_FILES}`.
+   → C'est l'étape clé qui génère ton programme final.
+
+
+
+#### **7. Ajout des bibliothèques SFML**
+
+```cmake
+target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml-system)
+```
+
+- **`target_link_libraries`** : Relie ton projet aux bibliothèques nécessaires de SFML :
+
+- **`sfml-graphics`** : Pour la gestion des graphismes (sprites, formes, etc.).
+- **`sfml-window`** : Pour la gestion des fenêtres et des événements.
+- **`sfml-system`** : Pour les outils de gestion du temps et les utilitaires.
+
+
+
+#### **8. Activation du standard C++17**
+
+```cmake
+target_compile_features(SFML_MVC_YaltaChess PRIVATE cxx_std_17)
+```
+
+-  Active la norme **C++17** pour ton projet.
+   → SFML 3 est conçu pour fonctionner avec cette version ou supérieure.
+
+
+
+#### **9. Inclusion des répertoires de headers**
+
+```cmake
+target_include_directories(SFML_MVC_YaltaChess PRIVATE ${CMAKE_SOURCE_DIR}/main)
+```
+
+- Indique à CMake d'inclure le dossier `/main` pour retrouver les fichiers `.h` (headers).
+   → Cela permet que les `#include "Model.h"` ou `#include "Controller.h"` fonctionnent sans chemin compliqué.
+
+
+
+#### **10. Commandes finales pour compiler et exécuter**
+
+Dans ton terminal, à la racine de ton projet :
+
+##### ➤ **Générer les fichiers de build**
+
+```bash
+cmake -B build_main -S main
+```
+
+- Généra le répertoire `build_main` avec les fichiers de compilation.
+
+
+
+##### ➤ **Compiler le projet**
+
+```bash
+cmake --build build_main
+```
+
+-  Compile ton projet et génère l'exécutable dans `build_main/bin/SFML_MVC_YaltaChess`.
+
+
+
+##### ➤ **Exécuter ton projet**
+
+```bash
+./build_main/bin/SFML_MVC_YaltaChess
+```
+
+-  Lance ton application SFML.
+
+
+
+
+
+https://chatgpt.com/share/67d899f9-7af8-8009-a9f4-23be488ebe83
