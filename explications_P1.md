@@ -185,6 +185,11 @@ Il sert d’intermédiaire entre la Vue et le Modèle.
 
 
 
+pas terminé
+
+---
+
+#
 
 
 
@@ -198,6 +203,11 @@ Il sert d’intermédiaire entre la Vue et le Modèle.
 
 
 
+
+
+
+
+---
 
 
 
