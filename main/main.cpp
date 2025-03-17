@@ -1,21 +1,21 @@
 #include <SFML/Graphics.hpp>
+#include "Model.h"
+#include "View.h"
+#include "Controller.h"
 
-int main()
-{
-    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "YaltaChess");
+int main() {
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "SFML MVC Example");
     window.setFramerateLimit(144);
 
-    while (window.isOpen())
-    {
-        while (const std::optional event = window.pollEvent())
-        {
-            if (event->is<sf::Event::Closed>())
-            {
-                window.close();
-            }
-        }
+    Model model;
+    View view(window);
+    Controller controller(model, view);
 
-        window.clear();
-        window.display();
+    while (window.isOpen()) {
+        controller.processEvents(window);  // Gestion des événements
+        model.update();                    // Mise à jour des données
+        view.render();                     // Rendu graphique
     }
+
+    return 0;
 }
