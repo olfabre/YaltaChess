@@ -6,7 +6,7 @@
 class Model {
 public:
     Model();
-    void update();
+    void update(); // Mise à jour des données du modèle (ex : position des pièces d'échecs).
 };
 
 #endif // MODEL_H

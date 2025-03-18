@@ -283,6 +283,18 @@ Cette base inclut les bonnes pratiques et une architecture claire:
 - **Extensibilité** : Cette structure permet d'ajouter facilement des entités, des scènes ou d'autres fonctionnalités.
 -  **Optimisation SFML 3** : Utilisation de `std::optional` pour améliorer la gestion d'événements.
 
+L'architecture **MVC** (Modèle-Vue-Contrôleur) est une structure de code puissante qui permet de séparer la logique métier, l'affichage et la gestion des interactions utilisateur. 
+
+
+
+L'architecture MVC se divise en trois parties principales :
+
+- **Modèle (Model)** → Gestion des données et logique métier.
+- **Vue (View)** → Gestion de l'affichage graphique avec SFML.
+- **Contrôleur (Controller)** → Gestion des événements et interactions utilisateur.
+
+
+
 ```bash
 /YaltaChess
 │ 
@@ -301,6 +313,8 @@ Cette base inclut les bonnes pratiques et une architecture claire:
 
 
 1 fichier `/main/Model.h`
+
+Gère les données, les règles du jeu, et la logique métier.
 
 ```cpp
 #ifndef MODEL_H
@@ -323,6 +337,8 @@ public:
 
 1 fichier `/main/Model.cpp`
 
+Gère les données, les règles du jeu, et la logique métier.
+
 ```cpp
 #include "Model.h"
 
@@ -335,7 +351,10 @@ void Model::update() {
 }
 ```
 
+**Rôle du `Model` :**
 
+- Stocke les informations clés (ex : position des pièces d'échecs).
+- Met à jour les données en fonction des règles métier (ex : déplacement légal des pièces).
 
 
 
@@ -631,6 +650,10 @@ cmake --build build_main
 ```
 
 -  Lance ton application SFML.
+
+
+
+
 
 
 
