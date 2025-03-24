@@ -325,7 +325,7 @@ Gère les données, les règles du jeu, et la logique métier.
 class Model {
 public:
     Model();  
-    void update();  
+    void update();  // Mise à jour des données du modèle (ex : position des pièces d'échecs).
 };
 
 #endif // MODEL_H
@@ -343,11 +343,11 @@ Gère les données, les règles du jeu, et la logique métier.
 #include "Model.h"
 
 Model::Model() {
-    // Initialisation des données
+    // Initialisation des données (ex : position initiale des pièces)
 }
 
 void Model::update() {
-    // Logique métier et gestion des données
+    // Exemple : Mettre à jour les positions des pièces, gérer les règles du jeu, etc.
 }
 ```
 
@@ -360,6 +360,8 @@ void Model::update() {
 
 1 fichier `/main/View.h`
 
+Gère l'affichage et le rendu graphique à l'écran.
+
 ```cpp
 #ifndef VIEW_H
 #define VIEW_H
@@ -369,9 +371,9 @@ void Model::update() {
 class View {
 public:
     View(sf::RenderWindow& window);
-    void render();
+    void render(); // Dessine les éléments graphiques
 private:
-    sf::RenderWindow& m_window;
+    sf::RenderWindow& m_window; // Référence vers la fenêtre SFML
 };
 
 #endif // VIEW_H
@@ -383,6 +385,8 @@ private:
 
 1 fichier `/main/View.cpp`
 
+Gère l'affichage et le rendu graphique à l'écran.
+
 ```cpp
 #include "View.h"
 
@@ -390,16 +394,28 @@ View::View(sf::RenderWindow& window) : m_window(window) {}
 
 void View::render() {
     m_window.clear(sf::Color::Black);  // Couleur de fond par défaut
-    // Dessine les éléments graphiques ici
+    // Dessine les éléments graphiques ici: les pièces, l'échiquier, etc
     m_window.display();
 }
 ```
 
 
 
+**Rôle du `View` :**
+
+- Affiche les éléments graphiques.
+- Récupère les informations du `Model` pour afficher correctement les données à l'utilisateur.
+- Ne contient **aucune** logique métier.
+
+
+
+
+
 
 
 1 fichier `/main/Controller.h`
+
+
 
 ```cpp
 #ifndef CONTROLLER_H
