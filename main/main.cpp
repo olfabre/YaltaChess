@@ -4,7 +4,7 @@
 #include "Controller.h"
 
 int main() {
-    auto window = sf::RenderWindow(sf::VideoMode({1200u, 800u}), "YaltaChess");
+    auto window = sf::RenderWindow(sf::VideoMode({1200u, 900u}), "YaltaChess");
     window.setFramerateLimit(144);
 
     Model model;

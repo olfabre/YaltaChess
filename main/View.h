@@ -5,12 +5,13 @@
 #include "Model.h"
 
 class View {
-public:
-    View(sf::RenderWindow& window, Model& model);
-    void render();
 private:
     sf::RenderWindow& m_window;
     Model& m_model;
+
+public:
+    View(sf::RenderWindow& window, Model& model);
+    void render();
 };
 
 #endif

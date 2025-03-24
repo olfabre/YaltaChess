@@ -1082,7 +1082,17 @@ cmake --build build_main
 
 
 
-Notre échiquier actuel utilise des cases carrées disposées dans un tableau 2D simple. C'est une première étape. 
+Notre échiquier actuel utilise des cases carrées disposées dans un tableau 2D simple. C'est une première étape. Or, l'échiquier Yalta est hexagonal avec 96 cases trapézoïdales!
+
+Pour gérer ce type spécifique d’échiquier, il faut adapter ta structure graphique et logique.
+
+**Comment dessiner l'échiquier Yalta sous SFML clairement**
+
+- Chaque case sera dessinée comme un **polygone SFML** (`sf::ConvexShape`).
+- Chaque case aura une coordonnée spécifique (personnalisée).
+- On stockera dans notre classe `Case` chaque position sous forme de polygone (`sf::ConvexShape`) et on l’affichera ensuite directement.
+
+
 
 
 

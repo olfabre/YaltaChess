@@ -8,14 +8,16 @@
 
 class Model {
 private:
-    std::vector<std::vector<Case>> echiquier; // 12x8 = 96 cases
-    std::vector<std::unique_ptr<Piece>> pieces; // gestion dynamique des pièces
+    std::vector<Case> echiquier;  // 96 cases pour Yalta
+    std::vector<std::unique_ptr<Piece>> pieces; // Pièces dynamiques
+
+    void initialiserEchiquierYalta(); // Initialisation spécifique Yalta
 
 public:
     Model();
     void update();
-    Case& getCase(sf::Vector2i pos);
-    const std::vector<std::vector<Case>>& getEchiquier() const;
+
+    const std::vector<Case>& getEchiquier() const;
 };
 
 #endif

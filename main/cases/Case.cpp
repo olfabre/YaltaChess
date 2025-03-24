@@ -1,19 +1,21 @@
 #include "Case.h"
 
-Case::Case(sf::Vector2i pos) : position(pos), piece(nullptr) {}
+Case::Case(const std::vector<sf::Vector2f>& points, sf::Color couleur) : piece(nullptr) {
+    forme.setPointCount(points.size());
+    for (size_t i = 0; i < points.size(); ++i) {
+        forme.setPoint(i, points[i]);
+    }
+    forme.setFillColor(couleur);  // Utiliser la couleur passée en paramètre
+    forme.setOutlineThickness(1.f);
+    forme.setOutlineColor(sf::Color::Black);
+}
 
 bool Case::estOccupee() const { return piece != nullptr; }
-
 Piece* Case::getPiece() const { return piece; }
-
 void Case::setPiece(Piece* p) { piece = p; }
 
-sf::Vector2i Case::getPosition() const { return position; }
-
-// Correction ici :
 void Case::dessiner(sf::RenderWindow& window) const {
-    sf::RectangleShape carre({100.f, 100.f});
-    carre.setPosition(sf::Vector2f(position.x * 100.f, position.y * 100.f));
-    carre.setFillColor((position.x + position.y) % 2 ? sf::Color(209,139,71) : sf::Color(255,206,158));
-    window.draw(carre);
+    window.draw(forme);
+    if (piece)
+        piece->dessiner(window);
 }
