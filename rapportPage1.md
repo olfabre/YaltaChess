@@ -1076,11 +1076,13 @@ cmake --build build_main
 ./build_main/bin/SFML_MVC_YaltaChess 
 ```
 
+<img src="1.jpg" alt="1" style="zoom:50%;" />
 
 
 
 
 
+Notre échiquier actuel utilise des cases carrées disposées dans un tableau 2D simple. C'est une première étape. 
 
 
 
