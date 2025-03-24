@@ -761,7 +761,176 @@ Piece (abstraite)
 
 
 
+Fichier `pieces/Piece.h`
 
+```cpp
+#ifndef PIECE_H
+#define PIECE_H
+
+#include <SFML/Graphics.hpp>
+
+enum Couleur { BLANC, NOIR, ROUGE };
+
+// Classe abstraite représentant une pièce du jeu Yalta
+class Piece {
+protected:
+    sf::Vector2i position; // Position sur l'échiquier
+    Couleur couleur;       // Couleur de la pièce (joueur)
+
+public:
+    Piece(sf::Vector2i pos, Couleur coul);
+    virtual ~Piece() = default;
+
+    // Vérifie la validité du déplacement spécifique à chaque pièce
+    virtual bool mouvementValide(sf::Vector2i nouvellePos) const = 0;
+
+    // Dessine graphiquement la pièce (SFML)
+    virtual void dessiner(sf::RenderWindow& window) const = 0;
+
+    // Accesseurs
+    sf::Vector2i getPosition() const;
+    void setPosition(sf::Vector2i nouvellePos);
+    Couleur getCouleur() const;
+};
+
+#endif
+```
+
+
+
+Fichier `pieces/Piece.cpp`
+
+```cpp
+#include "Piece.h"
+
+Piece::Piece(sf::Vector2i pos, Couleur coul)
+        : position(pos), couleur(coul) {}
+
+sf::Vector2i Piece::getPosition() const {
+    return position;
+}
+
+void Piece::setPosition(sf::Vector2i nouvellePos) {
+    position = nouvellePos;
+}
+
+Couleur Piece::getCouleur() const {
+    return couleur;
+}
+```
+
+
+
+Un exemple de pièce du jeu qui va heriter de `piece` : fichiers `Roi.h` et `Roi.cpp`
+
+
+
+```cpp
+#ifndef ROI_H
+#define ROI_H
+
+#include "Piece.h"
+
+// Classe Roi héritant de Piece
+class Roi : public Piece {
+public:
+    Roi(sf::Vector2i pos, Couleur coul);
+    bool mouvementValide(sf::Vector2i nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
+};
+
+#endif
+```
+
+
+
+```cpp
+#include "Roi.h"
+#include <cmath>
+
+Roi::Roi(sf::Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+
+bool Roi::mouvementValide(sf::Vector2i nouvellePos) const {
+    int dx = std::abs(nouvellePos.x - position.x);
+    int dy = std::abs(nouvellePos.y - position.y);
+    return (dx <= 1 && dy <= 1);
+}
+
+void Roi::dessiner(sf::RenderWindow& window) const {
+    // Ici, dessiner le Roi (sprite ou forme)
+}
+
+```
+
+
+
+### Étape 6: création de la hierarchie orientée objet des cases
+
+La structure avec les cases intégrées
+
+```bash
+/main
+│── Model.h
+│── Model.cpp
+│── View.h
+│── View.cpp
+│── Controller.h
+│── Controller.cpp
+│── main.cpp
+│
+├── /pieces
+│   ├── Piece.h
+│   ├── Piece.cpp
+│   ├── Roi.h
+│   ├── Roi.cpp
+│   ├── Dame.h
+│   ├── Dame.cpp
+│   ├── Tour.h
+│   ├── Tour.cpp
+│   ├── Fou.h
+│   ├── Fou.cpp
+│   ├── Cavalier.h
+│   ├── Cavalier.cpp
+│   ├── Pion.h
+│   └── Pion.cpp
+│
+└── /cases (nouveau dossier)
+    ├── Case.h
+    └── Case.cpp
+
+
+```
+
+
+
+Fichier `cases/Case.h`
+
+```cpp
+#ifndef CASE_H
+#define CASE_H
+
+#include <SFML/Graphics.hpp>
+#include "../pieces/Piece.h"
+
+class Case {
+private:
+    sf::Vector2i position;
+    Piece* piece; // Pointeur vers une pièce ou nullptr si vide
+
+public:
+    Case(sf::Vector2i pos);
+
+    bool estOccupee() const;
+    Piece* getPiece() const;
+    void setPiece(Piece* p);
+    sf::Vector2i getPosition() const;
+
+    void dessiner(sf::RenderWindow& window);
+};
+
+#endif
+
+```
 
 
 
