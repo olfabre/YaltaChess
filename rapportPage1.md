@@ -729,6 +729,36 @@ Piece (abstraite)
 
 
 
+**Organisation des fichiers**
+
+````bash
+/main
+│── Model.h
+│── Model.cpp
+│── View.h
+│── View.cpp
+│── Controller.h
+│── Controller.cpp
+│── main.cpp
+│
+└── /pieces
+    ├── Piece.h
+    ├── Piece.cpp
+    ├── Roi.h
+    ├── Roi.cpp
+    ├── Dame.h
+    ├── Dame.cpp
+    ├── Tour.h
+    ├── Tour.cpp
+    ├── Fou.h
+    ├── Fou.cpp
+    ├── Cavalier.h
+    ├── Cavalier.cpp
+    ├── Pion.h
+    └── Pion.cpp
+
+````
+
 
 
 
