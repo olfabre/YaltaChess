@@ -415,7 +415,7 @@ void View::render() {
 
 1 fichier `/main/Controller.h`
 
-
+Gère les entrées utilisateur (clics, clavier) et met à jour le modèle et la vue.
 
 ```cpp
 #ifndef CONTROLLER_H
@@ -428,7 +428,7 @@ void View::render() {
 class Controller {
 public:
     Controller(Model& model, View& view);
-    void processEvents(sf::RenderWindow& window);
+    void processEvents(sf::RenderWindow& window); // Gère les événements SFML
 private:
     Model& m_model;
     View& m_view;
@@ -443,6 +443,8 @@ private:
 
 1 fichier `/main/Controller.cpp`
 
+Gère les entrées utilisateur (clics, clavier) et met à jour le modèle et la vue.
+
 ```cpp
 #include "Controller.h"
 
@@ -453,15 +455,22 @@ void Controller::processEvents(sf::RenderWindow& window) {
         if (event->is<sf::Event::Closed>()) {
             window.close();
         }
+      // Ici, gestion des clics sur les pièces d'échecs, les déplacements, etc.
     }
 }
 ```
 
+**Rôle du `Controller` :**
 
+- Récupère les événements utilisateurs (clics, mouvements de souris, etc.).
+- Met à jour le `Model` en fonction de ces interactions.
+- Informe la `View` des changements pour que l'affichage soit correct.
 
 
 
 1 fichier `/main/main.cpp`
+
+Point d'entrée principal du programme qui connecte le modèle, la vue et le contrôleur.
 
 ```cpp
 #include <SFML/Graphics.hpp>
@@ -473,19 +482,51 @@ int main() {
     auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "SFML MVC Example");
     window.setFramerateLimit(144);
 
-    Model model;
-    View view(window);
-    Controller controller(model, view);
+    Model model; // Création du modèle
+    View view(window); // Création de la vue (lié à la fenêtre)
+    Controller controller(model, view); // Création du contrôleur
 
     while (window.isOpen()) {
-        controller.processEvents(window);  // Gestion des événements
+        controller.processEvents(window);  // Gestion des événements (entrées utilisateurs)
         model.update();                    // Mise à jour des données
-        view.render();                     // Rendu graphique
+        view.render();                     // Rendu graphique et mise à jour affichage
     }
 
     return 0;
 }
 ```
+
+
+
+**Rôle du `main` :**
+
+- Initialise les trois composants (`Model`, `View`, `Controller`).
+- Utilise une boucle infinie pour :
+  - Traiter les événements avec le **Controller**.
+  - Mettre à jour les données avec le **Model**.
+  - Afficher les résultats avec la **View**.
+
+
+
+**Cycle de fonctionnement du code (Flux MVC)**
+
+Voici le cycle complet de fonctionnement :
+
+1. **Démarrage du programme**
+    → Le `main` crée une fenêtre SFML et initialise les trois composants.
+2. **Événements utilisateur (input)**
+    → Le `Controller` intercepte les interactions (ex : clic sur une pièce).
+    → Il met à jour le `Model` en conséquence (ex : déplacement d'une pièce).
+3. **Mise à jour des données**
+    → Le `Model` applique les règles du jeu (ex : vérifie si le déplacement est légal).
+4. **Affichage (output)**
+    → La `View` récupère les informations du `Model` et met à jour l’écran.
+5. **Répétition**
+    → Ce cycle se répète tant que la fenêtre est ouverte.
+
+
+
+
 
 
 
@@ -666,6 +707,33 @@ cmake --build build_main
 ```
 
 -  Lance ton application SFML.
+
+
+
+
+
+### Étape 5: création de la hierarchie orientée objet des pièces 
+
+Chaque pièce d’échecs Yalta sera un objet dérivant d'une classe abstraite commune (`Piece`), selon ce schéma :
+
+```scss
+Piece (abstraite)
+ │
+ ├── Roi
+ ├── Dame
+ ├── Tour
+ ├── Fou
+ ├── Cavalier
+ └── Pion
+```
+
+
+
+
+
+
+
+
 
 
 
