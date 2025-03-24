@@ -11,8 +11,12 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-# Inclusion de tous les fichiers du dossier actuel (car CMakeLists.txt est dans /main)
-file(GLOB_RECURSE SRC_FILES ./*.cpp)
+# Inclusion de tous les fichiers .cpp du dossier courant ET des sous-dossiers (pieces et cases)
+file(GLOB_RECURSE SRC_FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/pieces/*.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/cases/*.cpp
+        )
 
 # Création de l'exécutable avec tous les fichiers sources
 add_executable(SFML_MVC_YaltaChess ${SRC_FILES})
@@ -23,5 +27,9 @@ target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml
 # Standard C++17
 target_compile_features(SFML_MVC_YaltaChess PRIVATE cxx_std_17)
 
-# Inclusion des répertoires pour les headers
-target_include_directories(SFML_MVC_YaltaChess PRIVATE ${CMAKE_SOURCE_DIR}/main)
+# Inclusion des répertoires pour les headers (y compris sous-dossiers)
+target_include_directories(SFML_MVC_YaltaChess PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/pieces
+        ${CMAKE_CURRENT_SOURCE_DIR}/cases
+        )

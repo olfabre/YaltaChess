@@ -4,17 +4,17 @@
 #include "Controller.h"
 
 int main() {
-    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "YaltaChess");
+    auto window = sf::RenderWindow(sf::VideoMode({1200u, 800u}), "YaltaChess");
     window.setFramerateLimit(144);
 
     Model model;
-    View view(window);
+    View view(window, model);
     Controller controller(model, view);
 
     while (window.isOpen()) {
-        controller.processEvents(window);  // Gestion des événements
-        model.update();                    // Mise à jour des données
-        view.render();                     // Rendu graphique
+        controller.processEvents(window);
+        model.update();
+        view.render();
     }
 
     return 0;
