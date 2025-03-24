@@ -4,7 +4,7 @@
 #include "Controller.h"
 
 int main() {
-    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "SFML MVC Example");
+    auto window = sf::RenderWindow(sf::VideoMode({1920u, 1080u}), "YaltaChess");
     window.setFramerateLimit(144);
 
     Model model;
