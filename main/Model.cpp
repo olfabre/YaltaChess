@@ -1,6 +1,11 @@
 #include "Model.h"
 #include "pieces/Roi.h"
 // inclure ici les autres pièces nécessaires (Dame, Fou, etc.)
+#include "pieces/Dame.h"
+#include "pieces/Fou.h"
+#include "pieces/Tour.h"
+#include "pieces/Cavalier.h"
+#include "pieces/Pion.h"
 
 Model::Model() {
     // Initialisation des cases de l'échiquier (12x8 = 96 cases)

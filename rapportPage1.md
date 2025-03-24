@@ -966,4 +966,14 @@ void Case::dessiner(sf::RenderWindow& window) {
 
 
 
+
+
+
+
+
+
+
+
+
+
 https://chatgpt.com/share/67d899f9-7af8-8009-a9f4-23be488ebe83
