@@ -960,9 +960,121 @@ void Case::dessiner(sf::RenderWindow& window) {
 
 
 
+Quelques  modifications doivent être apportée:
 
 
 
+Fichier `cases/Case.h`
+
+```cpp
+// Case.h (correction)
+#ifndef CASE_H
+#define CASE_H
+
+#include <SFML/Graphics.hpp>
+#include "../pieces/Piece.h"
+
+class Case {
+private:
+    sf::Vector2i position;
+    Piece* piece; // Pointeur vers une pièce ou nullptr
+
+public:
+    Case(sf::Vector2i pos);
+
+    bool estOccupee() const;
+    Piece* getPiece() const;
+    void setPiece(Piece* p);
+    sf::Vector2i getPosition() const;
+
+    // Correction : ajout de const ici
+    void dessiner(sf::RenderWindow& window) const;
+};
+
+#endif
+
+```
+
+
+
+Fichier `cases/Case.cpp`
+
+```cpp
+#include "Case.h"
+
+Case::Case(sf::Vector2i pos) : position(pos), piece(nullptr) {}
+
+bool Case::estOccupee() const { return piece != nullptr; }
+
+Piece* Case::getPiece() const { return piece; }
+
+void Case::setPiece(Piece* p) { piece = p; }
+
+sf::Vector2i Case::getPosition() const { return position; }
+
+// Correction ici :
+void Case::dessiner(sf::RenderWindow& window) const {
+    sf::RectangleShape carre({100.f, 100.f});
+    carre.setPosition(sf::Vector2f(position.x * 100.f, position.y * 100.f));
+    carre.setFillColor((position.x + position.y) % 2 ? sf::Color(209,139,71) : sf::Color(255,206,158));
+    window.draw(carre);
+}
+
+```
+
+
+
+Fichier `CMakeLists.txt` pour prendre en compte les pièces et cases
+
+```txt
+cmake_minimum_required(VERSION 3.25.2)
+project(SFML_MVC_YaltaChess LANGUAGES CXX)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+include(FetchContent)
+FetchContent_Declare(
+        SFML
+        GIT_REPOSITORY https://github.com/SFML/SFML.git
+        GIT_TAG 3.0.0
+)
+FetchContent_MakeAvailable(SFML)
+
+# Inclusion de tous les fichiers .cpp du dossier courant ET des sous-dossiers (pieces et cases)
+file(GLOB_RECURSE SRC_FILES 
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/pieces/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/cases/*.cpp
+)
+
+# Création de l'exécutable avec tous les fichiers sources
+add_executable(SFML_MVC_YaltaChess ${SRC_FILES})
+
+# Ajout des bibliothèques SFML
+target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml-system)
+
+# Standard C++17
+target_compile_features(SFML_MVC_YaltaChess PRIVATE cxx_std_17)
+
+# Inclusion des répertoires pour les headers (y compris sous-dossiers)
+target_include_directories(SFML_MVC_YaltaChess PRIVATE 
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/pieces
+    ${CMAKE_CURRENT_SOURCE_DIR}/cases
+)
+
+```
+
+
+
+on compile de nouveau
+
+```bash
+cmake -B build_main -S main
+cmake --build build_main
+
+./build_main/bin/SFML_MVC_YaltaChess 
+```
 
 
 
