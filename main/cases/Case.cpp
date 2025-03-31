@@ -1,51 +1,35 @@
 #include "Case.h"
 
-Case::Case(sf::Vector2f pos, bool blanc) : position(pos), estBlanc(blanc), piece(nullptr)
+// Implémentation du constructeur
+Case::Case(const sf::Vector2f &pos, bool blanc)
+    : position(pos), estBlanc(blanc), piece(nullptr)
 {
-    // Création de la forme
-    forme = sf::RectangleShape(sf::Vector2f(TAILLE_CASE, TAILLE_CASE));
-    forme.setPosition(sf::Vector2f(pos.x, pos.y));
-
-    // Couleurs
-    if (blanc)
-    {
-        forme.setFillColor(sf::Color(238, 238, 210));
-    }
-    else
-    {
-        forme.setFillColor(sf::Color(118, 150, 86));
-    }
-
-    // Contour et rotation
-    forme.setOutlineThickness(1.f);
-    forme.setOutlineColor(sf::Color::Black);
-    forme.setOrigin(sf::Vector2f(TAILLE_CASE / 2.f, TAILLE_CASE / 2.f));
-    forme.setRotation(sf::degrees(45.f));
+    forme.setSize({TAILLE_CASE, TAILLE_CASE});
+    forme.setPosition(pos);
+    forme.setFillColor(estBlanc ? sf::Color(235, 235, 208) : sf::Color(119, 148, 85));
 }
 
-Case::~Case() {}
+// Implémentation du destructeur
+Case::~Case()
+{
+    // rien à détruire ici (pour l'instant)
+}
 
+// Dessin de la case
 void Case::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-    // Dessiner uniquement la forme
     target.draw(forme, states);
 }
 
-bool Case::contientPoint(sf::Vector2f point) const
+// Vérifie si un point est dans la case
+bool Case::contientPoint(const sf::Vector2f &point) const
 {
-    auto bounds = forme.getGlobalBounds();
-    // Modification de la méthode contains
-    return bounds.contains(point);
+    return forme.getGlobalBounds().contains(point);
 }
 
+// Activation de la surbrillance
 void Case::surbrillance(bool actif)
 {
-    if (actif)
-    {
-        forme.setFillColor(sf::Color(247, 247, 105));
-    }
-    else
-    {
-        forme.setFillColor(estBlanc ? sf::Color(238, 238, 210) : sf::Color(118, 150, 86));
-    }
+    forme.setOutlineThickness(actif ? 3.f : 0.f);
+    forme.setOutlineColor(sf::Color::Yellow);
 }

@@ -2,16 +2,20 @@
 #define CONTROLLER_H
 
 #include <SFML/Graphics.hpp>
-#include "Model.h"
-#include "View.h"
 
-class Controller {
-public:
-    Controller(Model& model, View& view);
-    void processEvents(sf::RenderWindow& window);
+// Forward declarations
+class Model;
+class View;
+
+class Controller
+{
 private:
-    Model& m_model;
-    View& m_view;
+    Model &model;
+    View &view;
+
+public:
+    Controller(Model &m, View &v);
+    void handleEvent(const sf::Event &event);
 };
 
-#endif // CONTROLLER_H
+#endif

@@ -1,13 +1,22 @@
 #include "View.h"
+#include "Model.h"
+#include "cases/Case.h"
+
+View::View(sf::RenderWindow &win, const Model &mod)
+    : window(win), model(mod) {}
 
 void View::draw()
 {
-    window.clear(sf::Color(49, 46, 43)); // Fond sombre
+    window.clear(sf::Color::Black);
 
-    // Dessiner toutes les cases
-    for (const auto &c : model.getCases())
+    // Dessiner l'échiquier
+    const auto &cases = model.getCases();
+    for (const auto &c : cases)
     {
-        window.draw(*c);
+        if (c != nullptr)
+        {
+            window.draw(*c);
+        }
     }
 
     window.display();

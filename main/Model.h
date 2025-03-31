@@ -21,4 +21,4 @@ public:
     const std::vector<Case *> &getCases() const { return cases; }
 };
 
-#endif // MODEL_H
+#endif

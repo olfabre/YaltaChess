@@ -1,11 +1,10 @@
 #include "Controller.h"
+#include "Model.h"
+#include "View.h"
 
-Controller::Controller(Model& model, View& view) : m_model(model), m_view(view) {}
+Controller::Controller(Model &m, View &v) : model(m), view(v) {}
 
-void Controller::processEvents(sf::RenderWindow& window) {
-    while (const std::optional event = window.pollEvent()) {
-        if (event->is<sf::Event::Closed>()) {
-            window.close();
-        }
-    }
+void Controller::handleEvent(const sf::Event &event)
+{
+    // À implémenter selon les besoins
 }

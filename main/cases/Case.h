@@ -15,19 +15,20 @@ private:
     static constexpr float TAILLE_CASE = 60.f;
 
 public:
-    Case(sf::Vector2f pos, bool blanc);
+    Case(const sf::Vector2f &pos, bool blanc);
     virtual ~Case();
+
     virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    bool contientPoint(const sf::Vector2f &point) const;
+    void surbrillance(bool actif);
 
     // Getters
-    sf::Vector2f getPosition() const { return position; }
-    bool contientPoint(sf::Vector2f point) const;
+    const sf::Vector2f &getPosition() const { return position; }
     bool estOccupee() const { return piece != nullptr; }
     Piece *getPiece() const { return piece; }
 
     // Setters
     void setPiece(Piece *p) { piece = p; }
-    void surbrillance(bool actif);
 };
 
-#endif // CASE_H
+#endif
