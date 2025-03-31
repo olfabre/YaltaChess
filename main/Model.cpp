@@ -1,59 +1,67 @@
 #include "Model.h"
 #include <cmath>
 
-Model::Model()
-{
-    initialiserEchiquier();
-}
+Model::Model() { initialiserEchiquier(); }
 
-Model::~Model()
+Model::~Model() { for (auto &c : cases) delete c; }
+
+void Model::ajouterCase(const std::vector<sf::Vector2f>& points, bool estBlanc)
 {
-    for (auto &c : cases)
-    {
-        delete c;
-    }
+    cases.push_back(new Case(points, estBlanc));
 }
 
 void Model::initialiserEchiquier()
 {
-    // Branche verticale (vers le bas)
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X + (j * TAILLE_CASE);
-            float y = CENTRE_Y + (i * TAILLE_CASE);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
+    cases.clear();
 
-    // Branche gauche (vers le haut-gauche)
-    for (int i = 1; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X - (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
-            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
+    const float WIDTH = 800.f, HEIGHT = 800.f;
+    sf::Vector2f mid(WIDTH / 2.f, HEIGHT / 2.f);
+    float size = WIDTH / 2.f;
+    float side = size / 2.f;
+    float height = std::sqrt(size * size - side * side);
 
-    // Branche droite (vers le haut-droit)
-    for (int i = 1; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X + (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
-            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
-}
+    sf::Vector2f v123[] = {
+            {-size*0.5f, -height}, {size*0.5f,-height}, {size,0},
+            {size*0.5f, height}, {-size*0.5f,height}, {-size,0}
+    };
 
-void Model::ajouterCase(float x, float y, bool estBlanc)
-{
-    cases.push_back(new Case(sf::Vector2f(x, y), estBlanc));
+    sf::Vector2f vabc[] = {
+            {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
+            {0.f, -height},
+            {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
+            {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))},
+            {0.f, height},
+            {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))}
+    };
+
+    std::vector<std::pair<sf::Vector2i, sf::Vector2i>> intervals = {
+            {{0,4},{0,4}},{{0,4},{4,8}},{{8,12},{4,8}},
+            {{8,12},{8,12}},{{4,8},{8,12}},{{4,8},{0,4}}
+    };
+
+    for(int zone = 0; zone < 6; zone++)
+    {
+        auto [ix, iy] = intervals[zone];
+        sf::Vector2f s1 = v123[zone]*0.5f;
+        sf::Vector2f s2 = v123[(zone+2)%6]*0.5f;
+        sf::Vector2f corner = mid + v123[(zone+4)%6];
+
+        for(int x = ix.x; x < ix.y; x++)
+            for(int y = iy.x; y < iy.y; y++)
+            {
+                float rx1 = (x%4)/4.f, ry1 = (y%4)/4.f;
+                float rx2 = (x%4+1)/4.f, ry2 = (y%4+1)/4.f;
+
+                sf::Vector2f U1 = vabc[(zone+1)%6]*ry1 - s1*ry1 + s2;
+                sf::Vector2f U2 = vabc[(zone+1)%6]*ry2 - s1*ry2 + s2;
+
+                sf::Vector2f p1 = corner + s1*ry1 + U1*rx1;
+                sf::Vector2f p2 = corner + s1*ry1 + U1*rx2;
+                sf::Vector2f p3 = corner + s1*ry2 + U2*rx2;
+                sf::Vector2f p4 = corner + s1*ry2 + U2*rx1;
+
+                bool estBlanc = (x + y + zone) % 2 == 0;
+                ajouterCase({p1,p2,p3,p4}, estBlanc);
+            }
+    }
 }

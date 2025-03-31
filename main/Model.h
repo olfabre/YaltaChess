@@ -9,15 +9,15 @@ class Model
 {
 private:
     std::vector<Case *> cases;
-    static constexpr float CENTRE_X = 400.f;
-    static constexpr float CENTRE_Y = 400.f;
-    static constexpr float TAILLE_CASE = 60.f;
+    static constexpr float WIDTH = 800.f;
+    static constexpr float HEIGHT = 800.f;
+
+    void ajouterCase(const std::vector<sf::Vector2f>& points, bool estBlanc); // Correction ici
 
 public:
     Model();
     ~Model();
     void initialiserEchiquier();
-    void ajouterCase(float x, float y, bool estBlanc);
     const std::vector<Case *> &getCases() const { return cases; }
 };
 

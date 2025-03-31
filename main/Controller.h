@@ -3,7 +3,6 @@
 
 #include <SFML/Graphics.hpp>
 
-// Forward declarations
 class Model;
 class View;
 
