@@ -5,7 +5,7 @@
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode({800u, 800u}), "Yalta Chess");
+    sf::RenderWindow window(sf::VideoMode({1100u, 1100u}), "Yalta Chess");
     window.setFramerateLimit(60);
 
     Model model;

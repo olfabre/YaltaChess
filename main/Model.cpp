@@ -14,8 +14,10 @@ void Model::initialiserEchiquier()
 {
     cases.clear();
 
-    const float WIDTH = 800.f, HEIGHT = 800.f;
-    sf::Vector2f mid(WIDTH / 2.f, HEIGHT / 2.f);
+    const float WIDTH = 1000.f, HEIGHT = 1000.f;  // Échiquier 1000x1000
+    const float OFFSET_X = 50.f, OFFSET_Y = 50.f; // Décalage pour centrer dans une fenêtre 1100x1100
+
+    sf::Vector2f mid(WIDTH / 2.f + OFFSET_X, HEIGHT / 2.f + OFFSET_Y);
     float size = WIDTH / 2.f;
     float side = size / 2.f;
     float height = std::sqrt(size * size - side * side);
