@@ -1089,8 +1089,39 @@ Pour gérer ce type spécifique d’échiquier, il faut adapter ta structure gra
 **Comment dessiner l'échiquier Yalta sous SFML clairement**
 
 - Chaque case sera dessinée comme un **polygone SFML** (`sf::ConvexShape`).
+
+```cpp
+void Model::initialiserEchiquierYalta() {
+    std::vector<std::vector<sf::Vector2f>> coordCases = {
+            {{400,400},{450,380},{500,400},{450,420}},
+            {{500,400},{550,380},{600,400},{550,420}},
+            {{345.f,825.f},{395.f,805.f},{445.f,825.f},{395.f,845.f}},
+     //etc...
+    };
+```
+
 - Chaque case aura une coordonnée spécifique (personnalisée).
 - On stockera dans notre classe `Case` chaque position sous forme de polygone (`sf::ConvexShape`) et on l’affichera ensuite directement.
+
+**Problème rencontré pour la création de l'échiquier avec cette méthode**
+
+En effet, cela signifie que je serais obligé de prendre toutes les coordonnées des 96 cases à partir du logiciel Photoshop sur une vraie photo d'un échiquier Yalta en fond.
+
+Le travail reste tout de même **colossal**.
+
+**Y'aurait-il une autre solution ?**
+
+oui d'après mes recherches sur internet, j'ai trouvé une autre solution. Beaucoup moins chronophage et longue:
+
+Cette nouvelle implémentation peut crée un échiquier Yalta avec :
+
+- Des cases hexagonales (obtenues en rotant des carrés)
+
+- Trois branches distinctes !
+
+- Une alternance de cases blanches et noires
+
+- Une structure propre et modulaire
 
 
 

@@ -4,20 +4,21 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 #include "cases/Case.h"
-#include "pieces/Piece.h"
 
-class Model {
+class Model
+{
 private:
-    std::vector<Case> echiquier;  // 96 cases pour Yalta
-    std::vector<std::unique_ptr<Piece>> pieces; // Pièces dynamiques
-
-    void initialiserEchiquierYalta(); // Initialisation spécifique Yalta
+    std::vector<Case *> cases;
+    static constexpr float CENTRE_X = 400.f;
+    static constexpr float CENTRE_Y = 400.f;
+    static constexpr float TAILLE_CASE = 60.f;
 
 public:
     Model();
-    void update();
-
-    const std::vector<Case>& getEchiquier() const;
+    ~Model();
+    void initialiserEchiquier();
+    void ajouterCase(float x, float y, bool estBlanc);
+    const std::vector<Case *> &getCases() const { return cases; }
 };
 
-#endif
+#endif // MODEL_H

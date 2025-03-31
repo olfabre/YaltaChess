@@ -2,21 +2,32 @@
 #define CASE_H
 
 #include <SFML/Graphics.hpp>
-#include "../pieces/Piece.h"
 
-class Case {
+class Piece;
+
+class Case : public sf::Drawable
+{
 private:
-    sf::ConvexShape forme;
-    Piece* piece;
+    sf::RectangleShape forme;
+    sf::Vector2f position;
+    bool estBlanc;
+    Piece *piece;
+    static constexpr float TAILLE_CASE = 60.f;
 
 public:
-    Case(const std::vector<sf::Vector2f>& points, sf::Color couleur);
+    Case(sf::Vector2f pos, bool blanc);
+    virtual ~Case();
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
-    bool estOccupee() const;
-    Piece* getPiece() const;
-    void setPiece(Piece* p);
+    // Getters
+    sf::Vector2f getPosition() const { return position; }
+    bool contientPoint(sf::Vector2f point) const;
+    bool estOccupee() const { return piece != nullptr; }
+    Piece *getPiece() const { return piece; }
 
-    void dessiner(sf::RenderWindow& window) const;
+    // Setters
+    void setPiece(Piece *p) { piece = p; }
+    void surbrillance(bool actif);
 };
 
-#endif
+#endif // CASE_H

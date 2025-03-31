@@ -4,14 +4,15 @@
 #include <SFML/Graphics.hpp>
 #include "Model.h"
 
-class View {
+class View
+{
 private:
-    sf::RenderWindow& m_window;
-    Model& m_model;
+    sf::RenderWindow &window;
+    Model &model;
 
 public:
-    View(sf::RenderWindow& window, Model& model);
-    void render();
+    View(sf::RenderWindow &win, Model &mod) : window(win), model(mod) {}
+    void draw();
 };
 
-#endif
+#endif // VIEW_H

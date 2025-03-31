@@ -1,44 +1,59 @@
 #include "Model.h"
-#include "pieces/Roi.h"
-#include "pieces/Dame.h"
-#include "pieces/Fou.h"
-#include "pieces/Tour.h"
-#include "pieces/Cavalier.h"
-#include "pieces/Pion.h"
+#include <cmath>
 
-Model::Model() {
-    initialiserEchiquierYalta();
+Model::Model()
+{
+    initialiserEchiquier();
 }
 
-void Model::initialiserEchiquierYalta() {
-    std::vector<std::vector<sf::Vector2f>> coordCases = {
-            {{400,400},{450,380},{500,400},{450,420}},
-            {{500,400},{550,380},{600,400},{550,420}},
-            {{345.f,825.f},{395.f,805.f},{445.f,825.f},{395.f,845.f}},
-            // ... tes autres coordonnées
-    };
+Model::~Model()
+{
+    for (auto &c : cases)
+    {
+        delete c;
+    }
+}
 
-    sf::Color couleurClaire = sf::Color(255,206,158);
-    sf::Color couleurFoncee = sf::Color(209,139,71);
-
-    int compteurCases = 0;
-
-    for (const auto& points : coordCases) {
-        bool estCaseClaire = compteurCases % 2 == 0;
-        sf::Color couleurCase = estCaseClaire ? couleurClaire : couleurFoncee;
-        echiquier.emplace_back(points, couleurCase);
-        compteurCases++;
+void Model::initialiserEchiquier()
+{
+    // Branche verticale (vers le bas)
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = -3; j <= 3; j++)
+        {
+            float x = CENTRE_X + (j * TAILLE_CASE);
+            float y = CENTRE_Y + (i * TAILLE_CASE);
+            bool estBlanc = ((i + j) % 2 == 0);
+            ajouterCase(x, y, estBlanc);
+        }
     }
 
-    auto roiBlanc = std::make_unique<Roi>(sf::Vector2i(0,0), BLANC);
-    echiquier[0].setPiece(roiBlanc.get());
-    pieces.push_back(std::move(roiBlanc));
+    // Branche gauche (vers le haut-gauche)
+    for (int i = 1; i < 8; i++)
+    {
+        for (int j = -3; j <= 3; j++)
+        {
+            float x = CENTRE_X - (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
+            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
+            bool estBlanc = ((i + j) % 2 == 0);
+            ajouterCase(x, y, estBlanc);
+        }
+    }
+
+    // Branche droite (vers le haut-droit)
+    for (int i = 1; i < 8; i++)
+    {
+        for (int j = -3; j <= 3; j++)
+        {
+            float x = CENTRE_X + (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
+            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
+            bool estBlanc = ((i + j) % 2 == 0);
+            ajouterCase(x, y, estBlanc);
+        }
+    }
 }
 
-void Model::update() {
-    // Logique métier ici...
-}
-
-const std::vector<Case>& Model::getEchiquier() const {
-    return echiquier;
+void Model::ajouterCase(float x, float y, bool estBlanc)
+{
+    cases.push_back(new Case(sf::Vector2f(x, y), estBlanc));
 }
