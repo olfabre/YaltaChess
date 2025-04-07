@@ -1111,7 +1111,101 @@ Le travail reste tout de même **colossal**.
 
 **Y'aurait-il une autre solution ?**
 
-oui d'après mes recherches sur internet, j'ai trouvé une autre solution. Beaucoup moins chronophage et longue:
+oui d'après mes recherches sur internet, j'ai trouvé une autre solution. Beaucoup moins chronophage et longue à réaliser:
+
+
+
+1. La structure globale
+
+   ![3](3.jpg)
+
+- On part d'un **hexagone** (une forme à 6 côtés égaux).
+- Cet hexagone central est divisé en **6 zones** distinctes appelées **"sextants"** (comme 6 parts égales d'un gâteau hexagonal).
+- Chaque sextant contient des **petites cases** (cellules) dans lesquelles les pièces d'échecs peuvent se déplacer.
+
+   
+
+   
+
+2. La forme de chaque case
+
+- Contrairement aux cases habituelles (carrées), ici chaque case est un **quadrilatère** (4 côtés, mais pas forcément égaux).
+- Pourquoi des quadrilatères ?
+   Car c’est la forme géométrique qui permet de parfaitement remplir chaque sextant pour obtenir l’échiquier hexagonal global sans trous ni chevauchements.
+
+
+
+3. Comment on dessine précisément chaque case ?
+
+Voici simplement comment c’est fait dans ton programme :
+
+Étape par étape :
+
+**Étape 1 :** On choisit un **point central** de l’écran (`mid`) :
+
+```cpp
+mid = (largeur_ecran / 2, hauteur_ecran / 2)
+```
+
+**Étape 2 :** Autour de ce point central, on calcule **6 points extérieurs** pour créer l'hexagone global :
+
+```cpp
+points_hexagone = [
+  haut-gauche, haut-droite, droite,
+  bas-droite, bas-gauche, gauche
+]
+```
+
+**Étape 3 :** Pour chaque sextant (zone), on prend deux points consécutifs de l'hexagone pour dessiner les cases à l’intérieur en effectuant des calculs géométriques précis (on appelle ça **interpolation linéaire**).
+
+**Étape 4 :** On utilise ces points pour calculer les coins de chaque petite case (quadrilatère). Cela donne à chaque petite case sa position précise sur l'écran.
+
+
+
+4. Alternance de couleurs des cases
+
+Chaque case est alternativement colorée en blanc ou en noir selon une règle mathématique simple :
+
+- Si la somme des coordonnées de la case (en x, y, et la zone) est paire, la case est blanche ; sinon, elle est noire :
+
+```cpp
+couleur = ((x + y + zone) % 2 == 0) ? blanc : noir;
+```
+
+Cela crée l’effet échiquier caractéristique.
+
+
+
+5. Centrage final sur l’écran
+
+Pour que l’échiquier soit parfaitement centré dans ta fenêtre graphique :
+
+On décale toutes les cases d'une même distance (ici 50 pixels) vers la droite et vers le bas, afin que l'échiquier apparaisse exactement au milieu de l'écran :
+
+```cpp
+centre_final = (largeur_echiquier / 2 + décalage_x, hauteur_echiquier / 2 + décalage_y)
+```
+
+
+
+En résumé, dessiner l’échiquier Yalta, c'est :
+
+- Créer un hexagone, puis le découper en 6 zones égales.
+- Remplir chaque zone par des cases à 4 côtés, calculées mathématiquement.
+- Alterner blanc/noir les cases.
+- Décaler légèrement le tout pour le centrer sur l'écran.
+
+
+
+
+
+
+
+
+
+
+
+https://chatgpt.com/share/67d899f9-7af8-8009-a9f4-23be488ebe83
 
 Cette nouvelle implémentation peut crée un échiquier Yalta avec :
 
@@ -1123,55 +1217,3 @@ Cette nouvelle implémentation peut crée un échiquier Yalta avec :
 
 - Une structure propre et modulaire
 
-
-
-Alors je vais essayer un premier code en modifiant quasiment tous les fichiers et entre autre `model.ccp`
-
-```cpp
-void Model::initialiserEchiquier()
-{
-    // Branche verticale (vers le bas)
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X + (j * TAILLE_CASE);
-            float y = CENTRE_Y + (i * TAILLE_CASE);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
-
-    // Branche gauche (vers le haut-gauche)
-    for (int i = 1; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X - (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
-            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
-
-    // Branche droite (vers le haut-droit)
-    for (int i = 1; i < 8; i++)
-    {
-        for (int j = -3; j <= 3; j++)
-        {
-            float x = CENTRE_X + (i * TAILLE_CASE * 0.866f) + (j * TAILLE_CASE * 0.5f);
-            float y = CENTRE_Y - (i * TAILLE_CASE * 0.5f) + (j * TAILLE_CASE * 0.866f);
-            bool estBlanc = ((i + j) % 2 == 0);
-            ajouterCase(x, y, estBlanc);
-        }
-    }
-}
-```
-
-
-
-
-
-
-
-https://chatgpt.com/share/67d899f9-7af8-8009-a9f4-23be488ebe83
