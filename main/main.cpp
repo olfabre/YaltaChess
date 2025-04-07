@@ -10,8 +10,8 @@ int main()
     window.setFramerateLimit(60);
 
     Model model;
-    View view(window, model);
-    Controller controller(model, view);
+    YaltaChessView YaltaChessView(window, model);
+    Controller controller(model, YaltaChessView);
 
     while (window.isOpen())
     {
@@ -23,7 +23,7 @@ int main()
             else
                 controller.handleEvent(*event);
         }
-        view.draw();
+        YaltaChessView.draw();
     }
     return 0;
 }

@@ -7,14 +7,14 @@ using namespace std;
 
 class Model;
 
-class View
+class YaltaChessView
 {
 private:
     RenderWindow &window;
     const Model &model;
 
 public:
-    View(RenderWindow &win, const Model &mod);
+    YaltaChessView(RenderWindow &win, const Model &mod);
     void draw();
 };
 

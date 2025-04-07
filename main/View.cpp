@@ -4,10 +4,10 @@
 using namespace sf;
 using namespace std;
 
-View::View(RenderWindow &win, const Model &mod)
+YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
         : window(win), model(mod) {}
 
-void View::draw()
+void YaltaChessView::draw()
 {
     window.clear(Color::Black);
 
