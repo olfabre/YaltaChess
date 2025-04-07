@@ -1,13 +1,15 @@
 #include "View.h"
 #include "Model.h"
 #include "cases/Case.h"
+using namespace sf;
+using namespace std;
 
-View::View(sf::RenderWindow &win, const Model &mod)
+View::View(RenderWindow &win, const Model &mod)
         : window(win), model(mod) {}
 
 void View::draw()
 {
-    window.clear(sf::Color::Black);
+    window.clear(Color::Black);
 
     for (auto c : model.getCases())
         window.draw(*c);
