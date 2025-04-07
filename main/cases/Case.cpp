@@ -1,5 +1,8 @@
 #include "Case.h"
 
+
+
+
 Case::Case(const std::vector<sf::Vector2f>& points, bool blanc)
         : estBlanc(blanc), piece(nullptr)
 {
