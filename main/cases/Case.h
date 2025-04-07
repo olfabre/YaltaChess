@@ -3,22 +3,24 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+using namespace sf;
+using namespace std;
 
 class Piece;
 
-class Case : public sf::Drawable
+class Case : public Drawable
 {
 private:
-    sf::ConvexShape forme; // Quadrilatère
+    ConvexShape forme; // Quadrilatère
     bool estBlanc;
     Piece *piece;
 
 public:
-    Case(const std::vector<sf::Vector2f>& points, bool blanc);
+    Case(const vector<Vector2f>& points, bool blanc);
     virtual ~Case();
 
-    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-    bool contientPoint(const sf::Vector2f &point) const;
+    virtual void draw(RenderTarget &target, RenderStates states) const override;
+    bool contientPoint(const Vector2f &point) const;
 
     // Getters
     bool estOccupee() const { return piece != nullptr; }
