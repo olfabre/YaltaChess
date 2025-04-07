@@ -1,11 +1,13 @@
 #include "Model.h"
 #include <cmath>
+using namespace sf;
+using namespace std;
 
 Model::Model() { initialiserEchiquier(); }
 
 Model::~Model() { for (auto &c : cases) delete c; }
 
-void Model::ajouterCase(const std::vector<sf::Vector2f>& points, bool estBlanc)
+void Model::ajouterCase(const vector<Vector2f>& points, bool estBlanc)
 {
     cases.push_back(new Case(points, estBlanc));
 }
@@ -17,17 +19,17 @@ void Model::initialiserEchiquier()
     const float WIDTH = 1000.f, HEIGHT = 1000.f;  // Échiquier 1000x1000
     const float OFFSET_X = 50.f, OFFSET_Y = 50.f; // Décalage pour centrer dans une fenêtre 1100x1100
 
-    sf::Vector2f mid(WIDTH / 2.f + OFFSET_X, HEIGHT / 2.f + OFFSET_Y);
+    Vector2f mid(WIDTH / 2.f + OFFSET_X, HEIGHT / 2.f + OFFSET_Y);
     float size = WIDTH / 2.f;
     float side = size / 2.f;
-    float height = std::sqrt(size * size - side * side);
+    float height = sqrt(size * size - side * side);
 
-    sf::Vector2f v123[] = {
+    Vector2f v123[] = {
             {-size*0.5f, -height}, {size*0.5f,-height}, {size,0},
             {size*0.5f, height}, {-size*0.5f,height}, {-size,0}
     };
 
-    sf::Vector2f vabc[] = {
+    Vector2f vabc[] = {
             {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
             {0.f, -height},
             {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
@@ -36,7 +38,7 @@ void Model::initialiserEchiquier()
             {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))}
     };
 
-    std::vector<std::pair<sf::Vector2i, sf::Vector2i>> intervals = {
+    vector<pair<Vector2i, Vector2i>> intervals = {
             {{0,4},{0,4}},{{0,4},{4,8}},{{8,12},{4,8}},
             {{8,12},{8,12}},{{4,8},{8,12}},{{4,8},{0,4}}
     };

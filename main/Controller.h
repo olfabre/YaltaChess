@@ -4,16 +4,16 @@
 #include <SFML/Graphics.hpp>
 
 class Model;
-class View;
+class YaltaChessView;
 
 class Controller
 {
 private:
     Model &model;
-    View &view;
+    YaltaChessView &view;;
 
 public:
-    Controller(Model &m, View &v);
+    Controller(Model &m, YaltaChessView &v);
     void handleEvent(const sf::Event &event);
 };
 

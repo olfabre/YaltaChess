@@ -2,17 +2,19 @@
 #define VIEW_H
 
 #include <SFML/Graphics.hpp>
+using namespace sf;
+using namespace std;
 
 class Model;
 
-class View
+class YaltaChessView
 {
 private:
-    sf::RenderWindow &window;
+    RenderWindow &window;
     const Model &model;
 
 public:
-    View(sf::RenderWindow &win, const Model &mod);
+    YaltaChessView(RenderWindow &win, const Model &mod);
     void draw();
 };
 
