@@ -58,16 +58,26 @@ bool Intro::initialize() {
         return false;
     }
 
-    introText = make_unique<Text>(font, "Bienvenue dans Yalta Chess !", 40);
-    introText->setFillColor(Color::White);
+    introText = make_unique<Text>(font, "2025 | Olivier Fabre", 20);
+    introText->setFillColor(Color::Yellow);
 
-// Centrer le texte
+     // Centrer le texte
     FloatRect textRect = introText->getLocalBounds();
     introText->setOrigin(textRect.position + textRect.size / 2.0f);
-    introText->setPosition(Vector2f(window.getSize().x / 2.0f, window.getSize().y - 100));
+    //introText->setPosition(Vector2f(window.getSize().x / 2.0f, window.getSize().y - 100));
+    introText->setPosition(Vector2f(window.getSize().x / 2.0f, window.getSize().y / 2.0f + 350)); // texte centré
 
 
+    // Charger la musique
+    filesystem::path musicPath = filesystem::current_path() / "retro.ogg";  // Mets ton fichier ici
 
+    if (!music.openFromFile(musicPath)) {
+        cerr << "Erreur : Impossible de charger la musique " << musicPath << endl;
+        return false;
+    }
+
+    music.setLooping(true);  // Activer la boucle
+    music.play();         // Lancer la musique
 
 
 
@@ -82,7 +92,7 @@ void Intro::play() {
     window.display();
 
     // Attendre 5 secondes
-    if (clock.getElapsedTime().asSeconds() >= 5.0f) {
+    if (clock.getElapsedTime().asSeconds() >= 7.0f) {
         isIntroComplete = true;
         cout << "Intro terminée" << endl;
     }

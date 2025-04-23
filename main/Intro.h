@@ -2,6 +2,7 @@
 #define INTRO_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <string>
 #include <memory>
 using namespace sf;
@@ -16,6 +17,7 @@ private:
     bool isIntroComplete;
     Font font;
     unique_ptr<Text> introText;
+    Music music;
 
 public:
     Intro(RenderWindow& win);

@@ -1229,6 +1229,10 @@ Dans le fichier `intro.cpp`on s'occupe de charger l'image (initialisation) et re
 
 Nous avons aussi intégré la polcie d'ecriture  **Press Start 2P** récupérée chez google font https://fonts.google.com/share?selection.family=Press+Start+2P pour faire un titre au dessus de l'image
 
+Nosu avons aussi intégré une musique style des jeux des années 80 (libre de droits) que nous avons téléchargée sur le site https://pixabay.com/fr/music/search/genre/jeux%20vid%c3%a9o/?pagi=3
+
+
+
 
 
 
