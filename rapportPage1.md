@@ -1208,6 +1208,29 @@ cmake --build build_main
 
 
 
+### Étape 7: création d'une fenêtre intro
+
+Je me suis servi d'une I.A. générative pour créer l'image png qui porte le nom de mon application.
+
+On a crée une classe Intro pour typer un objet de type Intro. On a donc créer un objet Intro qui s'occupe
+
+d'afficher l'image d'introduction
+
+```cpp
+Intro intro(window);
+if (!intro.initialize()) { // Charge l'image intro.png
+    return -1; // Si l'image n'est pas trouvée, le programme s'arrête.
+}
+```
+
+On a ajouté une boucle de façon que tant que l'intro n'est pas finie (elle dure 5 secondes), la fenetre reste ouverte et montre l'image.
+
+Dans le fichier `intro.cpp`on s'occupe de charger l'image (initialisation) et redimensionne l'image pour qu'elle s'adapte à la fenêter du jeu (1100 x 1100)
+
+Nous avons aussi intégré la polcie d'ecriture  **Press Start 2P** récupérée chez google font https://fonts.google.com/share?selection.family=Press+Start+2P pour faire un titre au dessus de l'image
+
+
+
 
 
 

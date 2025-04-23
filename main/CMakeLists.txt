@@ -27,6 +27,7 @@ target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml
 # Standard C++17
 target_compile_features(SFML_MVC_YaltaChess PRIVATE cxx_std_17)
 target_compile_definitions(SFML_MVC_YaltaChess PRIVATE _LIBCPP_ENABLE_CXX17_REMOVED_FILESYSTEM)
+target_compile_options(SFML_MVC_YaltaChess PRIVATE -fvisibility=default)
 
 # Inclusion des répertoires pour les headers (y compris sous-dossiers)
 target_include_directories(SFML_MVC_YaltaChess PRIVATE
