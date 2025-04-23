@@ -11,7 +11,9 @@ Case::Case(const vector<Vector2f>& points, bool blanc)
     for(size_t i = 0; i < points.size(); ++i)
         forme.setPoint(i, points[i]);
 
-    forme.setFillColor(estBlanc ? Color(235,235,208) : Color(119,148,85));
+    forme.setFillColor(estBlanc ? Color(233,208,167) : Color(253,247,231));
+    forme.setOutlineColor(Color::Black);
+    forme.setOutlineThickness(2.f);
 }
 
 Case::~Case() {}
