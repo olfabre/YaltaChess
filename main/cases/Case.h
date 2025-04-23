@@ -8,6 +8,8 @@ using namespace std;
 
 class Piece;
 
+using Vec2 = sf::Vector2f;
+
 class Case : public Drawable
 {
 private:
@@ -16,7 +18,7 @@ private:
     Piece *piece;
 
 public:
-    Case(const vector<Vector2f>& points, bool blanc);
+    Case(const vector<Vec2>& points, bool blanc);
     virtual ~Case();
 
     virtual void draw(RenderTarget &target, RenderStates states) const override;

@@ -1197,6 +1197,17 @@ En résumé, dessiner l’échiquier Yalta, c'est :
 
 
 
+Rappel pour compiler
+
+```bash
+cmake -B build_main -S main
+cmake --build build_main
+
+./build_main/bin/SFML_MVC_YaltaChess 
+```
+
+
+
 
 
 
