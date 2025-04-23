@@ -46,9 +46,9 @@ void Model::initialiserEchiquier()
     for(int zone = 0; zone < 6; zone++)
     {
         auto [ix, iy] = intervals[zone];
-        sf::Vector2f s1 = v123[zone]*0.5f;
-        sf::Vector2f s2 = v123[(zone+2)%6]*0.5f;
-        sf::Vector2f corner = mid + v123[(zone+4)%6];
+        Vector2f s1 = v123[zone]*0.5f;
+        Vector2f s2 = v123[(zone+2)%6]*0.5f;
+        Vector2f corner = mid + v123[(zone+4)%6];
 
         for(int x = ix.x; x < ix.y; x++)
             for(int y = iy.x; y < iy.y; y++)
@@ -56,13 +56,13 @@ void Model::initialiserEchiquier()
                 float rx1 = (x%4)/4.f, ry1 = (y%4)/4.f;
                 float rx2 = (x%4+1)/4.f, ry2 = (y%4+1)/4.f;
 
-                sf::Vector2f U1 = vabc[(zone+1)%6]*ry1 - s1*ry1 + s2;
-                sf::Vector2f U2 = vabc[(zone+1)%6]*ry2 - s1*ry2 + s2;
+                Vector2f U1 = vabc[(zone+1)%6]*ry1 - s1*ry1 + s2;
+                Vector2f U2 = vabc[(zone+1)%6]*ry2 - s1*ry2 + s2;
 
-                sf::Vector2f p1 = corner + s1*ry1 + U1*rx1;
-                sf::Vector2f p2 = corner + s1*ry1 + U1*rx2;
-                sf::Vector2f p3 = corner + s1*ry2 + U2*rx2;
-                sf::Vector2f p4 = corner + s1*ry2 + U2*rx1;
+                Vector2f p1 = corner + s1*ry1 + U1*rx1;
+                Vector2f p2 = corner + s1*ry1 + U1*rx2;
+                Vector2f p3 = corner + s1*ry2 + U2*rx2;
+                Vector2f p4 = corner + s1*ry2 + U2*rx1;
 
                 bool estBlanc = (x + y + zone) % 2 == 0;
                 ajouterCase({p1,p2,p3,p4}, estBlanc);
