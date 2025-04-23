@@ -1,46 +1,76 @@
 #include "Intro.h"
 #include <iostream>
 #include <filesystem>
+using namespace sf;
+using namespace std;
 
-Intro::Intro(sf::RenderWindow& win) 
-    : window(win), isIntroComplete(false) {
+Intro::Intro(RenderWindow& win)
+    : window(win),
+    isIntroComplete(false) {
 }
 
 bool Intro::initialize() {
+
+
+
+
+
+
     // Obtenir le chemin du dossier d'exécution
-    std::filesystem::path execPath = std::filesystem::current_path();
-    std::filesystem::path imagePath = execPath / "intro.png";
+    filesystem::path execPath = filesystem::current_path();
+    filesystem::path imagePath = execPath / "intro.png";
     
-    std::cout << "Tentative de chargement de l'image : " << imagePath << std::endl;
+    cout << "Tentative de chargement de l'image : " << imagePath << endl;
 
     // Charger l'image d'intro
     if (!introTexture.loadFromFile(imagePath.string())) {
-        std::cerr << "Erreur : Impossible de charger l'image " << imagePath << std::endl;
+        cerr << "Erreur : Impossible de charger l'image " << imagePath << endl;
         return false;
     }
-    std::cout << "Image chargée avec succès. Taille : " 
-              << introTexture.getSize().x << "x" << introTexture.getSize().y << std::endl;
+    cout << "Image chargée avec succès. Taille : "
+              << introTexture.getSize().x << "x" << introTexture.getSize().y << endl;
 
     // Créer le sprite avec la texture
-    introSprite = std::make_unique<sf::Sprite>(introTexture);
+    introSprite = make_unique<Sprite>(introTexture);
     
     // Calculer le facteur d'échelle pour adapter l'image à la fenêtre
     float scaleX = static_cast<float>(window.getSize().x) / introTexture.getSize().x;
     float scaleY = static_cast<float>(window.getSize().y) / introTexture.getSize().y;
-    float scale = std::min(scaleX, scaleY); // Garder les proportions
+    float scale = min(scaleX, scaleY); // Garder les proportions
     
     // Appliquer l'échelle
-    introSprite->setScale(sf::Vector2f(scale, scale));
+    introSprite->setScale(Vector2f(scale, scale));
     
     // Centrer l'image
     float posX = (window.getSize().x - introTexture.getSize().x * scale) / 2.f;
     float posY = (window.getSize().y - introTexture.getSize().y * scale) / 2.f;
-    introSprite->setPosition(sf::Vector2f(posX, posY));
+    introSprite->setPosition(Vector2f(posX, posY));
     
-    std::cout << "Image redimensionnée avec un facteur d'échelle de : " << scale << std::endl;
-    std::cout << "Position de l'image : (" << posX << ", " << posY << ")" << std::endl;
-    std::cout << "Taille de la fenêtre : " << window.getSize().x << "x" << window.getSize().y << std::endl;
-    
+    cout << "Image redimensionnée avec un facteur d'échelle de : " << scale << endl;
+    cout << "Position de l'image : (" << posX << ", " << posY << ")" << endl;
+    cout << "Taille de la fenêtre : " << window.getSize().x << "x" << window.getSize().y << endl;
+
+
+    // Charger la police Google font
+    filesystem::path fontPath = execPath / "PressStart2P-Regular.ttf";
+    if (!font.openFromFile(fontPath)) { // CORRIGE loadFromFile -> openFromFile
+        cerr << "Erreur : Impossible de charger la police " << fontPath << endl;
+        return false;
+    }
+
+    introText = make_unique<Text>(font, "Bienvenue dans Yalta Chess !", 40);
+    introText->setFillColor(Color::White);
+
+// Centrer le texte
+    FloatRect textRect = introText->getLocalBounds();
+    introText->setOrigin(textRect.position + textRect.size / 2.0f);
+    introText->setPosition(Vector2f(window.getSize().x / 2.0f, window.getSize().y - 100));
+
+
+
+
+
+
     return true;
 }
 
@@ -48,11 +78,12 @@ void Intro::play() {
     // Afficher l'image d'intro
     window.clear();
     window.draw(*introSprite);
+    window.draw(*introText);
     window.display();
 
     // Attendre 5 secondes
     if (clock.getElapsedTime().asSeconds() >= 5.0f) {
         isIntroComplete = true;
-        std::cout << "Intro terminée" << std::endl;
+        cout << "Intro terminée" << endl;
     }
 } 

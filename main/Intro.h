@@ -4,17 +4,21 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <memory>
+using namespace sf;
+using namespace std;
 
 class Intro {
 private:
-    sf::RenderWindow& window;
-    sf::Texture introTexture;
-    std::unique_ptr<sf::Sprite> introSprite;
-    sf::Clock clock;
+    RenderWindow& window;
+    Texture introTexture;
+    unique_ptr<Sprite> introSprite;
+    Clock clock;
     bool isIntroComplete;
+    Font font;
+    unique_ptr<Text> introText;
 
 public:
-    Intro(sf::RenderWindow& win);
+    Intro(RenderWindow& win);
     bool initialize();
     void play();
     bool isComplete() const { return isIntroComplete; }
