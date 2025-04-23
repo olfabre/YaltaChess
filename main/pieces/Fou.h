@@ -2,13 +2,15 @@
 #define FOU_H
 
 #include "Piece.h"
+using namespace sf;
+using namespace std;
 
 // Classe Fou héritant de Piece
 class Fou : public Piece {
 public:
-    Fou(sf::Vector2i pos, Couleur coul);
-    bool mouvementValide(sf::Vector2i nouvellePos) const override;
-    void dessiner(sf::RenderWindow& window) const override;
+    Fou(Vector2i pos, Couleur coul);
+    bool mouvementValide(Vector2i nouvellePos) const override;
+    void dessiner(RenderWindow& window) const override;
 };
 
 #endif

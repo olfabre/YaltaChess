@@ -1,14 +1,16 @@
 #include "Dame.h"
 #include <cmath>
+using namespace sf;
+using namespace std;
 
-Dame::Dame(sf::Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Dame::Dame(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Dame::mouvementValide(sf::Vector2i nouvellePos) const {
-    int dx = std::abs(nouvellePos.x - position.x);
-    int dy = std::abs(nouvellePos.y - position.y);
+bool Dame::mouvementValide(Vector2i nouvellePos) const {
+    int dx = abs(nouvellePos.x - position.x);
+    int dy = abs(nouvellePos.y - position.y);
     return (dx == dy || dx == 0 || dy == 0);
 }
 
-void Dame::dessiner(sf::RenderWindow& window) const {
+void Dame::dessiner(RenderWindow& window) const {
     // Dessiner la Dame
 }
