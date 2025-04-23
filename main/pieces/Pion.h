@@ -2,13 +2,15 @@
 #define PION_H
 
 #include "Piece.h"
+using namespace sf;
+using namespace std;
 
 // Classe Pion héritant de Piece
 class Pion : public Piece {
 public:
-    Pion(sf::Vector2i pos, Couleur coul);
-    bool mouvementValide(sf::Vector2i nouvellePos) const override;
-    void dessiner(sf::RenderWindow& window) const override;
+    Pion(Vector2i pos, Couleur coul);
+    bool mouvementValide(Vector2i nouvellePos) const override;
+    void dessiner(RenderWindow& window) const override;
 };
 
 #endif

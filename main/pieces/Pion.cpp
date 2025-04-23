@@ -1,12 +1,14 @@
 #include "Pion.h"
+using namespace sf;
+using namespace std;
 
-Pion::Pion(sf::Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Pion::Pion(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Pion::mouvementValide(sf::Vector2i nouvellePos) const {
+bool Pion::mouvementValide(Vector2i nouvellePos) const {
     int dy = nouvellePos.y - position.y;
     return (dy == 1 && position.x == nouvellePos.x); // Simplifié pour exemple
 }
 
-void Pion::dessiner(sf::RenderWindow& window) const {
+void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
 }
