@@ -2,13 +2,15 @@
 #define CAVALIER_H
 
 #include "Piece.h"
+using namespace sf;
+using namespace std;
 
 // Classe Cavalier héritant de Piece
 class Cavalier : public Piece {
 public:
-    Cavalier(sf::Vector2i pos, Couleur coul);
-    bool mouvementValide(sf::Vector2i nouvellePos) const override;
-    void dessiner(sf::RenderWindow& window) const override;
+    Cavalier(Vector2i pos, Couleur coul);
+    bool mouvementValide(Vector2i nouvellePos) const override;
+    void dessiner(RenderWindow& window) const override;
 };
 
 #endif

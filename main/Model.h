@@ -10,7 +10,7 @@ using namespace std;
 class Model
 {
 private:
-    std::vector<Case *> cases;
+    vector<Case *> cases;
     static constexpr float WIDTH = 800.f;
     static constexpr float HEIGHT = 800.f;
 

@@ -4,6 +4,7 @@
 #include "Controller.h"
 using namespace sf;
 using namespace std;
+
 int main()
 {
     RenderWindow window(VideoMode({1100u, 1100u}), "Yalta Chess");

@@ -2,13 +2,15 @@
 #define TOUR_H
 
 #include "Piece.h"
+using namespace sf;
+using namespace std;
 
 // Classe Tour héritant de Piece
 class Tour : public Piece {
 public:
-    Tour(sf::Vector2i pos, Couleur coul);
-    bool mouvementValide(sf::Vector2i nouvellePos) const override;
-    void dessiner(sf::RenderWindow& window) const override;
+    Tour(Vector2i pos, Couleur coul);
+    bool mouvementValide(Vector2i nouvellePos) const override;
+    void dessiner(RenderWindow& window) const override;
 };
 
 #endif

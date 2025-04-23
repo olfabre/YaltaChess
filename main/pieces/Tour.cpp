@@ -1,11 +1,13 @@
 #include "Tour.h"
+using namespace sf;
+using namespace std;
 
-Tour::Tour(sf::Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Tour::Tour(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Tour::mouvementValide(sf::Vector2i nouvellePos) const {
+bool Tour::mouvementValide(Vector2i nouvellePos) const {
     return (nouvellePos.x == position.x || nouvellePos.y == position.y);
 }
 
-void Tour::dessiner(sf::RenderWindow& window) const {
+void Tour::dessiner(RenderWindow& window) const {
     // Dessiner la Tour
 }
