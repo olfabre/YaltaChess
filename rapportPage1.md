@@ -1232,9 +1232,50 @@ Nous avons aussi intégré la polcie d'ecriture  **Press Start 2P** récupérée
 Nosu avons aussi intégré une musique style des jeux des années 80 (libre de droits) que nous avons téléchargée sur le site https://pixabay.com/fr/music/search/genre/jeux%20vid%c3%a9o/?pagi=3
 
 
-### Étape 8: création d'une fenêtre intro
 
+### Étape 8: création des labels
 
+Nous devons créer les labels comportant lettres et chiffres. La numérotation est assez particulière sur un jeu d'échec Yalta. De plus les labels doivent être orientés selon le côté: perpendiculaire à l'arête du côté.
+
+![2](2.jpg)
+
+Donc le but est de placer les chiffres et lettres de la même manière que sur la photo ci-dessus avec un bandeau blanc autour du périmètre de l'échiquier. C'est dans `View.cpp` que tout est réalisé.
+
+ici un extrait du code qui permet d'affecter à chaque côté, les labels
+
+```cpp
+void YaltaChessView::initBorderLabels()
+{
+    const float WIDTH    = 1000.f;
+    const float OFFSET   = 50.f;
+    const float OUTSET   = 25.f;      // distance label → bordure
+
+    // Étiquettes par côté (dans l'ordre horaire)
+    const std::vector<std::vector<std::string>> labels = {
+            /* 0 (num.)   */ { "8","7","6","5","9","10","11","12" },
+            /* 1 (lettres)*/ { "l","k","j","i","e","f","g","h"       },
+            /* 2 (num.)   */ { "12","11","10","9","4","3","2","1"    },
+            /* 3 (lettres)*/ { "h","g","f","e","d","c","b","a"       },
+            /* 4 (num.)   */ { "1","2","3","4","5","6","7","8"       },
+            /* 5 (lettres)*/ { "a","b","c","d","i","j","k","l"       }
+    };
+  ....
+```
+
+ici un extrait du code qui permet d'orienter à chaque côté, les labels
+
+```cpp
+// override angles pour côtés lettres
+            float angleDeg = baseAngle;
+            if      (k == 1) angleDeg = 240.f;
+            else if (k == 3) angleDeg =   0.f;
+            else if (k == 5) angleDeg = 120.f;
+
+            txt.setRotation(sf::degrees(angleDeg));
+            txt.setPosition(pos);
+            borderLabels.push_back(txt);
+...
+```
 
 
 
