@@ -209,17 +209,12 @@ Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
 
 void YaltaChessView::draw()
 {
-    const float BOARD_SIZE   = 1000.f;
-    const float OFFSET       = 50.f;  // ta translation originale
-    const float BORDER_WIDTH = 50.f;  // épaisseur de la bordure blanche
-
-    // Calcul du centre
-    Vector2f mid(OFFSET + BOARD_SIZE/2.f,
-                     OFFSET + BOARD_SIZE/2.f);
-
-    // Les 6 sommets du hexagone (flat-top) autour du board
-    float size   = BOARD_SIZE/2.f;
-    float side   = size/2.f;
+    const float BOARD_SIZE = 1000.f;
+    const float OFFSET = 50.f;
+    const float BORDER_WIDTH = 50.f;
+    Vector2f mid(OFFSET + BOARD_SIZE/2.f, OFFSET + BOARD_SIZE/2.f);
+    float size = BOARD_SIZE/2.f;
+    float side = size/2.f;
     float height = sqrt(size*size - side*side);
     array<Vector2f,6> v = {
             Vector2f(-size*0.5f, -height),
@@ -229,28 +224,18 @@ void YaltaChessView::draw()
             Vector2f(-size*0.5f,  height),
             Vector2f(-size,       0      )
     };
-
-    // 1) Fond noir
     window.clear(Color::Black);
-
-    // 2) Bordure blanche : hexagone plus grand de BORDER_WIDTH vers l’extérieur
     ConvexShape whiteBorder;
     whiteBorder.setPointCount(6);
-    for (int i = 0; i < 6; ++i)
-    {
-        // direction unitaire
+    for (int i = 0; i < 6; ++i) {
         Vector2f dir = v[i];
         float len = sqrt(dir.x*dir.x + dir.y*dir.y);
         if (len != 0) dir /= len;
-
-        // point : sommet board + déplacement
         Vector2f pt = mid + v[i] + dir * BORDER_WIDTH;
         whiteBorder.setPoint(i, pt);
     }
     whiteBorder.setFillColor(Color::White);
     window.draw(whiteBorder);
-
-    // 3) Contour noir autour de la bordure blanche
     ConvexShape outline;
     outline.setPointCount(6);
     for (int i = 0; i < 6; ++i)
@@ -259,46 +244,57 @@ void YaltaChessView::draw()
     outline.setOutlineColor(Color::Black);
     outline.setOutlineThickness(2.f);
     window.draw(outline);
-
-    // 4) Dessiner l’échiquier (cases)
     for (auto c : model.getCases())
         window.draw(*c);
-
-    // 5) Dessiner les labels
     for (auto& txt : borderLabels)
         window.draw(txt);
-
-    // piece
-    for (auto p : model.getPieces())
-    {
-        // 2.a) choisir la bonne texture
-        string key =
-                p->getTypeName() + "_" +
-                (p->getCouleur()==BLANC ? "White"
-                                        : p->getCouleur()==NOIR  ? "Black"
-                                                                 : "White");
-        auto& tex = ResourceManager::get(key);
+    for (auto p : model.getPieces()) {
+        string key = p->getTypeName() + "_" +
+                     (p->getCouleur() == BLANC ? "White" :
+                      p->getCouleur() == NOIR  ? "Black" : "White");
+        const auto& tex = ResourceManager::get(key);
         Sprite spr(tex);
-        // centre du sprite
-        auto ts = ResourceManager::get(key).getSize();
-        //spr.setOrigin(ts.x/2.f, ts.y/2.f);
+        auto ts = tex.getSize();
+        // SFML3 : setOrigin prend un Vector2f
         spr.setOrigin({ ts.x/2.f, ts.y/2.f });
-
-        // 2.b) positionner
         Vector2f pos = gridToPixel(p->getPosition());
         spr.setPosition(pos);
+        if (p->getCouleur() == ROUGE)
+            spr.setColor(Color(195,83,51));
 
-        // 2.c) si rouge, sprite.setColor({195,83,51});
-        if (p->getCouleur()==ROUGE)
-            spr.setColor({195,83,51});
-        // 2.d) ajouter le liseré (voir la fonction drawOutlinedSprite plus haut)
 
-        drawOutlinedSprite(window, spr,
-                           (p->getCouleur()==BLANC? Color::Black : Color{246,243,232}),
-                           1.5f);
+        // Juste après avoir positionné spr :
+        float thickness    = 2.f;
+        Color outlineColor = (p->getCouleur() == BLANC ? Color(0,0,0) : Color(246,243,232));
+               // offsets pour simuler 8 directions
+        std::array<Vector2f,8> offsets = {
+                Vector2f(-thickness, -thickness),
+                Vector2f(-thickness,  0.f),
+                Vector2f(-thickness,  thickness),
+                Vector2f( 0.f,       -thickness),
+                Vector2f( 0.f,        thickness),
+                Vector2f( thickness, -thickness),
+                Vector2f( thickness,  0.f),
+                Vector2f( thickness,  thickness)
+        };
+
+// 1) on récupère et place le sprite de mask
+        const auto& maskTex = ResourceManager::getMask(key);
+        Sprite maskSpr(maskTex);
+        maskSpr.setOrigin({ maskTex.getSize().x/2.f,
+                            maskTex.getSize().y/2.f });
+        maskSpr.setPosition(pos);
+        maskSpr.setColor(outlineColor);
+
+// 2) on dessine 8 copies décalées du mask pour former le liseré
+        for (auto& off : offsets) {
+            Sprite s = maskSpr;
+            s.move(off);
+            window.draw(s);
+        }
+
+// 3) enfin on dessine la pièce originale
+        window.draw(spr);
     }
-
-
-
     window.display();
 }
