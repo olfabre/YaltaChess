@@ -1277,6 +1277,32 @@ ici un extrait du code qui permet d'orienter à chaque côté, les labels
 ...
 ```
 
+ici un extrait pour le contour de l'échiquier
+
+```cpp
+ // 2) Bordure blanche : hexagone plus grand de BORDER_WIDTH vers l’extérieur
+    sf::ConvexShape whiteBorder;
+    whiteBorder.setPointCount(6);
+    for (int i = 0; i < 6; ++i)
+    {
+        // direction unitaire
+        sf::Vector2f dir = v[i];
+        float len = std::sqrt(dir.x*dir.x + dir.y*dir.y);
+        if (len != 0) dir /= len;
+
+        // point : sommet board + déplacement
+        sf::Vector2f pt = mid + v[i] + dir * BORDER_WIDTH;
+        whiteBorder.setPoint(i, pt);
+    }
+    whiteBorder.setFillColor(sf::Color::White);
+    window.draw(whiteBorder);
+...
+```
+
+voici le résultat
+
+![4](4.jpg)
+
 
 
 

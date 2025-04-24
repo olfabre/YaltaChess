@@ -29,9 +29,9 @@ void YaltaChessView::initBorderLabels()
 {
     const float WIDTH    = 1000.f;
     const float OFFSET   = 50.f;
-    const float OUTSET   = 25.f;      // distance label → bordure
+    const float OUTSET   = 25.f;  // distance label → bordure
 
-    // Étiquettes par côté (dans l'ordre horaire)
+    // Étiquettes par côté (horaire)
     const std::vector<std::vector<std::string>> labels = {
             /* 0 (num.)   */ { "8","7","6","5","9","10","11","12" },
             /* 1 (lettres)*/ { "l","k","j","i","e","f","g","h"       },
@@ -41,9 +41,7 @@ void YaltaChessView::initBorderLabels()
             /* 5 (lettres)*/ { "a","b","c","d","i","j","k","l"       }
     };
 
-    // Centre de l’hexagone
     sf::Vector2f mid(WIDTH/2.f + OFFSET, WIDTH/2.f + OFFSET);
-
     float size   = WIDTH/2.f;
     float height = std::sqrt(size*size - (size/2.f)*(size/2.f));
 
@@ -64,28 +62,28 @@ void YaltaChessView::initBorderLabels()
         sf::Vector2f B   = mid + v123[(k+1)%6];
         sf::Vector2f dir = B - A;
 
-        // Angle « nature » de l’arête → vertical
+        // Angle « naturel » de l’arête
         float baseAngle = std::atan2(dir.y, dir.x) * 180.f / 3.14159265f + 90.f;
 
         for (int j = 0; j < count; ++j)
         {
-            // position initiale au bord
-            float t = (j + 0.5f) / float(count);
+            // position sur l’arête
+            float t   = (j + 0.5f) / float(count);
             sf::Vector2f pos = A + dir * t;
 
-            // calcul du vecteur vers l’extérieur
+            // décale vers l’extérieur de OUTSET px
             sf::Vector2f out = pos - mid;
             float len = std::sqrt(out.x*out.x + out.y*out.y);
             if (len > 0.f) {
                 out /= len;
-                pos += out * OUTSET;   // on décale de 20 pixels vers l’extérieur
+                pos += out * OUTSET;
             }
 
             // création du texte
             sf::Text txt(coordFont, sideLabels[j], 18);
-            txt.setFillColor(sf::Color::Yellow);
+            txt.setFillColor(sf::Color::Black);
 
-            // centrer l’origine du texte
+            // centre l’origine du texte
             auto b = txt.getLocalBounds();
             txt.setOrigin(
                     sf::Vector2f{
@@ -109,13 +107,62 @@ void YaltaChessView::initBorderLabels()
 
 void YaltaChessView::draw()
 {
+    const float BOARD_SIZE   = 1000.f;
+    const float OFFSET       = 50.f;  // ta translation originale
+    const float BORDER_WIDTH = 50.f;  // épaisseur de la bordure blanche
+
+    // Calcul du centre
+    sf::Vector2f mid(OFFSET + BOARD_SIZE/2.f,
+                     OFFSET + BOARD_SIZE/2.f);
+
+    // Les 6 sommets du hexagone (flat-top) autour du board
+    float size   = BOARD_SIZE/2.f;
+    float side   = size/2.f;
+    float height = std::sqrt(size*size - side*side);
+    std::array<sf::Vector2f,6> v = {
+            sf::Vector2f(-size*0.5f, -height),
+            sf::Vector2f( size*0.5f, -height),
+            sf::Vector2f( size,        0      ),
+            sf::Vector2f( size*0.5f,  height),
+            sf::Vector2f(-size*0.5f,  height),
+            sf::Vector2f(-size,       0      )
+    };
+
+    // 1) Fond noir
     window.clear(sf::Color::Black);
 
-    // 1) dessiner les cases
+    // 2) Bordure blanche : hexagone plus grand de BORDER_WIDTH vers l’extérieur
+    sf::ConvexShape whiteBorder;
+    whiteBorder.setPointCount(6);
+    for (int i = 0; i < 6; ++i)
+    {
+        // direction unitaire
+        sf::Vector2f dir = v[i];
+        float len = std::sqrt(dir.x*dir.x + dir.y*dir.y);
+        if (len != 0) dir /= len;
+
+        // point : sommet board + déplacement
+        sf::Vector2f pt = mid + v[i] + dir * BORDER_WIDTH;
+        whiteBorder.setPoint(i, pt);
+    }
+    whiteBorder.setFillColor(sf::Color::White);
+    window.draw(whiteBorder);
+
+    // 3) Contour noir autour de la bordure blanche
+    sf::ConvexShape outline;
+    outline.setPointCount(6);
+    for (int i = 0; i < 6; ++i)
+        outline.setPoint(i, whiteBorder.getPoint(i));
+    outline.setFillColor(sf::Color::Transparent);
+    outline.setOutlineColor(sf::Color::Black);
+    outline.setOutlineThickness(2.f);
+    window.draw(outline);
+
+    // 4) Dessiner l’échiquier (cases)
     for (auto c : model.getCases())
         window.draw(*c);
 
-    // 2) dessiner les labels décalés de 20px
+    // 5) Dessiner les labels
     for (auto& txt : borderLabels)
         window.draw(txt);
 
