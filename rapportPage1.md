@@ -1262,7 +1262,7 @@ void YaltaChessView::initBorderLabels()
   ....
 ```
 
-ici un extrait du code qui permet d'orienter à chaque côté, les labels
+ici un extrait du code qui permet d'orienter à chaque côté, les labels (Police Robot de Google)
 
 ```cpp
 // override angles pour côtés lettres
@@ -1277,7 +1277,7 @@ ici un extrait du code qui permet d'orienter à chaque côté, les labels
 ...
 ```
 
-ici un extrait pour le contour de l'échiquier
+ici un extrait pour le contour de l'échiquier (bordure blanche entourée d'un trait noir)
 
 ```cpp
  // 2) Bordure blanche : hexagone plus grand de BORDER_WIDTH vers l’extérieur
