@@ -15,9 +15,9 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
             // SFML 3 : charger la police
             // Charge la police SFML 3 depuis le répertoire de l'exécutable
             auto execPath = std::filesystem::current_path();
-            auto fontPath = execPath / "PressStart2P-Regular.ttf";
+            auto fontPath = execPath / "Roboto-Regular.ttf";
             if (!coordFont.openFromFile(fontPath.string()))
-                throw std::runtime_error("Impossible de charger PressStart2P-Regular.ttf");
+                throw std::runtime_error("Impossible de charger Roboto-Regular.ttf");
 
             // Initialise tous les labels
             initBorderLabels();
