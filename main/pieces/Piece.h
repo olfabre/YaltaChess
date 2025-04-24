@@ -27,6 +27,8 @@ public:
     Vector2i getPosition() const;
     void setPosition(Vector2i nouvellePos);
     Couleur getCouleur() const;
+
+    virtual string getTypeName() const = 0;
 };
 
 #endif
