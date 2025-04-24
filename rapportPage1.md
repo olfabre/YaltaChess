@@ -1481,6 +1481,174 @@ Au moment du dessin (`YaltaChessView::draw()`), pour chaque pièce:
 
 
 
+### Étape 11: gestion des noms des joueurs et attribution couleur
+
+Le jeu d'échec Yalta est un jeu d'échec à 3 joueurs. Pour mon application, le premier joueur est un humain et les deux autres sont des joueurs fictifs dan sun premier temps
+
+Pour l'instant, c'est toujours l'humain (joueur) qui doit commencer à jouer.
+
+L'application va chosir au hasard quelle est la couleur attitré à chacun (son côté).
+
+Je souhaite que les autres joueurs fictifs soient définies par des prénoms au hasard.
+
+Sur chaque côté il y aura affichée le prénom des joueurs fictifs et "Vous" pour représenter le joueur. 
+
+Pour connaitre quel est le tour de la personne qui doit jouer, un point vert sera affiché à côté des prénoms.
+
+Par conséquent les autres, auront un point rouge.
+
+Le joueur aura la main seulement sur ces pièces du jeu.
+
+
+
+1/ Pour la première étape je souhaite tiré au hasard, un côté à chacun avec un prénom au hasard et pour l joueur humain le prenom "Vous" affiché sur le côté attitré. Ensuite placer un point vert clignotant pour désigner que c'est son tour à joueur et rouge pour les autres.
+
+- Structure des joueurs dans le modèle
+
+  - Définir un type `PlayerInfo` pour stocker l’état de chaque joueur dans `model.h`. je l'ai placé dans une structure car ce ne sont ques des données à gérer
+
+    ```cpp
+    enum Couleur { BLANC, ROUGE, NOIR };
+    struct PlayerInfo {
+      std::string name;   // "Humain" ou prénom
+      Couleur    color;   // côté du joueur
+      bool       isHuman; // true si joueur réel
+    };
+    ```
+
+- Tirage aléatoire des prénoms et des couleurs
+
+  - Liste de prénoms à choisir
+
+  - ```cpp
+    std::vector<std::string> botNames = {
+      "Alice","Bob","Charlie","Diane","Eve","Frank"
+    };
+    ```
+
+  - liste de couleurs
+
+  - ```cppstd::vector<Couleur> cols = { BLANC, ROUGE, NOIR };
+    std::vector<Couleur> cols = { BLANC, ROUGE, NOIR };
+    ```
+
+  - Mélange aléatoire dans `model.cpp`
+
+  - ```cpp
+    
+    void Model::initialiserJoueurs() {
+      static std::mt19937_64 rng{std::random_device{}()};
+      std::shuffle(cols.begin(),   cols.end(),   rng);
+      std::shuffle(botNames.begin(), botNames.end(), rng);
+      
+      players.clear();
+      players.push_back({ "Humain", cols[0], true });
+      players.push_back({ botNames[0], cols[1], false });
+      players.push_back({ botNames[1], cols[2], false });
+      currentPlayerIdx = 0; // l’humain commence
+    }
+    ```
+
+  - **`std::mt19937_64`** : moteur de génération pseudo-aléatoire.
+
+    **`std::shuffle`** ( `<algorithm>` ) : mélange uniforme du vecteur.
+
+
+
+- Affichage des prénoms sur leurs côtés
+
+  
+
+Dans le fichier `View.cpp`on récupére les joueurs
+
+```cpp
+auto const& players = model.getPlayers();
+int currentIdx      = model.getCurrentPlayerIdx();
+```
+
+On calcule la position autour du plateau
+
+```cpp
+Vector2f mid(OFFSET + BOARD_SIZE/2.f,
+             OFFSET + BOARD_SIZE/2.f);
+float infoRadius = BOARD_SIZE/2.f + 30.f;
+for (size_t i = 0; i < players.size(); ++i) {
+  auto const& p = players[i];
+  float angleDeg = 0.f;
+  // angles corrigés pour BLANC en bas, ROUGE en haut-gauche, NOIR en haut-droite
+  switch (p.color) {
+    case BLANC: angleDeg =  90.f;  break;
+    case ROUGE: angleDeg = -150.f; break;
+    case NOIR:  angleDeg =  -30.f; break;
+  }
+  float a = angleDeg * 3.14159265f / 180.f;
+  Vector2f pos = mid + Vector2f(std::cos(a), std::sin(a)) * infoRadius;
+```
+
+bien choisir les côtés !
+
+on dessine le texte
+
+```cpp
+Text label(coordFont,
+           p.isHuman ? "Vous" : p.name,
+           20);
+label.setFillColor(Color::Black);
+label.setPosition(pos + Vector2f(-20.f, -10.f));
+window.draw(label);
+```
+
+**`coordFont`** : police chargée au constructeur.
+
+On aligne légèrement le texte pour qu’il n’empiète pas sur le point.
+
+
+
+- Indicateurs rouge/vert clignotant
+
+  - j'ai ajouté`sf::Clock blinkClock;` dans `YaltaChessView` et je l’initialise dans le constructeur (`blinkClock.restart();`).
+
+  - on calcule l’état “on/off” chaque frame
+
+  - ```cpp
+    const float blinkPeriod = 0.5f;
+    bool blinkOn = std::fmod(
+      blinkClock.getElapsedTime().asSeconds(),
+      blinkPeriod * 2.f
+    ) < blinkPeriod;
+    ```
+
+  - on dessine le cercle
+
+  - ```cpp
+    CircleShape dot(8.f);
+    dot.setOrigin({8.f, 8.f});
+    dot.setPosition(pos + Vector2f(-40.f, 0.f));
+    if ((int)i == currentIdx) {
+      // actif : clignote vert
+      if (blinkOn) {
+        dot.setFillColor(Color::Green);
+        window.draw(dot);
+      }
+    } else {
+      // autres : rouge fixe
+      dot.setFillColor(Color::Red);
+      window.draw(dot);
+    }
+    ```
+
+    **`CircleShape`** : forme SFML pour un rond.
+
+    **`blinkClock`** : mesure le temps écoulé et permet de découper les cycles.
+
+
+
+
+
+
+
+
+
 
 
 

@@ -50,6 +50,7 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
 
             // Initialise tous les labels
             initBorderLabels();
+            blinkClock.restart();
 
 }
 
@@ -248,6 +249,80 @@ void YaltaChessView::draw()
         window.draw(*c);
     for (auto& txt : borderLabels)
         window.draw(txt);
+
+
+
+// Après avoir dessiné borderLabels…
+
+
+// --- DESSIN DES JOUEURS ---
+    auto const& players = model.getPlayers();            // vector<PlayerInfo>
+    int currentIdx      = model.getCurrentPlayerIdx();    // qui doit jouer
+
+// Centre et rayon pour placer les infos autour de l'échiquier
+    //Vector2f mid(OFFSET + BOARD_SIZE/2.f, OFFSET + BOARD_SIZE/2.f);
+    float    infoRadius = BOARD_SIZE/2.f + 30.f;
+
+    // Durée d’un cycle (en secondes)
+    const float blinkPeriod = 0.5f;
+// true pendant la première moitié du cycle, false pendant la seconde
+    bool blinkOn = fmod(blinkClock.getElapsedTime().asSeconds(), blinkPeriod*2.f) < blinkPeriod;
+
+
+// Pour chaque joueur, on choisit un angle en fonction de sa couleur
+    for (size_t i = 0; i < players.size(); ++i) {
+        auto const& p = players[i];
+
+        // 1) Calcule l'angle (en degrés) selon p.color
+        float angleDeg = 0.f;
+        switch (p.color) {
+            //case BLANC: angleDeg = -90.f; break;  // en haut
+            //case ROUGE: angleDeg = -30.f; break;  // à droite
+            //case NOIR:  angleDeg = 150.f; break;  // à gauche
+            case BLANC: angleDeg =  90.f;  break;  // en bas
+            case ROUGE: angleDeg = -150.f; break;  // en haut-gauche
+            case NOIR:  angleDeg =  -30.f; break;  // en haut-droite
+
+        }
+        float a = angleDeg * 3.14159265f / 180.f;
+
+        // 2) Positionne le texte & le cercle
+        Vector2f pos = mid + Vector2f(std::cos(a), std::sin(a)) * infoRadius;
+
+        // Cercle indicateur (vert si actif, rouge sinon)
+        CircleShape dot(8.f);
+        //dot.setOrigin(8.f, 8.f);
+        dot.setOrigin({8.f, 8.f});
+        dot.setPosition(pos + Vector2f(-40.f, 0.f));
+        //dot.setFillColor((int)i == currentIdx ? Color::Green : Color::Red);
+        //window.draw(dot);
+        if ((int)i == currentIdx) {
+            // joueur actif : vert qui clignote
+            if (blinkOn)
+                dot.setFillColor(Color::Green),
+                        window.draw(dot);
+        }
+        else {
+            // autres joueurs : point rouge fixe
+            dot.setFillColor(Color::Red);
+            window.draw(dot);
+        }
+
+        // Texte du prénom ("Vous" pour l'humain)
+        Text label(coordFont,
+                   p.isHuman ? "Vous" : p.name,
+                   20);
+        label.setFillColor(Color::Yellow);
+        // aligne un peu à droite du point
+        label.setPosition(pos + Vector2f(-20.f, -10.f));
+        window.draw(label);
+    }
+
+
+
+
+
+
     for (auto p : model.getPieces()) {
         string key = p->getTypeName() + "_" +
                      (p->getCouleur() == BLANC ? "White" :
@@ -296,5 +371,11 @@ void YaltaChessView::draw()
 // 3) enfin on dessine la pièce originale
         window.draw(spr);
     }
+
+
+
+
+
+
     window.display();
 }

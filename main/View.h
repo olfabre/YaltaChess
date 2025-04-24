@@ -2,6 +2,7 @@
 #define VIEW_H
 
 #include <SFML/Graphics.hpp>
+#include <SFML/System/Clock.hpp>
 #include "Model.h"
 #include <vector>
 using namespace sf;
@@ -14,6 +15,7 @@ class YaltaChessView
 private:
     RenderWindow &window;
     const Model &model;
+    Clock blinkClock; // mesure le temps pour le clignotement
 
     // police et labels bordure
     Font coordFont;
