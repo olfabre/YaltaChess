@@ -10,7 +10,7 @@
 using namespace sf;
 using namespace std;
 
-// Ta table de départ (inspirée du Python)
+// ma table de départ (inspirée ddes infos que j'ai récupérée sur internet
 // en haut de Model.cpp, juste après les includes :
 static const pair<int,int> SETUP[12][12] = {
         //  y=0

@@ -1309,6 +1309,216 @@ voici le résultat
 
 Il est conseillé d'utiliser des images au format png transparent. Je vais télécharger toutes les images de pions d'un jeu d'échec à l'adresse suivante: https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
 
+Nous avons donc ajouté les ressources d'images png pour toutes les pièces nommé sous la forme: 
+
+- Tour_White.png
+- Tour_Black.png
+
+1 / Mise en place des pièces pour 3 joueurs
+
+nous avons défini une énumération des couleurs dans `Piece.h`
+
+```cpp
+enum Couleur { BLANC, NOIR, ROUGE };
+```
+
+Chaque pièce porte donc une valeur `BLANC`, `NOIR` ou `ROUGE`.
+
+Dans le constructeur de `Model` (`Model::Model()`), on parcourt un tableau statique `SETUP[12][12]` : chaque entrée est un `pair<coul, type>`. Si `coul<0` la case est vide, sinon on instancie la bonne sous-classe de `Piece` (Roi, Pion, etc.) avec la couleur et la position `(x,y)`, et on l’ajoute au vecteur `pieces`.
+
+
+
+2 / Chargement des textures et coloration
+
+`ResourceManager::loadAll()` charge les PNG nommés par exemple `"Pion_White.png"` ou `"Tour_Black.png"` dans une map `textures` de `string→Texture`.
+
+Pour le joueur ROUGE, on utilise la texture blanche mais on recolore le sprite en rouge juste avant le dessin:
+
+```cpp
+if (p->getCouleur() == ROUGE)
+    spr.setColor(Color(195,83,51));
+```
+
+Cela applique une teinte rouge sur l’ensemble des pixels non transparents. 
+
+
+
+3/ Placement et centrage des sprites
+
+Chaque pièce connaît sa position grille `Vector2i g` (indices de ligne/colonne). La fonction `gridToPixel(g)` convertit ces indices en coordonnées pixels au centre de la case hexagonale.
+
+Pour centrer le sprite sur ce point, j'ai fait:
+
+```cpp
+auto ts = tex.getSize();                      // taille en pixels de la texture
+spr.setOrigin({ ts.x/2.f, ts.y/2.f });        // origine au centre
+spr.setPosition(gridToPixel(p->getPosition()));
+```
+
+ la position du sprite correspond exactement au centre de la case
+
+Pour placer correctement les pièces (informations trouvées sur internet): on représente l’échiquier sous forme d’une grille logique 12×12 (indices 0 à 11 en X et Y). Chaque case de la grille est décrite par un `pair<int,int>`
+
+Pourquoi un tableau 12×12 pour un jeu à 3 joueurs ?
+
+L’échiquier en étoile a 6 « bras » de longueur 4 : on choisit une grille 12×12, plus simple à parcourir, et on marque `-1` partout où il n’y a pas de case valide. Seules les zones centrales et terminales de chaque bras portent des pièces de départ. Les `initialiserEchiquier()` s’occupe, indépendamment, de traduire ces indices `(x,y)` en formes hexagonales et positions pixels à l’écran.
+
+Le premier entier (`coul`) indique la couleur du joueur:
+
+`0` → BLANC
+
+`1` → ROUGE
+
+`2` → NOIR
+
+`<0` (dans mon programme `-1`) → pas de pièce dans cette case
+
+
+
+Le second entier (`type`) indique le type de pièce:
+
+`0` → Roi
+
+`1` → Pion
+
+`2` → Cavalier
+
+`3` → Fou
+
+`4` → Tour
+
+`5` → Dame
+
+
+
+en résumé
+
+Le tableau `SETUP` encode, pour chaque coordonnée logique, la couleur et le  type de la pièce de départ (ou `-1` si vide).
+
+Dans le constructeur de `Model`, on boucle sur ce tableau, on convertit dans mon programme, ces codes en instances concrètes (`new Roi`, etc.), et on remplit le `vector<Piece*> pieces` pour pouvoir ultérieurement afficher et manipuler toutes les pièces du jeu!
+
+```cpp
+// ma table de départ (inspirée ddes infos que j'ai récupérée sur internet
+// en haut de Model.cpp, juste après les includes :
+static const pair<int,int> SETUP[12][12] = {
+        //  y=0
+        { {0,4},{0,2},{0,3},{0,5},{0,4},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=1
+        { {0,1},{0,1},{0,1},{0,1},{0,2},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=2
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{0,3},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=3
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{0,0},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=4
+        { {1,4},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{1,4},{1,2},{1,3},{1,5} },
+        //  y=5
+        { {1,2},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{1,1},{1,1},{1,1},{1,1} },
+        //  y=6
+        { {1,3},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=7
+        { {1,0},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=8
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,4},{2,2},{2,3},{2,5},{2,4},{2,1},{-1,-1},{-1,-1} },
+        //  y=9
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,1},{2,1},{2,1},{2,1},{2,2},{2,1},{-1,-1},{-1,-1} },
+        // y=10
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,3},{2,1},{-1,-1},{-1,-1} },
+        // y=11
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
+};
+
+Model::Model() {
+    initialiserEchiquier();
+    for (int y = 0; y < 12; ++y) {
+        for (int x = 0; x < 12; ++x) {
+            auto [coul, type] = SETUP[y][x];
+            if (coul < 0) continue;
+            Vector2i grid{x,y};
+            Piece* p = nullptr;
+            Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
+            switch(type) {
+                case 0: p = new Roi(grid, cc);       break;
+                case 1: p = new Pion(grid, cc);      break;
+                case 2: p = new Cavalier(grid, cc);  break;
+                case 3: p = new Fou(grid, cc);       break;
+                case 4: p = new Tour(grid, cc);      break;
+                case 5: p = new Dame(grid, cc);      break;
+            }
+            pieces.push_back(p);
+        }
+    }
+}
+```
+
+
+
+
+
+4/ Création du liseré (outline) via un mask
+
+Toujours dans `ResourceManager::loadAll()`, on génère en parallèle avec un procédé qui est un `maskTexture` (procédé trouvé sur internet)
+
+- on récupère l’`Image` de la texture originale,
+
+- on crée une image du même format,
+- pour chaque pixel où `alpha>0`, on écrit `Color(255,255,255,alpha)`, sinon `transparent`,
+- on recharge cette image dans un `Texture maskTex` et on l’ajoute à `maskTextures`.
+   Cela donne une silhouette blanche de la pièce basée sur son canal alpha
+
+Au moment du dessin (`YaltaChessView::draw()`), pour chaque pièce:
+
+- on récupère `maskTex = getMask(key)` et on crée un `maskSpr` centré comme le sprite original,
+- on choisit une `outlineColor` (noir pour les pièces blanches, crème pour les autres),
+- on dessine 8 copies de `maskSpr` décalées de `±thickness` en x et/ou y (tableau `offsets`) pour former le contour,
+
+- on dessine le sprite normal par-dessus.
+
+ 
+
+ Le résultat est un liseré net, sans artefact, parfaitement calé sur la forme de la pièce.
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
