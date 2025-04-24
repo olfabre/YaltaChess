@@ -3,8 +3,37 @@
 #include <stdexcept>
 #include "Model.h"
 #include "cases/Case.h"
+#include "ResourceManager.h"
+#include <array>
 using namespace sf;
 using namespace std;
+namespace {
+    void drawOutlinedSprite(RenderTarget& target,
+                            const Sprite& sprite,
+                            Color outlineColor,
+                            float thickness)
+    {
+        // dessine 8 copies décalées pour simuler un liseré
+        array<Vector2f,8> offsets = {
+                Vector2f(-thickness, -thickness),
+                Vector2f(-thickness,  0.f),
+                Vector2f(-thickness,  thickness),
+                Vector2f( 0.f,       -thickness),
+                Vector2f( 0.f,        thickness),
+                Vector2f( thickness, -thickness),
+                Vector2f( thickness,  0.f),
+                Vector2f( thickness,  thickness)
+        };
+        for (auto& off : offsets) {
+            Sprite outline = sprite;
+            outline.setColor(outlineColor);
+            outline.move(off);
+            target.draw(outline);
+        }
+        target.draw(sprite);
+    }
+}
+
 
 YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
         : window(win), model(mod)
@@ -14,10 +43,10 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
             // Charger la police Google font
             // SFML 3 : charger la police
             // Charge la police SFML 3 depuis le répertoire de l'exécutable
-            auto execPath = std::filesystem::current_path();
+            auto execPath = filesystem::current_path();
             auto fontPath = execPath / "Roboto-Regular.ttf";
             if (!coordFont.openFromFile(fontPath.string()))
-                throw std::runtime_error("Impossible de charger Roboto-Regular.ttf");
+                throw runtime_error("Impossible de charger Roboto-Regular.ttf");
 
             // Initialise tous les labels
             initBorderLabels();
@@ -32,7 +61,7 @@ void YaltaChessView::initBorderLabels()
     const float OUTSET   = 25.f;  // distance label → bordure
 
     // Étiquettes par côté (horaire)
-    const std::vector<std::vector<std::string>> labels = {
+    const vector<vector<string>> labels = {
             /* 0 (num.)   */ { "8","7","6","5","9","10","11","12" },
             /* 1 (lettres)*/ { "l","k","j","i","e","f","g","h"       },
             /* 2 (num.)   */ { "12","11","10","9","4","3","2","1"    },
@@ -41,12 +70,12 @@ void YaltaChessView::initBorderLabels()
             /* 5 (lettres)*/ { "a","b","c","d","i","j","k","l"       }
     };
 
-    sf::Vector2f mid(WIDTH/2.f + OFFSET, WIDTH/2.f + OFFSET);
+    Vector2f mid(WIDTH/2.f + OFFSET, WIDTH/2.f + OFFSET);
     float size   = WIDTH/2.f;
-    float height = std::sqrt(size*size - (size/2.f)*(size/2.f));
+    float height = sqrt(size*size - (size/2.f)*(size/2.f));
 
     // Sommets du hexagone (flat-top)
-    std::vector<sf::Vector2f> v123 = {
+    vector<Vector2f> v123 = {
             {-size*0.5f, -height}, { size*0.5f, -height},
             { size,        0      }, { size*0.5f,  height},
             {-size*0.5f,  height}, {-size,       0      }
@@ -58,35 +87,35 @@ void YaltaChessView::initBorderLabels()
         int count = int(sideLabels.size());
 
         // Extrémités de l’arête k
-        sf::Vector2f A   = mid + v123[k];
-        sf::Vector2f B   = mid + v123[(k+1)%6];
-        sf::Vector2f dir = B - A;
+        Vector2f A   = mid + v123[k];
+        Vector2f B   = mid + v123[(k+1)%6];
+        Vector2f dir = B - A;
 
         // Angle « naturel » de l’arête
-        float baseAngle = std::atan2(dir.y, dir.x) * 180.f / 3.14159265f + 90.f;
+        float baseAngle = atan2(dir.y, dir.x) * 180.f / 3.14159265f + 90.f;
 
         for (int j = 0; j < count; ++j)
         {
             // position sur l’arête
             float t   = (j + 0.5f) / float(count);
-            sf::Vector2f pos = A + dir * t;
+            Vector2f pos = A + dir * t;
 
             // décale vers l’extérieur de OUTSET px
-            sf::Vector2f out = pos - mid;
-            float len = std::sqrt(out.x*out.x + out.y*out.y);
+            Vector2f out = pos - mid;
+            float len = sqrt(out.x*out.x + out.y*out.y);
             if (len > 0.f) {
                 out /= len;
                 pos += out * OUTSET;
             }
 
             // création du texte
-            sf::Text txt(coordFont, sideLabels[j], 18);
-            txt.setFillColor(sf::Color::Black);
+            Text txt(coordFont, sideLabels[j], 18);
+            txt.setFillColor(Color::Black);
 
             // centre l’origine du texte
             auto b = txt.getLocalBounds();
             txt.setOrigin(
-                    sf::Vector2f{
+                    Vector2f{
                             b.position.x + b.size.x/2.f,
                             b.position.y + b.size.y/2.f
                     }
@@ -98,12 +127,35 @@ void YaltaChessView::initBorderLabels()
             else if (k == 3) angleDeg =   0.f;
             else if (k == 5) angleDeg = 120.f;
 
-            txt.setRotation(sf::degrees(angleDeg));
+            txt.setRotation(degrees(angleDeg));
             txt.setPosition(pos);
             borderLabels.push_back(txt);
         }
     }
 }
+
+
+
+// 1) Ce helper instantie les mêmes v123, vabc, intervals que Model
+Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
+    const float W = 1000.f, O = 50.f;
+    // Mid, size, v123, vabc, intervals… recopier ici
+    // puis la boucle for zone=0..5 identique :
+    //   si interval[zone] contient (g.x,g.y), calculer :
+    //     float rx1 = (g.x%4)/4.f, ry1 = (g.y%4)/4.f;
+    //     float mid_r_x = (rx1 + (g.x%4+1)/4.f)/2, idem mid_r_y
+    //     Vector2f s1 = v123[z]*0.5f, s2 = v123[(z+2)%6]*0.5f;
+    //     Vector2f corner = mid + v123[(z+4)%6];
+    //     Vector2f U1 = vabc[(z+1)%6]*ry1 - s1*ry1 + s2;
+    //     Vector2f midU = vabc[(z+1)%6]*mid_r_y - s1*mid_r_y + s2;
+    //     return corner + s1*mid_r_y + midU*mid_r_x;
+    // (identique à ce qu’on fait dans Model pour construire les cases).
+    // …
+    // le return « bouche-trou » pour supprimer le warning :
+    return { 100.f, 100.f };
+}
+
+
 
 void YaltaChessView::draw()
 {
@@ -112,49 +164,49 @@ void YaltaChessView::draw()
     const float BORDER_WIDTH = 50.f;  // épaisseur de la bordure blanche
 
     // Calcul du centre
-    sf::Vector2f mid(OFFSET + BOARD_SIZE/2.f,
+    Vector2f mid(OFFSET + BOARD_SIZE/2.f,
                      OFFSET + BOARD_SIZE/2.f);
 
     // Les 6 sommets du hexagone (flat-top) autour du board
     float size   = BOARD_SIZE/2.f;
     float side   = size/2.f;
-    float height = std::sqrt(size*size - side*side);
-    std::array<sf::Vector2f,6> v = {
-            sf::Vector2f(-size*0.5f, -height),
-            sf::Vector2f( size*0.5f, -height),
-            sf::Vector2f( size,        0      ),
-            sf::Vector2f( size*0.5f,  height),
-            sf::Vector2f(-size*0.5f,  height),
-            sf::Vector2f(-size,       0      )
+    float height = sqrt(size*size - side*side);
+    array<Vector2f,6> v = {
+            Vector2f(-size*0.5f, -height),
+            Vector2f( size*0.5f, -height),
+            Vector2f( size,        0      ),
+            Vector2f( size*0.5f,  height),
+            Vector2f(-size*0.5f,  height),
+            Vector2f(-size,       0      )
     };
 
     // 1) Fond noir
-    window.clear(sf::Color::Black);
+    window.clear(Color::Black);
 
     // 2) Bordure blanche : hexagone plus grand de BORDER_WIDTH vers l’extérieur
-    sf::ConvexShape whiteBorder;
+    ConvexShape whiteBorder;
     whiteBorder.setPointCount(6);
     for (int i = 0; i < 6; ++i)
     {
         // direction unitaire
-        sf::Vector2f dir = v[i];
-        float len = std::sqrt(dir.x*dir.x + dir.y*dir.y);
+        Vector2f dir = v[i];
+        float len = sqrt(dir.x*dir.x + dir.y*dir.y);
         if (len != 0) dir /= len;
 
         // point : sommet board + déplacement
-        sf::Vector2f pt = mid + v[i] + dir * BORDER_WIDTH;
+        Vector2f pt = mid + v[i] + dir * BORDER_WIDTH;
         whiteBorder.setPoint(i, pt);
     }
-    whiteBorder.setFillColor(sf::Color::White);
+    whiteBorder.setFillColor(Color::White);
     window.draw(whiteBorder);
 
     // 3) Contour noir autour de la bordure blanche
-    sf::ConvexShape outline;
+    ConvexShape outline;
     outline.setPointCount(6);
     for (int i = 0; i < 6; ++i)
         outline.setPoint(i, whiteBorder.getPoint(i));
-    outline.setFillColor(sf::Color::Transparent);
-    outline.setOutlineColor(sf::Color::Black);
+    outline.setFillColor(Color::Transparent);
+    outline.setOutlineColor(Color::Black);
     outline.setOutlineThickness(2.f);
     window.draw(outline);
 
@@ -165,6 +217,38 @@ void YaltaChessView::draw()
     // 5) Dessiner les labels
     for (auto& txt : borderLabels)
         window.draw(txt);
+
+    // piece
+    for (auto p : model.getPieces())
+    {
+        // 2.a) choisir la bonne texture
+        string key =
+                p->getTypeName() + "_" +
+                (p->getCouleur()==BLANC ? "White"
+                                        : p->getCouleur()==NOIR  ? "Black"
+                                                                 : "White");
+        auto& tex = ResourceManager::get(key);
+        Sprite spr(tex);
+        // centre du sprite
+        auto ts = ResourceManager::get(key).getSize();
+        //spr.setOrigin(ts.x/2.f, ts.y/2.f);
+        spr.setOrigin({ ts.x/2.f, ts.y/2.f });
+
+        // 2.b) positionner
+        Vector2f pos = gridToPixel(p->getPosition());
+        spr.setPosition(pos);
+
+        // 2.c) si rouge, sprite.setColor({195,83,51});
+        if (p->getCouleur()==ROUGE)
+            spr.setColor({195,83,51});
+        // 2.d) ajouter le liseré (voir la fonction drawOutlinedSprite plus haut)
+
+        drawOutlinedSprite(window, spr,
+                           (p->getCouleur()==BLANC? Color::Black : Color{246,243,232}),
+                           1.5f);
+    }
+
+
 
     window.display();
 }

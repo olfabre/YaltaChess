@@ -20,6 +20,8 @@ private:
     vector<Text> borderLabels;
 
     void initBorderLabels();
+    // helper pour convertir une position grille (x,y) en pixel centre de case
+    Vector2f gridToPixel(const Vector2i &g) const;
 
 public:
     YaltaChessView(RenderWindow &win, const Model &mod);
