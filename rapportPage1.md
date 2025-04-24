@@ -1232,6 +1232,12 @@ Nous avons aussi intégré la polcie d'ecriture  **Press Start 2P** récupérée
 Nosu avons aussi intégré une musique style des jeux des années 80 (libre de droits) que nous avons téléchargée sur le site https://pixabay.com/fr/music/search/genre/jeux%20vid%c3%a9o/?pagi=3
 
 
+### Étape 8: création d'une fenêtre intro
+
+
+
+
+
 
 
 
