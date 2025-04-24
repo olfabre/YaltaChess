@@ -138,22 +138,72 @@ void YaltaChessView::initBorderLabels()
 
 // 1) Ce helper instantie les mêmes v123, vabc, intervals que Model
 Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
-    const float W = 1000.f, O = 50.f;
-    // Mid, size, v123, vabc, intervals… recopier ici
-    // puis la boucle for zone=0..5 identique :
-    //   si interval[zone] contient (g.x,g.y), calculer :
-    //     float rx1 = (g.x%4)/4.f, ry1 = (g.y%4)/4.f;
-    //     float mid_r_x = (rx1 + (g.x%4+1)/4.f)/2, idem mid_r_y
-    //     Vector2f s1 = v123[z]*0.5f, s2 = v123[(z+2)%6]*0.5f;
-    //     Vector2f corner = mid + v123[(z+4)%6];
-    //     Vector2f U1 = vabc[(z+1)%6]*ry1 - s1*ry1 + s2;
-    //     Vector2f midU = vabc[(z+1)%6]*mid_r_y - s1*mid_r_y + s2;
-    //     return corner + s1*mid_r_y + midU*mid_r_x;
-    // (identique à ce qu’on fait dans Model pour construire les cases).
-    // …
-    // le return « bouche-trou » pour supprimer le warning :
-    return { 100.f, 100.f };
+    const float W = 1000.f;
+    const float O = 50.f;
+    Vector2f mid(W/2.f + O, W/2.f + O);
+    float size   = W/2.f;
+    float side   = size/2.f;
+    float height = std::sqrt(size*size - side*side);
+
+    // vecteurs vers les 6 sommets
+    std::array<Vector2f,6> v123 = {{
+                                           Vector2f(-size*0.5f, -height),
+                                           Vector2f( size*0.5f, -height),
+                                           Vector2f( size,        0      ),
+                                           Vector2f( size*0.5f,  height),
+                                           Vector2f(-size*0.5f,  height),
+                                           Vector2f(-size,       0      )
+                                   }};
+
+    // vecteurs internes
+    std::array<Vector2f,6> vabc = {{
+                                           Vector2f(-height * std::cos(30.f * M_PI/180.f),
+                                                    -height * std::sin(30.f * M_PI/180.f)),
+                                           Vector2f(0.f, -height),
+                                           Vector2f( height * std::cos(30.f * M_PI/180.f),
+                                                     -height * std::sin(30.f * M_PI/180.f)),
+                                           Vector2f( height * std::cos(30.f * M_PI/180.f),
+                                                     height * std::sin(30.f * M_PI/180.f)),
+                                           Vector2f(0.f, height),
+                                           Vector2f(-height * std::cos(30.f * M_PI/180.f),
+                                                    height * std::sin(30.f * M_PI/180.f))
+                                   }};
+
+    // intervalles sextants: on appelle explicitement le constructeur de pair
+    static const std::array<std::pair<Vector2i,Vector2i>,6> intervals = {{
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 0, 4), Vector2i( 0, 4)),
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 0, 4), Vector2i( 4, 8)),
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 8,12), Vector2i( 4, 8)),
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 8,12), Vector2i( 8,12)),
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 4, 8), Vector2i( 8,12)),
+                                                                                 std::pair<Vector2i,Vector2i>(Vector2i( 4, 8), Vector2i( 0, 4))
+                                                                         }};
+
+    for (int z = 0; z < 6; ++z) {
+        auto [ix, iy] = intervals[z];
+        if (g.x >= ix.x && g.x < ix.y && g.y >= iy.x && g.y < iy.y) {
+            float rx1 = (g.x % 4) / 4.f;
+            float ry1 = (g.y % 4) / 4.f;
+            float rx2 = (g.x % 4 + 1) / 4.f;
+            float ry2 = (g.y % 4 + 1) / 4.f;
+            float mid_r_x = (rx1 + rx2) * 0.5f;
+            float mid_r_y = (ry1 + ry2) * 0.5f;
+
+            Vector2f s1 = v123[z] * 0.5f;
+            Vector2f s2 = v123[(z + 2) % 6] * 0.5f;
+            Vector2f corner = mid + v123[(z + 4) % 6];
+
+            Vector2f U1 = vabc[(z + 1) % 6] * ry1 - s1 * ry1 + s2;
+            Vector2f midU = vabc[(z + 1) % 6] * mid_r_y - s1 * mid_r_y + s2;
+
+            return corner + s1 * mid_r_y + midU * mid_r_x;
+        }
+    }
+
+    return mid; // fallback
 }
+
+
 
 
 
