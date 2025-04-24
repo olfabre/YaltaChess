@@ -1,8 +1,10 @@
 #include <SFML/Graphics.hpp>
+#include "Intro.h"
+#include "ResourceManager.h"
 #include "Model.h"
 #include "View.h"
 #include "Controller.h"
-#include "Intro.h"
+
 using namespace sf;
 using namespace std;
 
@@ -28,6 +30,10 @@ int main()
         intro.play();
     }
 
+    // Chargement des textures de pièces (PNG)
+    ResourceManager::loadAll();   // chargé une seule fois
+
+
     // Initialisation du jeu
     Model model;
     YaltaChessView YaltaChessView(window, model);
@@ -46,5 +52,10 @@ int main()
         }
         YaltaChessView.draw();
     }
+
+    // **IMPORTANT** : on vide le cache de textures
+    ResourceManager::unloadAll();
+
+
     return 0;
 }

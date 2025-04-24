@@ -1,11 +1,71 @@
 #include "Model.h"
+#include "cases/Case.h"
+#include "Pion.h"     // tes classes
+#include "Tour.h"
+#include "Fou.h"
+#include "Cavalier.h"
+#include "Dame.h"
+#include "Roi.h"
 #include <cmath>
 using namespace sf;
 using namespace std;
 
-Model::Model() { initialiserEchiquier(); }
+// Ta table de départ (inspirée du Python)
+// en haut de Model.cpp, juste après les includes :
+static const pair<int,int> SETUP[12][12] = {
+        //  y=0
+        { {0,4},{0,2},{0,3},{0,5},{0,4},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=1
+        { {0,1},{0,1},{0,1},{0,1},{0,2},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=2
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{0,3},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=3
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{0,0},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=4
+        { {1,4},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{1,4},{1,2},{1,3},{1,5} },
+        //  y=5
+        { {1,2},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{1,1},{1,1},{1,1},{1,1} },
+        //  y=6
+        { {1,3},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=7
+        { {1,0},{1,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
+        //  y=8
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,4},{2,2},{2,3},{2,5},{2,4},{2,1},{-1,-1},{-1,-1} },
+        //  y=9
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,1},{2,1},{2,1},{2,1},{2,2},{2,1},{-1,-1},{-1,-1} },
+        // y=10
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,3},{2,1},{-1,-1},{-1,-1} },
+        // y=11
+        { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
+};
 
-Model::~Model() { for (auto &c : cases) delete c; }
+Model::Model() {
+    initialiserEchiquier();
+    for (int y = 0; y < 12; ++y) {
+        for (int x = 0; x < 12; ++x) {
+            auto [coul, type] = SETUP[y][x];
+            if (coul < 0) continue;
+            Vector2i grid{x,y};
+            Piece* p = nullptr;
+            Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
+            switch(type) {
+                case 0: p = new Roi(grid, cc);       break;
+                case 1: p = new Pion(grid, cc);      break;
+                case 2: p = new Cavalier(grid, cc);  break;
+                case 3: p = new Fou(grid, cc);       break;
+                case 4: p = new Tour(grid, cc);      break;
+                case 5: p = new Dame(grid, cc);      break;
+            }
+            pieces.push_back(p);
+        }
+    }
+}
+
+Model::~Model() {
+    for (auto &c : cases) delete c;
+    for(auto p: pieces) delete p;
+
+}
 
 void Model::ajouterCase(const vector<Vector2f>& points, bool estBlanc)
 {

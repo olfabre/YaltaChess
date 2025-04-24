@@ -1305,6 +1305,12 @@ voici le résultat
 
 
 
+### Étape 9: création et positions des pions
+
+Il est conseillé d'utiliser des images au format png transparent. Je vais télécharger toutes les images de pions d'un jeu d'échec à l'adresse suivante: https://commons.wikimedia.org/wiki/Category:SVG_chess_pieces
+
+
+
 
 
 
