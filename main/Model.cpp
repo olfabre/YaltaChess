@@ -7,8 +7,12 @@
 #include "Dame.h"
 #include "Roi.h"
 #include <cmath>
+#include <random>
+#include <algorithm>
 using namespace sf;
 using namespace std;
+
+
 
 // ma table de départ (inspirée ddes infos que j'ai récupérée sur internet
 // en haut de Model.cpp, juste après les includes :
@@ -40,6 +44,10 @@ static const pair<int,int> SETUP[12][12] = {
 };
 
 Model::Model() {
+
+    initialiserEchiquier();
+    initialiserJoueurs();
+
     initialiserEchiquier();
     for (int y = 0; y < 12; ++y) {
         for (int x = 0; x < 12; ++x) {
@@ -60,6 +68,32 @@ Model::Model() {
         }
     }
 }
+
+
+void Model::initialiserJoueurs()
+{
+    // 1) Les trois couleurs possibles et un engine RNG
+    vector<Couleur> cols = { BLANC, ROUGE, NOIR };
+    static mt19937_64 rng{ random_device{}() };
+    shuffle(cols.begin(), cols.end(), rng);
+
+    // 2) Liste de prénoms pour IA (ajoutez les vôtres)
+    vector<string> botNames = {
+            "Alice", "Bob", "Charlie", "Diane", "Eve", "Frank"
+    };
+    shuffle(botNames.begin(), botNames.end(), rng);
+
+    // 3) Construction du vecteur players
+    players.clear();
+    players.push_back({ "Humain", cols[0], true });      // toujours premier (le joueur)
+    players.push_back({ botNames[0], cols[1], false });  // IA1
+    players.push_back({ botNames[1], cols[2], false });  // IA2
+
+    // 4) Tour de jeu initial: vous commencez toujours
+    currentPlayerIdx = 0;
+}
+
+
 
 Model::~Model() {
     for (auto &c : cases) delete c;
