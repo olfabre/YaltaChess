@@ -1645,6 +1645,10 @@ On aligne légèrement le texte pour qu’il n’empiète pas sur le point.
 
 
 
+### Étape 12: Gestion du premier évenement souris
+
+Je souhaite quand c'est mon tour de jouer (cercle vert clignotant) au passage de ma souris sur mes  pièces, il y a un changement (surbrillance). Ce que l'on appelle un `hover`.
+
 
 
 
