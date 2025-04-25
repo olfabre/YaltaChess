@@ -30,6 +30,7 @@ namespace {
             outline.move(off);
             target.draw(outline);
         }
+        // Dessine le sprite original par-dessus
         target.draw(sprite);
     }
 }
@@ -37,20 +38,20 @@ namespace {
 
 YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
         : window(win), model(mod)
-        {
-            // Charge la police (unique, tirée de ton dossier de ressources)
-            // Charge la police (SFML 3)
-            // Charger la police Google font
-            // SFML 3 : charger la police
-            // Charge la police SFML 3 depuis le répertoire de l'exécutable
-            auto execPath = filesystem::current_path();
-            auto fontPath = execPath / "Roboto-Regular.ttf";
-            if (!coordFont.openFromFile(fontPath.string()))
-                throw runtime_error("Impossible de charger Roboto-Regular.ttf");
+{
+    // Charge la police (unique, tirée de ton dossier de ressources)
+    // Charge la police (SFML 3)
+    // Charger la police Google font
+    // SFML 3 : charger la police
+    // Charge la police SFML 3 depuis le répertoire de l'exécutable
+    auto execPath = filesystem::current_path();
+    auto fontPath = execPath / "Roboto-Regular.ttf";
+    if (!coordFont.openFromFile(fontPath.string()))
+        throw runtime_error("Impossible de charger Roboto-Regular.ttf");
 
-            // Initialise tous les labels
-            initBorderLabels();
-            blinkClock.restart();
+    // Initialise tous les labels
+    initBorderLabels();
+    blinkClock.restart();
 
 }
 
@@ -226,6 +227,8 @@ void YaltaChessView::draw()
             Vector2f(-size,       0      )
     };
     window.clear(Color::Black);
+
+    // Dessin du plateau et des labels (inchangé)
     ConvexShape whiteBorder;
     whiteBorder.setPointCount(6);
     for (int i = 0; i < 6; ++i) {
@@ -245,14 +248,55 @@ void YaltaChessView::draw()
     outline.setOutlineColor(Color::Black);
     outline.setOutlineThickness(2.f);
     window.draw(outline);
-    for (auto c : model.getCases())
-        window.draw(*c);
+
+
+    // --- MISE À JOUR DES ptr de pièce dans chaque case ---
+        // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
+                for (Case* c : model.getCases())
+                c->setPiece(nullptr);
+       for (Piece* p : model.getPieces())
+            {
+                        // centre de la case en pixels
+                                Vector2f center = gridToPixel(p->getPosition());
+                        // recherche de la case qui contient ce centre
+                        for (Case* c : model.getCases())
+                        {
+                                if (c->contientPoint(center))
+                                    {
+                                                c->setPiece(p);
+                                                break;
+                                            }
+                                }
+                    }
+
+
+
+    // dessin des cases, avec highlight vert sur la case hoverée
+    for (Case* c : model.getCases())
+           {
+        if (hoveredCase == c)
+        {
+            // case sous le curseur → fond vert
+            ConvexShape highlight = c->getShape();   // copie
+            highlight.setFillColor(Color::Green);
+            // on conserve le contour d’origine
+            highlight.setOutlineColor(Color::Black);
+            highlight.setOutlineThickness(2.f);
+            window.draw(highlight);
+        }
+        else
+        {
+            window.draw(*c); // dessin normal (couleur + contour)
+        }
+    }
+
+
     for (auto& txt : borderLabels)
         window.draw(txt);
 
 
 
-// Après avoir dessiné borderLabels…
+
 
 
 // --- DESSIN DES JOUEURS ---
@@ -324,10 +368,12 @@ void YaltaChessView::draw()
 
 
     for (auto p : model.getPieces()) {
+        // Prépare le sprite de la pièce
         string key = p->getTypeName() + "_" +
                      (p->getCouleur() == BLANC ? "White" :
                       p->getCouleur() == NOIR  ? "Black" : "White");
         const auto& tex = ResourceManager::get(key);
+
         Sprite spr(tex);
         auto ts = tex.getSize();
         // SFML3 : setOrigin prend un Vector2f
@@ -338,11 +384,14 @@ void YaltaChessView::draw()
             spr.setColor(Color(195,83,51));
 
 
+
+
+
         // Juste après avoir positionné spr :
-        float thickness    = 2.f;
+        float thickness    = 1.f;
         Color outlineColor = (p->getCouleur() == BLANC ? Color(0,0,0) : Color(246,243,232));
-               // offsets pour simuler 8 directions
-        std::array<Vector2f,8> offsets = {
+        // offsets pour simuler 8 directions
+        array<Vector2f,8> offsets = {
                 Vector2f(-thickness, -thickness),
                 Vector2f(-thickness,  0.f),
                 Vector2f(-thickness,  thickness),
