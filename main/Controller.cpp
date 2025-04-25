@@ -13,9 +13,9 @@ Controller::Controller(Model &m, YaltaChessView &v) : model(m), view(v) {}
 void Controller::handleEvent(const sf::Event& event)
 {
 
-    // 1) Check for a MouseMoved event:
+    // 1) Check MouseMoved event
     if (event.is<sf::Event::MouseMoved>()) {
-        // 2) Get the MouseMoved data safely
+        // Récupère l’événement MouseMoved
         auto const* mouseMoved = event.getIf<sf::Event::MouseMoved>();
         if (!mouseMoved)
             return;

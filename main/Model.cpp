@@ -79,7 +79,7 @@ void Model::initialiserJoueurs()
 
     // 2) Liste de prénoms pour IA (ajoutez les vôtres)
     vector<string> botNames = {
-            "Alice", "Bob", "Charlie", "Diane", "Eve", "Frank"
+            "Alice", "Bob", "Charlie", "Diane", "Eve", "Frank", "Mickael"
     };
     shuffle(botNames.begin(), botNames.end(), rng);
 
