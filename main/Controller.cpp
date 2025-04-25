@@ -1,6 +1,8 @@
+#include <iostream>
 #include "Controller.h"
 #include "View.h"
 #include <SFML/Window/Event.hpp>
+#include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
 
 using namespace sf;
 using namespace std;
@@ -46,6 +48,43 @@ void Controller::handleEvent(const sf::Event& event)
                     }
                 view.setHoveredCase(hoveredCase);
     }
-
+    //sf::Vector2i grid = clickedCase->getGridPos();
     // … autres événements (clic, touches…) …
+
+    // 2) Check MouseButtonPressed event for selection / déplacement
+    if (event.is<sf::Event::MouseButtonPressed>()) {
+                auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
+                if (!mb) return;
+
+                        // on ne gère que le clic gauche
+                                if (mb->button == Mouse::Button::Left) {
+                        // coords pixel → monde
+                                Vector2i pixel{ mb->position.x, mb->position.y };
+                        Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+                                // trouver la case cliquée
+                                        Case* clickedCase = nullptr;
+                        for (Case* c : model.getCases()) {
+                                if (c->contientPoint(world)) {
+                                        clickedCase = c;
+                                        break;
+                                    }
+                            }
+                        if (!clickedCase)
+                                return; // clic hors plateau
+
+                                // récupérer la position logique (grille)
+                                        sf::Vector2i grid = clickedCase->getGridPos();
+                        // → ici : interroger model.getPieceAt(grid), sélectionner la pièce, etc.
+
+                                    // ————— DEBUG : affiche dans la console
+                                    std::cout << "DEBUG click gridPos = ("<< grid.x << "," << grid.y << ")" << std::endl;
+                                    hoveredCase = clickedCase;
+                                    view.setHoveredCase(clickedCase);
+
+                                }
+            }
+
+
+
+
 }

@@ -1731,7 +1731,14 @@ Le passage de la souris, le hover, sur mes pièces fonctione parfaitement. Nous 
 
 ### Étape 13: Gestion du second évenement souris
 
+Rappel pour compiler
 
+```bash
+cmake -B build_main -S main
+cmake --build build_main
+
+./build_main/bin/SFML_MVC_YaltaChess 
+```
 
 
 
