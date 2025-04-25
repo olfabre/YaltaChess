@@ -1647,11 +1647,79 @@ On aligne légèrement le texte pour qu’il n’empiète pas sur le point.
 
 ### Étape 12: Gestion du premier évenement souris
 
-Je souhaite quand c'est mon tour de jouer (cercle vert clignotant) au passage de ma souris sur mes  pièces, il y a un changement (surbrillance). Ce que l'on appelle un `hover`.
+Je souhaite quand c'est mon tour de jouer (cercle vert clignotant) au passage de ma souris sur mes  pièces, il y a un changement (la case prend la couleur orange). Ce que l'on appelle un `hover`.
+
+1/ Boucle principale et gestion des événements
+
+Mon `main.cpp`appelle à chaque frame le` controller.handleEvent(event)`pour traiter tous les évènements  dont les déplacements de la souris `MouseMoved `mais aussi ses actions `view.draw()`
 
 
 
+2/ Capture du déplacement de la souris
 
+Dans `Controller::handleEvent` je vérifie que l'évnèment est bien un MouseMoved
+
+Je récupère la position écran (`event.mouseMove.x`, `event.mouseMove.y`)  et je la convetit en coordonnées monde avec 
+
+```cpp
+Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+```
+
+J e m'assure bien que c'est bien au tour de l'humain à jouer ("vous")
+
+```cpp
+players[model.getCurrentPlayerIdx()].isHuman
+```
+
+
+
+3/ Recherche de la case sous le curseur
+
+Dans le HandleEvent:
+
+- Je parcoure toutes les case (pointeur Case) de model.getCases()
+
+- Pour chaque case, on appelle une méthode `contientPoint(world)` pour déterminer si le point est à l'intérieur du polygone convexe
+
+- Je vérifie que la case est bien occupée `c->estOccupee()` (par une de mes pièce) que la pièce m'appartient bien (`c->getPiece()->getCouleur() == players[…].color`).
+
+- Le premier c (case) qui passe ces tests est stoké dans `hoveredCase`, puis on appelle `view.setHoveredCase(hoveredCase)`.
+
+
+
+4/ Mise à jour de la liaison pièces ⇒ cases
+
+Dans `YaltaChessView::draw()` avant de dessiner:
+
+- Je remet à zéro avec la méthode `c->setPiece(nullptr)` pour chaque case
+- Je parcourt toutes les pièces (`model.getPieces()`), on calcule leur centre en pixels (avec `gridToPixel`), puis on redonne à la case correspondante son pointeur de pièce (`c->setPiece(p)`).
+
+5/ Dessin avec highlight orange
+
+Toujours dan sla méthode draw():
+
+```cpp
+for (Case* c : model.getCases()) {
+    if (c == hoveredCase) {
+        // copie du ConvexShape
+        ConvexShape highlight = c->getShape();
+        // fond orange semi-transparent (ici R=255, G=165, B=0, alpha=240)
+        highlight.setFillColor(Color(255,165,0,240));
+        // contour inchangé
+        highlight.setOutlineColor(Color::Black);
+        highlight.setOutlineThickness(2.f);
+        window.draw(highlight);
+    } else {
+        window.draw(*c); // dessin normal
+    }
+}
+```
+
+J'ai ajusté l’alpha (dernier paramètre) pour la transparence afin de ne pas avoir un ornage trop pur et pas très jolie à l'affichage. L’orange est obtenu en combinant `(255, 165, 0)`.
+
+6/ Rafraîchissement de la fenêtre
+
+`window.display()` affiche le résultat à l’écran.
 
 
 

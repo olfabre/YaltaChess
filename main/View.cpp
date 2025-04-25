@@ -278,7 +278,8 @@ void YaltaChessView::draw()
         {
             // case sous le curseur → fond vert
             ConvexShape highlight = c->getShape();   // copie
-            highlight.setFillColor(Color::Green);
+            //highlight.setFillColor(Color::Green);
+            highlight.setFillColor(Color(255,165,0, 240));
             // on conserve le contour d’origine
             highlight.setOutlineColor(Color::Black);
             highlight.setOutlineThickness(2.f);
