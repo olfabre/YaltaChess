@@ -1723,6 +1723,14 @@ J'ai ajusté l’alpha (dernier paramètre) pour la transparence afin de ne pas 
 
 
 
+Le passage de la souris, le hover, sur mes pièces fonctione parfaitement. Nous pouvons continuer la programmation restante
+
+![6](6.jpg)
+
+
+
+### Étape 13: Gestion du second évenement souris
+
 
 
 
