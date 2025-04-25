@@ -4,8 +4,8 @@ using namespace std;
 
 
 
-Case::Case(const vector<Vector2f>& points, bool blanc)
-        : estBlanc(blanc), piece(nullptr)
+Case::Case(const vector<Vector2f>& points, bool blanc, Vector2i gridPos)
+        : estBlanc(blanc), piece(nullptr), gridPos(gridPos)
 {
     forme.setPointCount(points.size());
     for(size_t i = 0; i < points.size(); ++i)

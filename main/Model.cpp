@@ -101,9 +101,11 @@ Model::~Model() {
 
 }
 
-void Model::ajouterCase(const vector<Vector2f>& points, bool estBlanc)
+void Model::ajouterCase(const vector<Vector2f>& points,
+                        bool estBlanc,
+                        Vector2i gridPos)
 {
-    cases.push_back(new Case(points, estBlanc));
+    cases.push_back(new Case(points, estBlanc, gridPos));
 }
 
 void Model::initialiserEchiquier()
@@ -159,7 +161,8 @@ void Model::initialiserEchiquier()
                 Vector2f p4 = corner + s1*ry2 + U2*rx1;
 
                 bool estBlanc = (x + y + zone) % 2 == 0;
-                ajouterCase({p1,p2,p3,p4}, estBlanc);
+                //ajouterCase({p1,p2,p3,p4}, estBlanc);
+                ajouterCase({p1,p2,p3,p4}, estBlanc, {x,y});
             }
     }
 }
