@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Clock.hpp>
 #include "Model.h"
+#include "Piece.h"
 #include <vector>
 using namespace sf;
 using namespace std;
@@ -13,6 +14,7 @@ class Model;
 class YaltaChessView
 {
 private:
+    Piece* hoveredPiece = nullptr; // une pièce sous la souris ou pas alors null du pointeur(nullptr)
     RenderWindow &window;
     const Model &model;
     Clock blinkClock; // mesure le temps pour le clignotement

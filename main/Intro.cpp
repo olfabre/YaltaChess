@@ -91,8 +91,12 @@ void Intro::play() {
     window.draw(*introText);
     window.display();
 
-    // Attendre 5 secondes
-    if (clock.getElapsedTime().asSeconds() >= 7.0f) {
+    // Attendre 7 secondes
+
+    // en période de dev, je mets moins longtemps
+    //float tpAttente = 7.0f; // prod
+    float tpAttente = 0.0f; // dev
+    if (clock.getElapsedTime().asSeconds() >= tpAttente) {
         isIntroComplete = true;
         cout << "Intro terminée" << endl;
     }
