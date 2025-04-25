@@ -25,5 +25,31 @@ void Case::draw(RenderTarget &target, RenderStates states) const
 
 bool Case::contientPoint(const Vector2f &point) const
 {
-    return forme.getGlobalBounds().contains(point);
+    //return forme.getGlobalBounds().contains(point);
+    // Comme nos ConvexShape stockent déjà les sommets
+    // en coordonnées monde (pas de transform), on peut
+    // directement faire un test "cross-product" pour un
+    // polygone convexe.
+
+    size_t n = forme.getPointCount();
+    bool hasPos = false, hasNeg = false;
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        // récupération des deux sommets de l’arête
+        Vector2f a = forme.getPoint(i);
+        Vector2f b = forme.getPoint((i + 1) % n);
+
+        // on calcule le cross produit (b–a) × (point–a)
+        float cross = (b.x - a.x) * (point.y - a.y)
+                      - (b.y - a.y) * (point.x - a.x);
+
+        if (cross > 0)  hasPos = true;
+        else if (cross < 0)  hasNeg = true;
+
+        // si on a des signes différents, point hors polygone
+        if (hasPos && hasNeg)
+            return false;
+    }
+    return true;
 }

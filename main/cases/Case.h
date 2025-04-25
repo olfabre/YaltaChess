@@ -28,6 +28,9 @@ public:
     bool estOccupee() const { return piece != nullptr; }
     Piece *getPiece() const { return piece; }
 
+    // Pour le highlight en survol
+    const ConvexShape& getShape() const { return forme; }
+
     // Setters
     void setPiece(Piece *p) { piece = p; }
 };
