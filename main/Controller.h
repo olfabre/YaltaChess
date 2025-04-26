@@ -19,6 +19,8 @@ private:
     YaltaChessView &view;;
     //Piece* hoveredPiece = nullptr; // une pièce sous la souris ou pas alors null du pointeur(nullptr)
     Case* hoveredCase = nullptr;
+    Piece*   selectedPiece = nullptr;   // pièce en cours de sélection
+    vector<sf::Vector2i> legalMoves;    // ses coups légaux
 
 
 public:

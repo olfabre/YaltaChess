@@ -178,3 +178,21 @@ Piece* Model::getPieceAt(Vector2i pos) const {
 bool Model::isOccupied(Vector2i pos) const {
         return getPieceAt(pos) != nullptr;
     }
+
+void Model::removePiece(Piece* p) {
+    pieces.erase(
+            std::remove(pieces.begin(), pieces.end(), p),
+            pieces.end()
+    );
+    delete p;
+}
+
+void Model::movePiece(Piece* p, Vector2i dest) {
+    // capture
+    if (Piece* enemi = getPieceAt(dest))
+        removePiece(enemi);
+    // met à jour la position de p
+    p->setPosition(dest);
+    // change de joueur
+    currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+}

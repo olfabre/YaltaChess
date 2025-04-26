@@ -1,7 +1,11 @@
 #include "Cavalier.h"
+#include "Model.h"   // pour getPieceAt / isOccupied
+#include <array>
 #include <cmath>
 using namespace sf;
 using namespace std;
+
+
 
 Cavalier::Cavalier(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
 
@@ -14,3 +18,31 @@ bool Cavalier::mouvementValide(Vector2i nouvellePos) const {
 void Cavalier::dessiner(RenderWindow& window) const {
     // Dessiner le Cavalier
 }
+
+// implémentation des coups légaux
+vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
+    static const array<Vector2i,8> jumps = {{
+      { 1, 2}, { 2, 1}, { 2,-1}, { 1,-2},
+       {-1,-2}, {-2,-1}, {-2, 1}, {-1, 2}
+                                            }};
+
+    vector<Vector2i> res;
+    for (auto d : jumps) {
+        Vector2i dest = position + d;
+        // bornes 0≤dest.x,y<12
+        if (dest.x<0||dest.x>=12||dest.y<0||dest.y>=12) continue;
+        if (!mouvementValide(dest)) continue;
+        Piece* cible = model.getPieceAt(dest);
+        //if (!cible || cible->getCouleur() != coul)
+        if (!cible || cible->getCouleur() != couleur)
+            res.push_back(dest);
+    }
+    return res;
+}
+
+// implémentation du nom
+string Cavalier::getTypeName() const {
+        return "Cavalier";
+    }
+
+
