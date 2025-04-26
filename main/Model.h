@@ -40,6 +40,12 @@ public:
     void initialiserEchiquier();
     const vector<Case *> &getCases() const { return cases; }
     const auto& getPieces() const { return pieces; }
+    /// Renvoie la pièce à la position grille donnée (ou nullptr)
+    Piece* getPieceAt(sf::Vector2i pos) const;
+    /// Vrai si une pièce occupe la case
+    bool isOccupied(sf::Vector2i pos) const;
+
+
 };
 
 #endif
