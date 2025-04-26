@@ -1740,6 +1740,57 @@ cmake --build build_main
 ./build_main/bin/SFML_MVC_YaltaChess 
 ```
 
+Je souhaite à ce stade, pouvoir interagir sur mes pièces avec ma souris (sélection/déselection, déplacement des pièces).
+
+Pour ce faire, je dois avancer en plusieurs étapes:
+
+1/ Faire en sorte que chaque Case connaisse sa position logique (coordonnées grille)
+
+- cela permet de traduire un clic pixel en coorodonées grille 
+- de demander au `Model`quelle pièce se trouve sur cette case
+- générer et tester des déplacements en se basant sur des Vector2i {x,y}
+
+J'ai ajouté un membre `gridPos`et un getter dans `Case`
+
+2/ intercepter l'évènement `MouseButtonPressed`
+
+J'ai ajouté un bloc `MouseButtonPressed`dans le controller qui declare `clickedCase`et récupère la case cliquée et appelle ensuite `getGridPos()` 
+
+j'ai placé un témoin pour visualiser si cela fonctionne correctement
+
+```cpp
+ // ————— DEBUG : affiche dans la console
+        std::cout << "DEBUG click gridPos = (" 
+                  << grid.x << "," << grid.y << ")" << std::endl;
+        // ————— VISUEL : force le highlight de la case cliquée
+        hoveredCase = clickedCase;
+        view.setHoveredCase(clickedCase);
+     }
+```
+
+A chaque click sur une case, les coordonnées sont affichées sur le terminal
+
+![7](7.jpg)
+
+
+
+Ensuite j'ai implémenté une méthode pour connaitre le type et la couleur d'une pièce qui a été sélectionnée (click souris). On va l'appeler `Model::getPieceAt(sf::Vector2i)`
+
+Mise en place d'un déboguage pour savoir si nous avons bien mis en place cette méthode
+
+```cpp
+Piece* p = model.getPieceAt(grid);
+if (p) {
+    std::cout << "DEBUG: pièce trouvée de type " 
+              << p->getTypeName() << " couleur " 
+              << int(p->getCouleur()) << "\n";
+} else {
+    std::cout << "DEBUG: case vide\n";
+}
+```
+
+![8](8.jpg)
+
 
 
 

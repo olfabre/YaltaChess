@@ -166,3 +166,15 @@ void Model::initialiserEchiquier()
             }
     }
 }
+
+Piece* Model::getPieceAt(Vector2i pos) const {
+        for (Piece* p : pieces) {
+                if (p->getPosition() == pos)
+                        return p;
+            }
+        return nullptr;
+    }
+
+bool Model::isOccupied(Vector2i pos) const {
+        return getPieceAt(pos) != nullptr;
+    }

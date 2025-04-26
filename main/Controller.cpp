@@ -77,9 +77,21 @@ void Controller::handleEvent(const sf::Event& event)
                         // → ici : interroger model.getPieceAt(grid), sélectionner la pièce, etc.
 
                                     // ————— DEBUG : affiche dans la console
-                                    std::cout << "DEBUG click gridPos = ("<< grid.x << "," << grid.y << ")" << std::endl;
-                                    hoveredCase = clickedCase;
-                                    view.setHoveredCase(clickedCase);
+                                    //std::cout << "DEBUG click gridPos = ("<< grid.x << "," << grid.y << ")" << std::endl;
+                                    //hoveredCase = clickedCase;
+                                    //view.setHoveredCase(clickedCase);
+
+                                    Piece* p = model.getPieceAt(grid);
+                                    if (p) {
+                                        std::cout << "DEBUG: pièce trouvée de type "
+                                                  << p->getTypeName() << " couleur "
+                                                  << int(p->getCouleur()) << "\n";
+                                    } else {
+                                        std::cout << "DEBUG: case vide\n";
+                                    }
+
+
+
 
                                 }
             }
