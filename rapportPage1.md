@@ -1740,7 +1740,7 @@ cmake --build build_main
 ./build_main/bin/SFML_MVC_YaltaChess 
 ```
 
-Je souhaite à ce stade, pouvoir interagir sur mes pièces avec ma souris (sélection/déselection, déplacement des pièces).
+Je souhaite à ce stade, pouvoir interagir sur mes pièces avec ma souris (sélection/déselection, déplacement des pièces) et qu'il m'indique aussi les positions possibles pour le déplacement de mes pièces.
 
 Pour ce faire, je dois avancer en plusieurs étapes:
 
@@ -1794,9 +1794,69 @@ if (p) {
 
 
 
+La prochaine étape est de faire passer mon `Controller`de la simple détection des clics de ma souris à un gestionaire en deus phases: sélection/déselection et déplacement et aussi, d'ajouter un moeyn de visualiser les coups possibles (coups légaux)
+
+On va se servir à la fois de notre Controller pour la sélection des pièces et coups possibles et de notre View pour dessiner le surlignage.
+
+Je clique sur ma pièce, elle devient `selectedPiece` et la case correspondante devient verte, et ses cases destinations apparaissent vertes aussi (comm eun asistance visuelle des coups possibles).
+
+Je clique sur une des cases vertes, cela appelle `model.movePiece()`, ma pièce bouge pui tout est réinitialisé.
+
+la gestion se fait avec l'évènement `MouseButtonPressed`
+
+```cpp
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Mouse.hpp>
+
+ if (event.is<sf::Event::MouseButtonPressed>()) {
+   ...
+```
 
 
 
+Techniquement, dans`Controller`, au premier clic, on récupère la pièce, on calcule ``getLegalMoves(Model)` on convertir ces coordonnées `Vector2i` en liste de `Case*`et on applelle 
+
+`view.setHighlightedCases` pour afficher les cases en vert.
+
+
+
+Au second click, si la case est dans `legalMoves`, on appelle `model.movePiece`, puis on réinitialise tout (`selectedPiece`, `legalMoves`, surlignage).
+
+Attention: dans cette phase, la liste des coups possibles selon les pièces  ne sont pas encore totalement parfaits. Il ya des erreurs que je corrigerai après dans une autre étape.
+
+Les coups possibles sont définis dans chaque classe des pièces
+
+un exemple ici pour le Cavalier.cpp
+
+```cpp
+#include "Cavalier.h"
+#include "Model.h"   // pour getPieceAt / isOccupied
+using namespace sf;
+using namespace std;
+
+std::vector<Vector2i>
+Cavalier::getLegalMoves(const Model& model) const {
+    static const array<Vector2i,8> jumps = {{
+        { 1, 2}, { 2, 1}, { 2,-1}, { 1,-2},
+        {-1,-2}, {-2,-1}, {-2, 1}, {-1, 2}
+    }};
+    vector<Vector2i> res;
+    for (auto d : jumps) {
+        Vector2i dest = position + d;
+        // bornes 0≤dest.x,y<12
+        if (dest.x<0||dest.x>=12||dest.y<0||dest.y>=12) continue;
+        if (!mouvementValide(dest)) continue;
+        Piece* cible = model.getPieceAt(dest);
+        if (!cible || cible->getCouleur() != coul)
+            res.push_back(dest);
+    }
+    return res;
+}
+```
+
+Au final, voici une impression écran du résultat
+
+![9](9.jpg)
 
 
 
