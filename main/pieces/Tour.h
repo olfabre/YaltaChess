@@ -2,8 +2,12 @@
 #define TOUR_H
 
 #include "Piece.h"
+#include <vector>
+
 using namespace sf;
 using namespace std;
+
+class Model;  // forward declaration
 
 // Classe Tour héritant de Piece
 class Tour : public Piece {
@@ -11,7 +15,12 @@ public:
     Tour(Vector2i pos, Couleur coul);
     bool mouvementValide(Vector2i nouvellePos) const override;
     void dessiner(RenderWindow& window) const override;
-    string getTypeName() const override { return "Tour"; }
+
+    // génère tous les déplacements valides en glissant
+    std::vector<sf::Vector2i> getLegalMoves(const Model& model) const override;
+
+    // nom pour identification / chargement texture
+    std::string getTypeName() const override;
 };
 
 #endif
