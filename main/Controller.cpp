@@ -51,52 +51,58 @@ void Controller::handleEvent(const sf::Event& event)
     //sf::Vector2i grid = clickedCase->getGridPos();
     // … autres événements (clic, touches…) …
 
-    // 2) Check MouseButtonPressed event for selection / déplacement
+    // --- Clic pour sélection / déplacement ---
     if (event.is<sf::Event::MouseButtonPressed>()) {
-                auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
-                if (!mb) return;
+        auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
+        if (!mb || mb->button != Mouse::Button::Left) return;
 
-                        // on ne gère que le clic gauche
-                                if (mb->button == Mouse::Button::Left) {
-                        // coords pixel → monde
-                                Vector2i pixel{ mb->position.x, mb->position.y };
-                        Vector2f world = view.getWindow().mapPixelToCoords(pixel);
-                                // trouver la case cliquée
-                                        Case* clickedCase = nullptr;
-                        for (Case* c : model.getCases()) {
-                                if (c->contientPoint(world)) {
-                                        clickedCase = c;
-                                        break;
-                                    }
-                            }
-                        if (!clickedCase)
-                                return; // clic hors plateau
-
-                                // récupérer la position logique (grille)
-                                        sf::Vector2i grid = clickedCase->getGridPos();
-                        // → ici : interroger model.getPieceAt(grid), sélectionner la pièce, etc.
-
-                                    // ————— DEBUG : affiche dans la console
-                                    //std::cout << "DEBUG click gridPos = ("<< grid.x << "," << grid.y << ")" << std::endl;
-                                    //hoveredCase = clickedCase;
-                                    //view.setHoveredCase(clickedCase);
-
-                                    Piece* p = model.getPieceAt(grid);
-                                    if (p) {
-                                        std::cout << "DEBUG: pièce trouvée de type "
-                                                  << p->getTypeName() << " couleur "
-                                                  << int(p->getCouleur()) << "\n";
-                                    } else {
-                                        std::cout << "DEBUG: case vide\n";
-                                    }
-
-
-
-
-                                }
+        // pixel → monde → case
+        Vector2i pixel{ mb->position.x, mb->position.y };
+        Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+        Case* clickedCase = nullptr;
+        for (Case* c : model.getCases()) {
+            if (c->contientPoint(world)) {
+                clickedCase = c;
+                break;
             }
+        }
+        if (!clickedCase) return;
 
+        // position logique
+        Vector2i grid = clickedCase->getGridPos();
+        auto const& players = model.getPlayers();
+        int cur = model.getCurrentPlayerIdx();
 
+        // 1) Sélection de la pièce
+        if (!selectedPiece) {
+            Piece* p = model.getPieceAt(grid);
+            if (p && p->getCouleur() == players[cur].color) {
+                selectedPiece = p;
+                legalMoves = p->getLegalMoves(model);
 
-
+                // construire la liste de Case* à surligner
+                vector<Case*> highlights;
+                for (auto& mv : legalMoves) {
+                    for (Case* c : model.getCases()) {
+                        if (c->getGridPos() == mv) {
+                            highlights.push_back(c);
+                            break;
+                        }
+                    }
+                }
+                view.setHighlightedCases(highlights);
+            }
+        }
+            // 2) Deuxième clic : déplacement ou annulation
+        else {
+            if (find(legalMoves.begin(), legalMoves.end(), grid) != legalMoves.end()) {
+                model.movePiece(selectedPiece, grid);
+            }
+            // reset quoi qu’il arrive
+            selectedPiece = nullptr;
+            legalMoves.clear();
+            view.clearHighlights();
+            view.setHoveredCase(nullptr);
+        }
+    }
 }

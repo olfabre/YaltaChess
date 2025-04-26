@@ -32,6 +32,9 @@ private:
                         sf::Vector2i gridPos);
     void initialiserJoueurs();
 
+    // Supprime p de `pieces` et libère la mémoire
+    void removePiece(Piece* p);
+
 public:
     Model();
     ~Model();
@@ -40,9 +43,11 @@ public:
     void initialiserEchiquier();
     const vector<Case *> &getCases() const { return cases; }
     const auto& getPieces() const { return pieces; }
-    /// Renvoie la pièce à la position grille donnée (ou nullptr)
+    // Renvoie la pièce à la position grille donnée (ou nullptr)
     Piece* getPieceAt(sf::Vector2i pos) const;
-    /// Vrai si une pièce occupe la case
+    // Déplace p vers dest, gère capture et passe au joueur suivant
+    void movePiece(Piece* p, sf::Vector2i dest);
+    // Vrai si une pièce occupe la case
     bool isOccupied(sf::Vector2i pos) const;
 
 

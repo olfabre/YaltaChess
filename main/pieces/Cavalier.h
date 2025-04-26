@@ -11,7 +11,10 @@ public:
     Cavalier(Vector2i pos, Couleur coul);
     bool mouvementValide(Vector2i nouvellePos) const override;
     void dessiner(RenderWindow& window) const override;
-    string getTypeName() const override { return "Cavalier"; }
+
+    vector<Vector2i> getLegalMoves(const Model& model) const override;
+    std::string getTypeName() const override;
+
 };
 
 #endif

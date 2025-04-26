@@ -6,8 +6,8 @@
 #include "Model.h"
 #include "Piece.h"
 #include "cases/Case.h"
-
 #include <vector>
+
 using namespace sf;
 using namespace std;
 
@@ -29,13 +29,15 @@ private:
     void initBorderLabels();
     // helper pour convertir une position grille (x,y) en pixel centre de case
     Vector2f gridToPixel(const Vector2i &g) const;
+    vector<Case*> highlightedCases;
 
 public:
     YaltaChessView(RenderWindow &win, const Model &mod);
     RenderWindow& getWindow() { return window; }
     //void setHoveredPiece(Piece* p) { hoveredPiece = p; }
     void setHoveredCase(Case* c)  { hoveredCase = c; }
-
+    void setHighlightedCases(const std::vector<Case*>& c) { highlightedCases = c; }
+    void clearHighlights() { highlightedCases.clear(); }
     void draw();
 };
 

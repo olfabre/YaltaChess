@@ -1779,6 +1779,7 @@ Ensuite j'ai implémenté une méthode pour connaitre le type et la couleur d'un
 Mise en place d'un déboguage pour savoir si nous avons bien mis en place cette méthode
 
 ```cpp
+sf::Vector2i grid = clickedCase->getGridPos();
 Piece* p = model.getPieceAt(grid);
 if (p) {
     std::cout << "DEBUG: pièce trouvée de type " 
