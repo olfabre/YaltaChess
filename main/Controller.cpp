@@ -51,6 +51,8 @@ void Controller::handleEvent(const sf::Event& event)
     //sf::Vector2i grid = clickedCase->getGridPos();
     // … autres événements (clic, touches…) …
 
+
+
     // --- Clic pour sélection / déplacement ---
     if (event.is<sf::Event::MouseButtonPressed>()) {
         auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
@@ -80,8 +82,11 @@ void Controller::handleEvent(const sf::Event& event)
                 selectedPiece = p;
                 legalMoves = p->getLegalMoves(model);
 
-                // construire la liste de Case* à surligner
+                // construire la liste de Case* à surligner (sélection + coups légaux)
                 vector<Case*> highlights;
+                // 1.a) la case où se trouvait la pièce sélectionnée
+                highlights.push_back(clickedCase);
+                // 1.b) les cases de destination légales
                 for (auto& mv : legalMoves) {
                     for (Case* c : model.getCases()) {
                         if (c->getGridPos() == mv) {
@@ -93,6 +98,7 @@ void Controller::handleEvent(const sf::Event& event)
                 view.setHighlightedCases(highlights);
             }
         }
+
             // 2) Deuxième clic : déplacement ou annulation
         else {
             if (find(legalMoves.begin(), legalMoves.end(), grid) != legalMoves.end()) {

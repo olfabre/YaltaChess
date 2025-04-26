@@ -22,7 +22,7 @@ void Tour::dessiner(RenderWindow& window) const {
 vector<Vector2i> Tour::getLegalMoves(const Model& model) const {
     // directions cardinales
     static const array<Vector2i,4> dirs = {{
-                                                   { 1,  0}, {-1,  0}, { 0,  1}, { 0, -1}
+     { 1,  0}, {-1,  0}, { 0,  1}, { 0, -1}
                                            }};
 
     vector<Vector2i> res;
