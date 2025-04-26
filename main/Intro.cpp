@@ -95,7 +95,7 @@ void Intro::play() {
 
     // en période de dev, je mets moins longtemps
     //float tpAttente = 7.0f; // prod
-    float tpAttente = 7.0f; // dev
+    float tpAttente = 0.0f; // dev
     if (clock.getElapsedTime().asSeconds() >= tpAttente) {
         isIntroComplete = true;
         cout << "Intro terminée" << endl;
