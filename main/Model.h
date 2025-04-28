@@ -27,9 +27,14 @@ private:
     static constexpr float HEIGHT = 800.f;
 
     //void ajouterCase(const vector<Vector2f>& points, bool estBlanc);
-    void ajouterCase(const std::vector<sf::Vector2f>& points,
+    /*void ajouterCase(const std::vector<sf::Vector2f>& points,
                         bool estBlanc,
                         sf::Vector2i gridPos);
+                        */
+    void ajouterCase(const std::vector<sf::Vector2f>& points,
+                        bool estBlanc,
+                        sf::Vector2i gridPos,
+                        Side side);
     void initialiserJoueurs();
 
     // Supprime p de `pieces` et libère la mémoire

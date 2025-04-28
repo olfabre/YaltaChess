@@ -103,9 +103,14 @@ Model::~Model() {
 
 void Model::ajouterCase(const vector<Vector2f>& points,
                         bool estBlanc,
-                        Vector2i gridPos)
+                        Vector2i gridPos,
+                        Side side
+                        )
 {
-    cases.push_back(new Case(points, estBlanc, gridPos));
+    /* cases.push_back(new Case(points, estBlanc, gridPos)); */
+    Case* c = new Case(points, estBlanc, gridPos);
+    c->setSide(side);       // on renseigne ici le Side de la case
+    cases.push_back(c);
 }
 
 void Model::initialiserEchiquier()
@@ -161,10 +166,47 @@ void Model::initialiserEchiquier()
                 Vector2f p4 = corner + s1*ry2 + U2*rx1;
 
                 bool estBlanc = (x + y + zone) % 2 == 0;
+
+                /*
                 //ajouterCase({p1,p2,p3,p4}, estBlanc);
                 ajouterCase({p1,p2,p3,p4}, estBlanc, {x,y});
+                 */
+                // on détermine à quel joueur appartient ce bloc de 4×8 cases
+                Side s;
+                if (zone==4 || zone==5)      s = Side::White;  // bas du plateau
+                else if (zone==0 || zone==1) s = Side::Red;    // en haut-gauche
+                else s = Side::Black;  // en haut-droite
+                ajouterCase({p1,p2,p3,p4}, estBlanc, {x,y}, s);
+
             }
     }
+
+// ——————————————————————————————————————————
+// 3) Lier les voisins intra-half-board (N/E/S/W)
+// ——————————————————————————————————————————
+    auto findCase = [&](sf::Vector2i p) -> Case* {
+        for (Case* c : cases) {
+            if (c->getGridPos() == p)
+                return c;
+        }
+        return nullptr;
+    };
+
+    for (Case* c : cases) {
+        sf::Vector2i g = c->getGridPos();
+        // on ne lie que si le voisin existe ET appartient au même side
+        Case* n = findCase({ g.x,     g.y - 1 });
+        if (n && n->getSide() == c->getSide()) c->setNorth(n);
+        Case* e = findCase({ g.x + 1, g.y     });
+        if (e && e->getSide() == c->getSide()) c->setEast(e);
+        Case* s = findCase({ g.x,     g.y + 1 });
+        if (s && s->getSide() == c->getSide()) c->setSouth(s);
+        Case* w = findCase({ g.x - 1, g.y     });
+        if (w && w->getSide() == c->getSide()) c->setWest(w);
+    }
+
+
+
 }
 
 Piece* Model::getPieceAt(Vector2i pos) const {
