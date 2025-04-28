@@ -5,12 +5,14 @@
 #include <vector>
 
 #include "cases/Case.h"
-
-
-class Piece;
+#include "Piece.h"
 
 using namespace sf;
 using namespace std;
+
+class Piece;
+
+
 
 // Modèle de données pour un joueur
 struct PlayerInfo {

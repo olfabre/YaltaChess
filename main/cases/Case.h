@@ -2,12 +2,11 @@
 #define CASE_H
 
 #include <SFML/Graphics.hpp>
+#include "../Couleur.h"
 #include "Piece.h"           // pour avoir la définition complète de Piece et de Couleur
 #include <vector>
 #include <string>
 #include <utility>
-
-enum Couleur { BLANC, NOIR, ROUGE };
 
 // forward-déclaration pour pouvoir manipuler des Piece*
 class Piece;
@@ -15,9 +14,7 @@ class Piece;
 using namespace sf;
 using namespace std;
 
-Piece *piece;
-
-
+//Piece *piece;
 
 using Vec2 = Vector2f;
 
@@ -78,7 +75,7 @@ public:
      * @param path    : chaîne de directions parmi 'N','E','S','W'
      * @param reverse : si true, on inverse N<->S et E<->W au premier changement de side
      * @param out     : vecteur de paires (Case* destination, bool reverseFinal)
-     *                  pour chaque extrémité atteinte, avec l’état de reverse correspondant.
+     *                  pour chaque extrémité atteinte, avec l'état de reverse correspondant.
      */
     void walk(const std::string& path,
               bool reverse,
@@ -89,9 +86,9 @@ public:
      * Calcule toutes les cases atteignables depuis *this* selon un jeu de directions.
      * @param playerColor : couleur du joueur (Couleur)
      * @param directions : vecteur de chaînes (ex. {"N","E","S","W"} pour une tour)
-     * @param limit      : nombre max d’itérations dans chaque direction
+     * @param limit      : nombre max d'itérations dans chaque direction
      * @param mayCapture : autorise les cases occupées pour capture
-     * @param mustCapture: n’autorise que les cases occupées
+     * @param mustCapture: n'autorise que les cases occupées
      * @return vecteur de Case* atteignables
      */
      //vector<Case*> targets(Couleur playerColor, const std::vector<std::string>& directions, int limit = 10, bool mayCapture = true, bool mustCapture = false) const;
