@@ -1,8 +1,10 @@
 #include "Cavalier.h"
 #include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"   // pour getPieceAt / isOccupied
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
+
 using namespace sf;
 using namespace std;
 
@@ -20,6 +22,8 @@ void Cavalier::dessiner(RenderWindow& window) const {
     // Dessiner le Cavalier
 }
 
+
+/*
 // implémentation des coups légaux
 /*
 vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
@@ -41,6 +45,12 @@ vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+
+vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
+        return Hex::movesCavalier(position, model, couleur);
+    }
 
 */
 
