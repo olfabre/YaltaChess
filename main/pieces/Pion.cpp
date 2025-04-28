@@ -1,5 +1,6 @@
 #include "Pion.h"
 #include "Model.h"
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -24,6 +25,7 @@ void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
 }
 
+/*
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
     vector<Vector2i> res;
 
@@ -57,6 +59,13 @@ vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
 
     return res;
 }
+*/
+
+vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
+    return Hex::movesPion(position, model, couleur);
+    }
+
+
 
 string Pion::getTypeName() const {
     return "Pion";

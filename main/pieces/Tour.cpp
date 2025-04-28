@@ -1,5 +1,6 @@
 #include "Tour.h"
 #include "Model.h"    // pour Model::getPieceAt
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -19,6 +20,7 @@ void Tour::dessiner(RenderWindow& window) const {
 }
 
 
+/*
 vector<Vector2i> Tour::getLegalMoves(const Model& model) const {
     // directions cardinales
     static const array<Vector2i,4> dirs = {{
@@ -52,6 +54,12 @@ vector<Vector2i> Tour::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+
+ */
+
+vector<Vector2i> Tour::getLegalMoves(const Model& model) const {
+        return Hex::movesTour(position, model, couleur);
+    }
 
 string Tour::getTypeName() const {
     return "Tour";
