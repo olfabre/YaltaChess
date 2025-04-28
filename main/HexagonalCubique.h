@@ -32,6 +32,14 @@ namespace Hex {
         return {col, r};
     }
 
+    // helper pour convertir grid → « a1, b1, … l12 »
+    inline string toAlgebrique(Vector2i g) {
+            static const char* files = "abcdefghijkl";
+            char file = files[g.x];
+            int  rank = 12 - g.y;
+            return string(1, file) + to_string(rank);
+        }
+
     // 6 directions possibles pour une tour (axes principaux)
     static constexpr array<Cube,6> directionsTour = {{
     {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
@@ -201,12 +209,15 @@ namespace Hex {
         return res;
     }
 
-    // indice de la direction "avant" pour chaque couleur
+    // indice de la direction "avant" (dans directionsTour) pour chaque couleur
+    // Couleur BLANC=0 -> axis 5  (grid (0,+1))
+    //        NOIR =1 -> axis 1  (grid (0,-1))
+    //        ROUGE=2 -> axis 0  (grid (+1,0))
     static constexpr int pawnDirIdx[3] = {
-            2,  // BLANC
-            0,  // ROUGE
-            5   // NOIR
-    };
+                5,  // BLANC
+                1,  // NOIR
+                0   // ROUGE
+        };
 
     inline vector<Vector2i> movesPion(
             const Vector2i& pos,
