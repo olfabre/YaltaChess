@@ -18,16 +18,10 @@ class Case;
 class Piece {
 protected:
     Vector2i position; // Position sur l'échiquier
-    Couleur couleur;       // Couleur de la pièce (joueur)
+    Couleur couleur;   // Couleur de la pièce (joueur)
 
-    // Helper commun pour les pièces glissantes et sauteuses
-    std::vector<Vector2i> slideOrJumpMoves(
-            const Model& model,
-            const std::vector<std::string>& directions,
-            int limit,
-            bool mayCapture = true,
-            bool mustCapture = false
-    ) const;
+    // La méthode slideOrJumpMoves est supprimée car elle reposait sur Case::targets()
+    // qui semble être la source du problème
 
 public:
     Piece(Vector2i pos, Couleur coul);

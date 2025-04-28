@@ -1,7 +1,8 @@
 #include "Fou.h"
 #include "cases/Case.h"   // pour .getGridPos() et .targets()
-#include "Model.h"
-#include "HexagonalCubique.h"
+#include "../Model.h"
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
+#include <vector>
 #include <array>
 #include <cmath>
 
@@ -23,17 +24,39 @@ void Fou::dessiner(RenderWindow& window) const {
 
 
 vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
-    Case* cur = nullptr;
-    for (auto c : model.getCases())
-        if (c->getGridPos() == position) { cur = c; break; }
-    if (!cur) return {};
-
-    vector<string> dirs = { "NE","NW","SE","SW" };
-    auto cibles = cur->targets(couleur, dirs, /*limit=*/10, /*mayCapture=*/true, /*mustCapture=*/false);
-
     vector<Vector2i> res;
-    for (auto dst : cibles)
-        res.push_back(dst->getGridPos());
+    Cube cur = Hex::grilleVersCube(position);
+    Couleur pieceCouleur = getCouleur();
+
+    // Parcourir les 6 directions diagonales du fou dans un système hexagonal
+    for (const auto& dir : Hex::directionsFou) {
+        Cube nxt = cur;
+        while (true) {
+            // Avancer d'une case dans la direction diagonale actuelle
+            nxt = { nxt.x + dir.x, nxt.y + dir.y, nxt.z + dir.z };
+            Vector2i gridPos = Hex::cubeVersGrille(nxt);
+
+            // Vérifier si la case existe
+            Case* c = model.getCaseAt(gridPos);
+            if (!c) break; // Sortir de la boucle si on sort de l'échiquier
+
+            // Vérifier si la case est occupée
+            if (!model.isOccupied(gridPos)) {
+                // Case vide, on peut y aller
+                res.push_back(gridPos);
+            } else {
+                // Case occupée
+                Piece* p = model.getPieceAt(gridPos);
+                if (p && p->getCouleur() != pieceCouleur) {
+                    // Pièce ennemie, on peut la capturer
+                    res.push_back(gridPos);
+                }
+                // On ne peut pas aller plus loin dans cette direction
+                break;
+            }
+        }
+    }
+
     return res;
 }
 

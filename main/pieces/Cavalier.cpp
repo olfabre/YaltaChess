@@ -1,7 +1,8 @@
 #include "Cavalier.h"
 #include "cases/Case.h"   // pour .getGridPos() et .targets()
-#include "Model.h"   // pour getPieceAt / isOccupied
-#include "HexagonalCubique.h"
+#include "../Model.h"
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
+#include <vector>
 #include <array>
 #include <cmath>
 
@@ -29,22 +30,37 @@ void Cavalier::dessiner(RenderWindow& window) const {
 
 
 vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
-    // 1) trouver la case actuelle
-    Case* cur = nullptr;
-    for (auto c : model.getCases())
-        if (c->getGridPos() == position) { cur = c; break; }
-    if (!cur) return {};
-
-    // 2) directions de saut du cavalier, relatives à la case/side
-    vector<string> dirs = { "NNE","NEE","SEE","SSE","SSW","SWW","NWW","NNW" };
-
-    // 3) appeler targets(limit=1, mayCapture=true)
-    auto cibles = cur->targets(couleur, dirs, 1, /*mayCapture=*/true, /*mustCapture=*/false);
-
-    // 4) convertir en Vector2i
     vector<Vector2i> res;
-    for (auto dst : cibles)
-        res.push_back(dst->getGridPos());
+    Cube cur = Hex::grilleVersCube(position);
+    Couleur pieceCouleur = getCouleur();
+
+    // Utiliser les sauts du cavalier définis dans HexagonalCubique.h
+    vector<Cube> jumps = Hex::sautsCavalier();
+
+    // Parcourir tous les sauts possibles du cavalier
+    for (const auto& jump : jumps) {
+        // Calculer la position après le saut
+        Cube nxt = { cur.x + jump.x, cur.y + jump.y, cur.z + jump.z };
+        Vector2i gridPos = Hex::cubeVersGrille(nxt);
+
+        // Vérifier si la case existe
+        Case* c = model.getCaseAt(gridPos);
+        if (!c) continue; // Passer au saut suivant si on sort de l'échiquier
+
+        // Vérifier si la case est occupée
+        if (!model.isOccupied(gridPos)) {
+            // Case vide, on peut y aller
+            res.push_back(gridPos);
+        } else {
+            // Case occupée
+            Piece* p = model.getPieceAt(gridPos);
+            if (p && p->getCouleur() != pieceCouleur) {
+                // Pièce ennemie, on peut la capturer
+                res.push_back(gridPos);
+            }
+        }
+    }
+
     return res;
 }
 
