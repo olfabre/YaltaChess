@@ -1,7 +1,9 @@
 #include "Cavalier.h"
 #include "Model.h"   // pour getPieceAt / isOccupied
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
+
 using namespace sf;
 using namespace std;
 
@@ -19,6 +21,8 @@ void Cavalier::dessiner(RenderWindow& window) const {
     // Dessiner le Cavalier
 }
 
+
+/*
 // implémentation des coups légaux
 vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
     static const array<Vector2i,8> jumps = {{
@@ -39,6 +43,12 @@ vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+
+vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
+        return Hex::movesCavalier(position, model, couleur);
+    }
 
 // implémentation du nom
 string Cavalier::getTypeName() const {

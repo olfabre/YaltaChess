@@ -1,5 +1,6 @@
 #include "Roi.h"
 #include "Model.h"
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -19,6 +20,8 @@ void Roi::dessiner(RenderWindow& window) const {
     // Ici, dessiner le Roi (sprite ou forme)
 }
 
+
+/*
 vector<Vector2i> Roi::getLegalMoves(const Model& model) const {
     static const array<Vector2i,8> dirs = {{
                                                    { 1,  0}, { 1,  1}, { 0,  1}, {-1,  1},
@@ -45,6 +48,12 @@ vector<Vector2i> Roi::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+
+ */
+
+vector<Vector2i> Roi::getLegalMoves(const Model& model) const {
+        return Hex::movesRoi(position, model, couleur);
+    }
 
 string Roi::getTypeName() const {
     return "Roi";

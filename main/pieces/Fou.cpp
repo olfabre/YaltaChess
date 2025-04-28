@@ -1,5 +1,6 @@
 #include "Fou.h"
 #include "Model.h"
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -18,7 +19,7 @@ void Fou::dessiner(RenderWindow& window) const {
     // Dessiner le Fou
 }
 
-
+/*
 vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
     // directions diagonales
     static const array<Vector2i,4> dirs = {{
@@ -50,6 +51,11 @@ vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
+        return Hex::movesFou(position, model, couleur);
+    }
 
 string Fou::getTypeName() const {
     return "Fou";

@@ -17,10 +17,10 @@ public:
     void dessiner(RenderWindow& window) const override;
 
     // génération des coups légaux
-    std::vector<sf::Vector2i> getLegalMoves(const Model& model) const override;
+    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
     // nom pour l’infrastructure
-    std::string getTypeName() const override;
+    string getTypeName() const override;
 };
 
 #endif

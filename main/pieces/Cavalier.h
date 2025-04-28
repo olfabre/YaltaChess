@@ -2,6 +2,7 @@
 #define CAVALIER_H
 
 #include "Piece.h"
+
 using namespace sf;
 using namespace std;
 
@@ -13,7 +14,7 @@ public:
     void dessiner(RenderWindow& window) const override;
 
     vector<Vector2i> getLegalMoves(const Model& model) const override;
-    std::string getTypeName() const override;
+    string getTypeName() const override;
 
 };
 

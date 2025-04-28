@@ -1,5 +1,6 @@
 #include "Dame.h"
 #include "Model.h"    // pour getPieceAt
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -19,6 +20,8 @@ void Dame::dessiner(RenderWindow& window) const {
     // Dessiner la Dame
 }
 
+
+/*
 // renvoie tous les déplacements valides jusqu’à obstacle
 vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
     static const array<Vector2i,8> dirs = {{
@@ -51,6 +54,11 @@ vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
+        return Hex::movesDame(position, model, couleur);
+    }
 
 // nom de la pièce (pour charger la texture, etc.)
 // getTypeName()
