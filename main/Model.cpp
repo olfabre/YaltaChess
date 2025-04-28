@@ -16,6 +16,7 @@ using namespace std;
 
 // ma table de départ (inspirée ddes infos que j'ai récupérée sur internet
 // en haut de Model.cpp, juste après les includes :
+
 static const pair<int,int> SETUP[12][12] = {
         //  y=0
         { {0,4},{0,2},{0,3},{0,5},{0,4},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
@@ -42,6 +43,9 @@ static const pair<int,int> SETUP[12][12] = {
         // y=11
         { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
 };
+
+
+
 
 Model::Model() {
 

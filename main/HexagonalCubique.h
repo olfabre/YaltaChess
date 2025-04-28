@@ -33,46 +33,66 @@ namespace Hex {
     }
 
     // helper pour convertir grid → « a1, b1, … l12 »
+    // Corrigé pour correspondre à la disposition réelle de l'échiquier Yalta
     inline string toAlgebrique(Vector2i g) {
-            static const char* files = "abcdefghijkl";
+        static const char* files = "abcdefghijkl";
+
+        // Déterminer la zone de l'échiquier (White, Red, Black)
+        int zone;
+        if (g.y >= 8) {
+            // Zone White (bas)
+            zone = 0;
             char file = files[g.x];
-            int  rank = 12 - g.y;
+            int rank = 12 - g.y;
+            return string(1, file) + to_string(rank);
+        } else if (g.x < 4) {
+            // Zone Red (haut-gauche)
+            zone = 1;
+            char file = files[g.x];
+            int rank = 8 - (g.y - 4);
+            return string(1, file) + to_string(rank);
+        } else {
+            // Zone Black (haut-droite)
+            zone = 2;
+            char file = files[g.x];
+            int rank = 12 - g.y;
             return string(1, file) + to_string(rank);
         }
+    }
 
     // 6 directions possibles pour une tour (axes principaux)
     static constexpr array<Cube,6> directionsTour = {{
-    {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
-    {-1, +1,  0}, {-1,  0, +1}, { 0, -1, +1}
-    }};
+                                                             {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
+                                                             {-1, +1,  0}, {-1,  0, +1}, { 0, -1, +1}
+                                                     }};
 
 // 6 directions possibles pour un fou (diagonales hex)
     static constexpr std::array<Cube,6> directionsFou = {{
-    {directionsTour[0].x + directionsTour[1].x,
-     directionsTour[0].y + directionsTour[1].y,
-     directionsTour[0].z + directionsTour[1].z },
+                                                                 {directionsTour[0].x + directionsTour[1].x,
+                                                                  directionsTour[0].y + directionsTour[1].y,
+                                                                  directionsTour[0].z + directionsTour[1].z },
 
 
-     {directionsTour[1].x + directionsTour[2].x,
-      directionsTour[1].y + directionsTour[2].y,
-      directionsTour[1].z + directionsTour[2].z },
+                                                                 {directionsTour[1].x + directionsTour[2].x,
+                                                                  directionsTour[1].y + directionsTour[2].y,
+                                                                  directionsTour[1].z + directionsTour[2].z },
 
-     { directionsTour[2].x + directionsTour[3].x,
-       directionsTour[2].y + directionsTour[3].y,
-       directionsTour[2].z + directionsTour[3].z },
+                                                                 { directionsTour[2].x + directionsTour[3].x,
+                                                                   directionsTour[2].y + directionsTour[3].y,
+                                                                   directionsTour[2].z + directionsTour[3].z },
 
-     { directionsTour[3].x + directionsTour[4].x,
-       directionsTour[3].y + directionsTour[4].y,
-       directionsTour[3].z + directionsTour[4].z },
+                                                                 { directionsTour[3].x + directionsTour[4].x,
+                                                                   directionsTour[3].y + directionsTour[4].y,
+                                                                   directionsTour[3].z + directionsTour[4].z },
 
-     { directionsTour[4].x + directionsTour[5].x,
-       directionsTour[4].y + directionsTour[5].y,
-       directionsTour[4].z + directionsTour[5].z },
+                                                                 { directionsTour[4].x + directionsTour[5].x,
+                                                                   directionsTour[4].y + directionsTour[5].y,
+                                                                   directionsTour[4].z + directionsTour[5].z },
 
-     { directionsTour[5].x + directionsTour[0].x,
-       directionsTour[5].y + directionsTour[0].y,
-       directionsTour[5].z + directionsTour[0].z }
-     }};
+                                                                 { directionsTour[5].x + directionsTour[0].x,
+                                                                   directionsTour[5].y + directionsTour[0].y,
+                                                                   directionsTour[5].z + directionsTour[0].z }
+                                                         }};
 
     // 12 sauts possibles pour un cavalier en hex-grille
     inline vector<Cube> sautsCavalier() {
@@ -81,16 +101,16 @@ namespace Hex {
             int v1 = (i + 1) % 6;
             int v2 = (i + 5) % 6;
             sauts.push_back({
-            directionsTour[i].x*2 + directionsTour[v1].x,
-            directionsTour[i].y*2 + directionsTour[v1].y,
-            directionsTour[i].z*2 + directionsTour[v1].z
-             });
+                                    directionsTour[i].x*2 + directionsTour[v1].x,
+                                    directionsTour[i].y*2 + directionsTour[v1].y,
+                                    directionsTour[i].z*2 + directionsTour[v1].z
+                            });
 
             sauts.push_back({
-            directionsTour[i].x*2 + directionsTour[v2].x,
-            directionsTour[i].y*2 + directionsTour[v2].y,
-            directionsTour[i].z*2 + directionsTour[v2].z
-             });
+                                    directionsTour[i].x*2 + directionsTour[v2].x,
+                                    directionsTour[i].y*2 + directionsTour[v2].y,
+                                    directionsTour[i].z*2 + directionsTour[v2].z
+                            });
         }
         return sauts;
     }
@@ -209,15 +229,15 @@ namespace Hex {
         return res;
     }
 
-    // indice de la direction "avant" (dans directionsTour) pour chaque couleur
+    // Correction des indices de direction "avant" pour chaque couleur
     // Couleur BLANC=0 -> axis 5  (grid (0,+1))
     //        NOIR =1 -> axis 1  (grid (0,-1))
     //        ROUGE=2 -> axis 0  (grid (+1,0))
     static constexpr int pawnDirIdx[3] = {
-                5,  // BLANC
-                1,  // NOIR
-                0   // ROUGE
-        };
+            5,  // BLANC
+            1,  // NOIR
+            0   // ROUGE
+    };
 
     inline vector<Vector2i> movesPion(
             const Vector2i& pos,
@@ -248,10 +268,4 @@ namespace Hex {
         }
         return res;
     }
-
-
-
-
-
-
 }
