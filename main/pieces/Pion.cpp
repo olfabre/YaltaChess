@@ -1,6 +1,6 @@
 #include "Pion.h"
+#include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"
-#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -24,6 +24,7 @@ bool Pion::mouvementValide(Vector2i nouvellePos) const {
 void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
 }
+
 
 /*
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
@@ -59,11 +60,33 @@ vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
 
     return res;
 }
-*/
+
+ */
 
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
-    return Hex::movesPion(position, model, couleur);
+    Case* cur = nullptr;
+    for (auto c : model.getCases())
+        if (c->getGridPos() == position) { cur = c; break; }
+    if (!cur) return {};
+
+    vector<Vector2i> res;
+
+    // 1) avancer d’une case (direction "N" relative à la side)
+    {
+        auto adv = cur->targets(couleur, { "N" }, 1, /*mayCapture=*/false, /*mustCapture=*/false);
+        for (auto dst : adv)
+            res.push_back(dst->getGridPos());
     }
+
+    // 2) captures diagonales (NE et NW), mustCapture=true
+    {
+        auto caps = cur->targets(couleur, { "NE","NW" }, 1, /*mayCapture=*/true, /*mustCapture=*/true);
+        for (auto dst : caps)
+            res.push_back(dst->getGridPos());
+    }
+
+    return res;
+}
 
 
 

@@ -7,10 +7,17 @@
 #include <string>
 #include <utility>
 
+enum Couleur { BLANC, NOIR, ROUGE };
+
+// forward-déclaration pour pouvoir manipuler des Piece*
+class Piece;
+
 using namespace sf;
 using namespace std;
 
-class Piece;
+Piece *piece;
+
+
 
 using Vec2 = Vector2f;
 
@@ -87,8 +94,8 @@ public:
      * @param mustCapture: n’autorise que les cases occupées
      * @return vecteur de Case* atteignables
      */
+     //vector<Case*> targets(Couleur playerColor, const std::vector<std::string>& directions, int limit = 10, bool mayCapture = true, bool mustCapture = false) const;
      vector<Case*> targets(Couleur playerColor, const std::vector<std::string>& directions, int limit = 10, bool mayCapture = true, bool mustCapture = false) const;
-
 };
 
 #endif

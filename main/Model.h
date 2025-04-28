@@ -3,8 +3,12 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-#include "Piece.h"
+
 #include "cases/Case.h"
+
+
+class Piece;
+
 using namespace sf;
 using namespace std;
 
@@ -44,6 +48,10 @@ public:
     Model();
     ~Model();
     const vector<PlayerInfo>& getPlayers() const { return players; }
+
+    // Retourne la Case* correspondant à une position grille (ou nullptr)
+    Case* getCaseAt(const sf::Vector2i& pos) const;
+
     int getCurrentPlayerIdx() const { return currentPlayerIdx; }
     void initialiserEchiquier();
     const vector<Case *> &getCases() const { return cases; }
