@@ -205,6 +205,42 @@ void Model::initialiserEchiquier()
         if (w && w->getSide() == c->getSide()) c->setWest(w);
     }
 
+    // ——————————————————————————————————————————
+// 4) Lier les frontières entre half-boards (cross-group)
+// ——————————————————————————————————————————
+// 1) Regrouper les cases par Side
+    array<vector<Case*>,3> bySide;
+    for (Case* c : cases)
+        bySide[c->getSide()].push_back(c);
+
+// 2) Pour chaque paire de côtés adjacents (White→Red, Red→Black, Black→White)
+    for (int s = 0; s < 3; ++s) {
+        auto& cur = bySide[s];
+        auto& nxt = bySide[(s + 1) % 3];
+
+        // 2.a) Trier chaque vecteur pour isoler les 8 cases de l’arête :
+        //     - On ordonne d’abord par "distance au joueur" (row % 4), puis par "half-col" (col % 4).
+        auto comp = [](Case* a, Case* b){
+            auto ga = a->getGridPos(), gb = b->getGridPos();
+            int rowA = ga.y % 4, rowB = gb.y % 4;
+            if (rowA != rowB) return rowA < rowB;
+            int colA = ga.x % 4, colB = gb.x % 4;
+            return colA < colB;
+        };
+        sort(cur.begin(), cur.end(), comp);
+        sort(nxt.begin(), nxt.end(), comp);
+
+        // 2.b) Les 8 dernières de cur (farthest row) vers 8 premières de nxt (nearest row)
+        for (int i = 0; i < 8; ++i) {
+            Case* a = cur[cur.size() - 8 + i];
+            Case* b = nxt[i];
+            // on traverse "en avant" : North de a → b, et South de b → a
+            a->setNorth(b);
+            b->setSouth(a);
+        }
+    }
+
+
 
 
 }
