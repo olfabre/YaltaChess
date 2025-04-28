@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Controller.h"
 #include "View.h"
+#include "HexagonalCubique.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
 
@@ -81,6 +82,19 @@ void Controller::handleEvent(const sf::Event& event)
             if (p && p->getCouleur() == players[cur].color) {
                 selectedPiece = p;
                 legalMoves = p->getLegalMoves(model);
+
+                       // ——— DEBUG : affiche les coups légaux
+
+
+                cout
+                        << p->getTypeName()
+                        << " en " << Hex::toAlgebrique(grid)
+                        << " -> legalMoves:";
+                for (auto& mv : legalMoves)
+                    cout << " " <<  Hex::toAlgebrique(mv);
+                cout << "\n";
+
+
 
                 // construire la liste de Case* à surligner (sélection + coups légaux)
                 vector<Case*> highlights;

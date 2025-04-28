@@ -18,10 +18,10 @@ public:
     void dessiner(RenderWindow& window) const override;
 
     // Renvoie tous les déplacements valides (1 case, captures incluses)
-    std::vector<sf::Vector2i> getLegalMoves(const Model& model) const override;
+    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
     // Nom de la pièce pour chargement de texture, etc.
-    std::string getTypeName() const override;
+    string getTypeName() const override;
 };
 
 #endif

@@ -17,10 +17,10 @@ public:
     void dessiner(RenderWindow& window) const override;
 
     // génère tous les déplacements valides en glissant
-    std::vector<sf::Vector2i> getLegalMoves(const Model& model) const override;
+    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
     // nom pour identification / chargement texture
-    std::string getTypeName() const override;
+    string getTypeName() const override;
 };
 
 #endif

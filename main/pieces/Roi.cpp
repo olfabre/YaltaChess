@@ -1,6 +1,7 @@
 #include "Roi.h"
 #include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -52,6 +53,7 @@ vector<Vector2i> Roi::getLegalMoves(const Model& model) const {
  */
 
 vector<Vector2i> Roi::getLegalMoves(const Model& model) const {
+
     Case* cur = nullptr;
     for (auto c : model.getCases())
         if (c->getGridPos() == position) { cur = c; break; }

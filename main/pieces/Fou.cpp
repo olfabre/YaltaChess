@@ -1,6 +1,7 @@
 #include "Fou.h"
 #include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"
+#include "HexagonalCubique.h"
 #include <array>
 #include <cmath>
 
@@ -51,6 +52,11 @@ vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
+        return Hex::movesFou(position, model, couleur);
+    }
 
  */
 
