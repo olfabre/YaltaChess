@@ -14,8 +14,6 @@ class Piece;
 using namespace sf;
 using namespace std;
 
-//Piece *piece;
-
 using Vec2 = Vector2f;
 
 enum Side { White=0, Red=1, Black=2 };

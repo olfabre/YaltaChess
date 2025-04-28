@@ -26,42 +26,7 @@ void Pion::dessiner(RenderWindow& window) const {
 }
 
 
-/*
-vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
-    vector<Vector2i> res;
 
-    // direction “avant” selon la couleur
-    Vector2i forward;
-    switch (couleur) {
-        case BLANC: forward = {0, +1}; break;
-        case NOIR:  forward = {0, -1}; break;
-        case ROUGE: forward = {+1, 0}; break;
-    }
-
-    // 1) case vide devant
-    Vector2i one = position + forward;
-    if (one.x >= 0 && one.x < 12 && one.y >= 0 && one.y < 12
-        && !model.getPieceAt(one)) {
-        res.push_back(one);
-    }
-
-    // 2) captures diagonales/latérales : forward ± perpendicular
-    Vector2i perp1 = { forward.y, -forward.x };
-    Vector2i perp2 = { -forward.y, forward.x };
-    for (auto side : {perp1, perp2}) {
-        Vector2i cap = position + forward + side;
-        if (cap.x < 0 || cap.x >= 12 || cap.y < 0 || cap.y >= 12)
-            continue;
-        if (Piece* cible = model.getPieceAt(cap)) {
-            if (cible->getCouleur() != couleur)
-                res.push_back(cap);
-        }
-    }
-
-    return res;
-}
-
- */
 
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
     Case* cur = nullptr;

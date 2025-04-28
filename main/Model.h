@@ -12,8 +12,6 @@ using namespace std;
 
 class Piece;
 
-
-
 // Modèle de données pour un joueur
 struct PlayerInfo {
     string name;    // "Humain" ou prénom aléatoire
@@ -64,15 +62,6 @@ public:
     void movePiece(Piece* p, sf::Vector2i dest);
     // Vrai si une pièce occupe la case
     bool isOccupied(sf::Vector2i pos) const;
-
-    // Renvoie la Case* à la coordonnée grille, ou nullptr
-    Case* getCaseAt(sf::Vector2i g) const {
-        for (auto* c : cases)
-            if (c->getGridPos() == g) return c;
-               return nullptr;
-       }
-
-
 };
 
 #endif
