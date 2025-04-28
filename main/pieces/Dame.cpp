@@ -1,4 +1,5 @@
 #include "Dame.h"
+#include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"    // pour getPieceAt
 #include <array>
 #include <cmath>
@@ -18,6 +19,8 @@ bool Dame::mouvementValide(Vector2i nouvellePos) const {
 void Dame::dessiner(RenderWindow& window) const {
     // Dessiner la Dame
 }
+
+/*
 
 // renvoie tous les déplacements valides jusqu’à obstacle
 vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
@@ -51,6 +54,23 @@ vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+ */
+
+vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
+    Case* cur = nullptr;
+    for (auto c : model.getCases())
+        if (c->getGridPos() == position) { cur = c; break; }
+    if (!cur) return {};
+
+    vector<string> dirs = { "N","E","S","W","NE","NW","SE","SW" };
+    auto cibles = cur->targets(couleur, dirs, /*limit=*/10, /*mayCapture=*/true, /*mustCapture=*/false);
+
+    vector<Vector2i> res;
+    for (auto dst : cibles)
+        res.push_back(dst->getGridPos());
+    return res;
+}
+
 
 // nom de la pièce (pour charger la texture, etc.)
 // getTypeName()

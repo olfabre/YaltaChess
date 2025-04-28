@@ -1,4 +1,5 @@
 #include "Cavalier.h"
+#include "cases/Case.h"   // pour .getGridPos() et .targets()
 #include "Model.h"   // pour getPieceAt / isOccupied
 #include <array>
 #include <cmath>
@@ -20,6 +21,7 @@ void Cavalier::dessiner(RenderWindow& window) const {
 }
 
 // implémentation des coups légaux
+/*
 vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
     static const array<Vector2i,8> jumps = {{
       { 1, 2}, { 2, 1}, { 2,-1}, { 1,-2},
@@ -39,6 +41,30 @@ vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
     }
     return res;
 }
+
+*/
+
+vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
+    // 1) trouver la case actuelle
+    Case* cur = nullptr;
+    for (auto c : model.getCases())
+        if (c->getGridPos() == position) { cur = c; break; }
+    if (!cur) return {};
+
+    // 2) directions de saut du cavalier, relatives à la case/side
+    vector<string> dirs = { "NNE","NEE","SEE","SSE","SSW","SWW","NWW","NNW" };
+
+    // 3) appeler targets(limit=1, mayCapture=true)
+    auto cibles = cur->targets(couleur, dirs, 1, /*mayCapture=*/true, /*mustCapture=*/false);
+
+    // 4) convertir en Vector2i
+    vector<Vector2i> res;
+    for (auto dst : cibles)
+        res.push_back(dst->getGridPos());
+    return res;
+}
+
+
 
 // implémentation du nom
 string Cavalier::getTypeName() const {

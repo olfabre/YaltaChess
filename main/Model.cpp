@@ -274,3 +274,11 @@ void Model::movePiece(Piece* p, Vector2i dest) {
     // change de joueur
     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 }
+
+Case* Model::getCaseAt(const sf::Vector2i& pos) const {
+    for (Case* c : cases) {
+        if (c->getGridPos() == pos)
+            return c;
+    }
+    return nullptr;
+}
