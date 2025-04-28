@@ -1864,6 +1864,20 @@ Au final, voici une impression écran du résultat
 
 
 
+### Étape 14: Gestion des coups légaux sur un échiquier Yalta
+
+Je pense que c'est la partie la plus dure avec le graphisme de l'échiquier. Je vais essayer de trouver des informations sur internet car bien que l'on trouve facilement pour un échiquier simple, je jeu d'échiquier Yalta est beaucoup plus complexe avec son style d'échiquier hexagonal à 3 joueurs.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
