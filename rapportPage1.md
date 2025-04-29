@@ -1868,12 +1868,22 @@ Au final, voici une impression écran du résultat
 
 Je pense que c'est la partie la plus dure avec le graphisme de l'échiquier. Je vais essayer de trouver des informations sur internet car bien que l'on trouve facilement pour un échiquier simple, je jeu d'échiquier Yalta est beaucoup plus complexe avec son style d'échiquier hexagonal à 3 joueurs.
 
-Après des recherches sur internet, j'ai choisi l'axe où je souhaite me diriger.
+Après des recherches sur internet, j'ai choisi les outils mathématiques avec lesquels je compte utiliser pour me faciliter la gestion des déplacements dans un grille complexe.
 
 
 On va travailler avec des vecteurs de déplacement, c'est à dire avce des coordonnées cubiques (x+y+z=0). C'est à dire qu'à partir des positions de départ grid(colonne, ligne): ce qu'on appelle offset odd-r ou Vector2i comme integer, nous allons les convertir en coordonnées cubiques avec la méthode `hex::grilleVersCube`
 
 Pourquoi des coordonnées cubiques ? vs position (x,y) grille
+
+- un seul conteneur de déplacements: toutes les directions possibles peuevnt être repréentées par 3 axes de 120° (dx, dy, dz) -> plus simple à itérer et additionner
+- le faite que x + y+ z = 0 me garantit de rester sur le plan du jeu et évite des erreurs.
+- La possibilité de génerer les glissades avec les pièces, sauts sans me poser de problème avec les bordures compliquées d'un jeu d'echec Yalta
+
+
+
+Les coordonnées cubiques sont avant tout un outil mathématique qui simplifie tous les calculs de déplacement sur une grille hexagonale
+
+![10](10.jpg)
 
 
 
