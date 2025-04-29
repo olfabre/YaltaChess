@@ -20,12 +20,12 @@ struct ResourceManager {
     // textures des masks générés (silhouette blanche)
     //static std::map<std::string, Texture> maskTextures;
 
-    static const sf::Texture& get(const std::string& key){
+    static const Texture& get(const string& key){
         return textures.at(key);
     }
 
 
-    static const sf::Texture& getMask(const std::string& key) {
+    static const Texture& getMask(const string& key) {
         return maskTextures.at(key);
     }
 };

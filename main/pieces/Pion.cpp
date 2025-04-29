@@ -1,7 +1,7 @@
 #include "Pion.h"
 #include "../cases/Case.h"
 #include "../Model.h"
-#include "../YaltaCoords.h"
+#include "HexagonalCubique.h"  // on utilise les coordonnées cube
 #include <vector>
 
 using namespace sf;
@@ -20,18 +20,23 @@ bool Pion::mouvementValide(Vector2i nouvellePos) const {
     return false;
 }
 
-void Pion::dessiner(RenderWindow& window) const {
-    // Dessiner le Pion
-}
+
 
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
+
+    // Lisste des cases vers lesquelles la pièce peut aller.
     vector<Vector2i> res;
 
-    // Utiliser les coordonnées cubiques pour les calculs
-    Cube cur = YaltaCoords::gridToCube(position);
+    // Conversion grid -> cube
+    Cube cur = Hex::grilleVersCube(position);
 
-    // Direction "avant" pour cette couleur
-    Cube forward = YaltaCoords::rookDirections[YaltaCoords::pawnForwardIndex[couleur]];
+    // Sélection de la direction "avant" selon la couleur
+    Cube forward;
+    switch (couleur) {
+        case BLANC: forward = Hex::directionsTour[2]; break; // vers le Nord
+        case ROUGE: forward = Hex::directionsTour[3]; break; // vers le Sud-Ouest
+        case NOIR:  forward = Hex::directionsTour[5]; break; // vers le Sud-Est
+    }
 
     // Avancer d'une case
     Cube oneStep = { cur.x + forward.x, cur.y + forward.y, cur.z + forward.z };

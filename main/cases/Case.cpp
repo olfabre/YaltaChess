@@ -76,7 +76,7 @@ void Case::walk(const std::string& path,
     };
 
     const std::string revPath = [&](){
-        std::string s = path;
+        string s = path;
         std::reverse(s.begin(), s.end());
         return s;
     }();
