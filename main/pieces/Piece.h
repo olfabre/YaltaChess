@@ -31,7 +31,7 @@ public:
     virtual bool mouvementValide(Vector2i nouvellePos) const = 0;
 
     // retourne toutes les destinations valides selon le model
-    virtual std::vector<sf::Vector2i> getLegalMoves(const Model& model) const = 0;
+    virtual vector<sf::Vector2i> getLegalMoves(const Model& model) const = 0;
 
     // Dessine graphiquement la pièce (SFML)
     virtual void dessiner(RenderWindow& window) const = 0;

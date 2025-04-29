@@ -77,7 +77,8 @@ bool Intro::initialize() {
     }
 
     music.setLooping(true);  // Activer la boucle
-    music.play();         // Lancer la musique
+    //music.play();         // Lancer la musique
+    // arret music le temps du dev
 
 
 

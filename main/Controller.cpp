@@ -82,12 +82,13 @@ void Controller::handleEvent(const sf::Event& event)
             if (p && p->getCouleur() == players[cur].color) {
                 selectedPiece = p;
                 legalMoves = p->getLegalMoves(model);
-
-                       // ——— DEBUG : affiche les coups légaux
+                auto g = p->getPosition();
+                // ——— DEBUG : affiche les coups légaux
 
 
                 cout
-                        << p->getTypeName()
+                        // << p->getTypeName()
+                        << "(" << g.x << "," << g.y << ")"
                         << " en " << Hex::toAlgebrique(grid)
                         << " -> legalMoves:";
                 for (auto& mv : legalMoves)

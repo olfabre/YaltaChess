@@ -6,6 +6,8 @@
 #include "Cavalier.h"
 #include "Dame.h"
 #include "Roi.h"
+#include <iostream>
+#include "HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <cmath>
 #include <random>
 #include <algorithm>
@@ -71,6 +73,21 @@ Model::Model() {
             pieces.push_back(p);
         }
     }
+
+    // === DÉBUG : afficher grid → cube pour chaque pièce ===
+    std::cout << "=== Debug positions ===\n";
+    for (Piece* p : pieces) {
+        auto g = p->getPosition();                  // grid (col,row)
+        auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
+        std::cout
+                << p->getTypeName()
+                << " couleur=" << p->getCouleur()
+                << "  grid("   << g.x << "," << g.y << ")"
+                << "  cube("   << c.x << "," << c.y << "," << c.z << ")"
+                << "\n";
+    }
+    std::cout << "========================\n";
+
 }
 
 
@@ -197,7 +214,7 @@ void Model::initialiserEchiquier()
     };
 
     for (Case* c : cases) {
-        sf::Vector2i g = c->getGridPos();
+        Vector2i g = c->getGridPos();
         // on ne lie que si le voisin existe ET appartient au même side
         Case* n = findCase({ g.x,     g.y - 1 });
         if (n && n->getSide() == c->getSide()) c->setNorth(n);
