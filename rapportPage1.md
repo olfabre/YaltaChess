@@ -1913,15 +1913,4 @@ Je pense que c'est la partie la plus dure avec le graphisme de l'échiquier. Je 
 
 
 
-https://chatgpt.com/share/67d899f9-7af8-8009-a9f4-23be488ebe83
-
-Cette nouvelle implémentation peut crée un échiquier Yalta avec :
-
-- Des cases hexagonales (obtenues en rotant des carrés)
-
-- Trois branches distinctes !
-
-- Une alternance de cases blanches et noires
-
-- Une structure propre et modulaire
 
