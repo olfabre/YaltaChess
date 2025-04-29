@@ -1878,16 +1878,39 @@ Pourquoi des coordonnées cubiques ? vs position (x,y) grille
 - un seul conteneur de déplacements: toutes les directions possibles peuevnt être repréentées par 3 axes de 120° (dx, dy, dz) -> plus simple à itérer et additionner
 - le faite que x + y+ z = 0 me garantit de rester sur le plan du jeu et évite des erreurs.
 - La possibilité de génerer les glissades avec les pièces, sauts sans me poser de problème avec les bordures compliquées d'un jeu d'echec Yalta
+- Lisibilité et maintenance
 
+```cpp
+// glisser en direction d (dx,dy,dz)
+Cube nxt = { cur.x + d.x, cur.y + d.y, cur.z + d.z };
+```
 
+- Si on veut ajouter un nouveau type de pièce ou une règle spéciale, on ajoute simplement un vecteur ou une condition, sans retoucher toute la logique de voisinage.
+
+![11](11.jpg)
 
 Les coordonnées cubiques sont avant tout un outil mathématique qui simplifie tous les calculs de déplacement sur une grille hexagonale
 
-![10](10.jpg)
+
+
+**Axe X** (ou Est–Ouest)
+
+- Vecteur cubique **(+1,−1,0)** pour aller vers l’Est,
+
+- Vecteur cubique**(−1,+1,0)** pour aller vers l’Ouest.
 
 
 
+**Axe Z** (ou Sud–Nord)
 
+- Vecteur cubique **(0,−1,+1)** pour aller vers le Nord
+- Vecteur cubique **(0,+1,−1)** pour aller vers le Sud
+
+
+
+**Axe Y** (ou diagonale Nord-Est–Sud-Ouest)
+
+- Vecteur cubique **(+1,0,−1)** pour aller en diagonale Nord-Est
 
 
 
