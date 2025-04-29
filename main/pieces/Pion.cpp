@@ -9,6 +9,10 @@ using namespace std;
 
 Pion::Pion(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
 
+void Pion::dessiner(RenderWindow& window) const {
+    // Dessiner le Pion
+}
+
 bool Pion::mouvementValide(Vector2i nouvellePos) const {
     // Cette fonction n'est pas utilisée pour getLegalMoves, donc nous la laissons telle quelle
     Vector2i delta = nouvellePos - position;
@@ -23,44 +27,35 @@ bool Pion::mouvementValide(Vector2i nouvellePos) const {
 
 
 vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
-
-    // Lisste des cases vers lesquelles la pièce peut aller.
     vector<Vector2i> res;
-
-    // Conversion grid -> cube
+    // Conversion grille -> cube
     Cube cur = Hex::grilleVersCube(position);
 
-    // Sélection de la direction "avant" selon la couleur
+    // Direction "avant" selon la couleur
     Cube forward;
     switch (couleur) {
-        case BLANC: forward = Hex::directionsTour[2]; break; // vers le Nord
-        case ROUGE: forward = Hex::directionsTour[3]; break; // vers le Sud-Ouest
-        case NOIR:  forward = Hex::directionsTour[5]; break; // vers le Sud-Est
+        case BLANC: forward = Hex::directionsTour[2]; break;   // Nord
+        case ROUGE: forward = Hex::directionsTour[3]; break;   // Sud-Ouest
+        case NOIR:  forward = Hex::directionsTour[5]; break;   // Sud-Est
     }
 
-    // Avancer d'une case
-    Cube oneStep = { cur.x + forward.x, cur.y + forward.y, cur.z + forward.z };
-    Vector2i g1 = YaltaCoords::cubeToGrid(oneStep);
-
-    // Vérifier si la case existe et est vide
-    if (model.getCaseAt(g1) && !model.isOccupied(g1)) {
+    // Un pas en avant
+    Cube step = { cur.x + forward.x, cur.y + forward.y, cur.z + forward.z };
+    Vector2i g1 = Hex::cubeVersGrille(step);
+    if (model.getCaseAt(g1) && !model.isOccupied(g1))
         res.push_back(g1);
-    }
 
     // Captures diagonales
-    for (const auto& diagDir : YaltaCoords::bishopDirections) {
-        // Calculer le produit scalaire pour déterminer si la direction est "vers l'avant"
-        int dotProduct = diagDir.x * forward.x + diagDir.y * forward.y + diagDir.z * forward.z;
-
-        if (dotProduct > 0) { // Direction diagonale vers l'avant
-            Cube captureCube = { cur.x + diagDir.x/2, cur.y + diagDir.y/2, cur.z + diagDir.z/2 };
-            Vector2i g2 = YaltaCoords::cubeToGrid(captureCube);
-
-            // Vérifier si la case existe et contient une pièce ennemie
-            Piece* targetPiece = model.getPieceAt(g2);
-            if (targetPiece && targetPiece->getCouleur() != couleur) {
+    for (const auto& dir : Hex::directionsFou) {
+        int dot = dir.x * forward.x + dir.y * forward.y + dir.z * forward.z;
+        if (dot <= 0) continue;  // seules les diagonales vers l'avant
+        Cube cap = { cur.x + dir.x, cur.y + dir.y, cur.z + dir.z };
+        Vector2i g2 = Hex::cubeVersGrille(cap);
+        Case* c = model.getCaseAt(g2);
+        if (c) {
+            Piece* p = model.getPieceAt(g2);
+            if (p && p->getCouleur() != couleur)
                 res.push_back(g2);
-            }
         }
     }
 
