@@ -441,3 +441,6 @@ void YaltaChessView::draw()
 
     window.display();
 }
+
+
+
