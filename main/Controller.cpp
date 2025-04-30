@@ -12,12 +12,13 @@ Controller::Controller(Model &m, YaltaChessView &v) : model(m), view(v) {}
 
 
 
-
+// gestion des évènements côté l'interface
 void Controller::handleEvent(const sf::Event& event)
 {
 
-    // 1) Check MouseMoved event
+    // Quand je passe la souris sur mes cases -> hover
     if (event.is<sf::Event::MouseMoved>()) {
+
         // Récupère l’événement MouseMoved
         auto const* mouseMoved = event.getIf<sf::Event::MouseMoved>();
         if (!mouseMoved)
