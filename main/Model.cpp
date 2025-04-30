@@ -72,9 +72,11 @@ Model::Model() {
     initialiserEchiquier();
     initialiserJoueurs();
 
+
+
     initialiserEchiquier();
-    for (int y = 0; y < 12; ++y) {
-        for (int x = 0; x < 12; ++x) {
+    for (int y = 0; y < 12; ++y) { // ligne
+        for (int x = 0; x < 12; ++x) { // colonne
 
             // desturcturation
             auto [coul, type] = SETUP[y][x];
@@ -85,8 +87,12 @@ Model::Model() {
             // memorise pour les coordonnées (x,y)
             Vector2i grid{x,y};
 
-            Piece* p = nullptr;
+            // convertion en enum couleur
             Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
+
+            Piece* p = nullptr;
+
+            // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
                 case 0: p = new Roi(grid, cc);       break;
                 case 1: p = new Pion(grid, cc);      break;
@@ -105,17 +111,21 @@ Model::Model() {
     std::cout << "=== Debug positions ===\n";
     for (Piece* p : pieces) {
         auto g = p->getPosition();                  // grid (col,row)
-        auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
+        //auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
         std::cout
                 << p->getTypeName()
                 << " couleur=" << p->getCouleur()
                 << "  grid("   << g.x << "," << g.y << ")"
-                << "  cube("   << c.x << "," << c.y << "," << c.z << ")"
+                //<< "  cube("   << c.x << "," << c.y << "," << c.z << ")"
                 << "\n";
     }
     std::cout << "========================\n";
 
 }
+
+
+
+
 
 
 void Model::initialiserJoueurs()
@@ -329,4 +339,60 @@ Case* Model::getCaseAt(const sf::Vector2i& pos) const {
             return c;
     }
     return nullptr;
+}
+
+
+// ------------------------------------------------------------------
+//  Corrige la coordonnée logique d'une pièce en se basant
+//  sur la case qui contient réellement son centre pixel.
+// ------------------------------------------------------------------
+void Model::realignerPieces()
+{
+    // helper interne pour (x,y) → position-pixel
+    auto gridToPixel = [](Vector2i g)->Vector2f
+    {
+        const float W = 1000.f, O = 50.f;
+        Vector2f mid(W/2.f+O, W/2.f+O);
+        float size=W/2.f, side=size/2.f;
+        float h = std::sqrt(size*size - side*side);
+        std::array<Vector2f,6> v = {{
+                                            {-size*0.5f,-h},{ size*0.5f,-h},{ size,0},
+                                            { size*0.5f, h},{-size*0.5f, h},{-size,0}
+                                    }};
+        std::array<std::pair<Vector2i,Vector2i>,6> inter = {{
+            {{0,4},{0,4}},{{0,4},{4,8}},{{8,12},{4,8}},
+            {{8,12},{8,12}},{{4,8},{8,12}},{{4,8},{0,4}}
+             }};
+
+        for(int z=0;z<6;++z){
+            auto [ix,iy]=inter[z];
+            if (g.x >= ix.x && g.x < ix.y && g.y >= iy.x && g.y < iy.y) {
+            //if(g.x>=ix.first&&g.x<ix.second&&g.y>=iy.first&&g.y<iy.second){
+                float rx=(g.x%4+0.5f)/4.f, ry=(g.y%4+0.5f)/4.f;
+                Vector2f s1=v[z]*0.5f, s2=v[(z+2)%6]*0.5f;
+                Vector2f corner=mid+v[(z+4)%6];
+                Vector2f vabc[6]={
+                        {-h*0.866f,-h*0.5f},{0,-h},{ h*0.866f,-h*0.5f},
+                        { h*0.866f, h*0.5f},{0, h},{-h*0.866f, h*0.5f}};
+                Vector2f U=vabc[(z+1)%6]*ry - s1*ry + s2;
+                return corner + s1*ry + U*rx;
+            }
+        }
+        return mid;                 // fallback
+    };
+
+    for (Piece* p : pieces)
+    {
+        Vector2f centre = gridToPixel(p->getPosition());
+
+        // retrouve la case qui contient ce centre
+        for (Case* c : cases)
+        {
+            if (c->contientPoint(centre))
+            {
+                p->setPosition(c->getGridPos());   // recale
+                break;
+            }
+        }
+    }
 }

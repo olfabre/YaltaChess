@@ -47,6 +47,7 @@ private:
 public:
     Model();
     ~Model();
+    void realignerPieces();
     const vector<PlayerInfo>& getPlayers() const { return players; }
 
     // Retourne la Case* correspondant à une position grille (ou nullptr)

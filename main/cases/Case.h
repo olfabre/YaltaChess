@@ -68,29 +68,8 @@ public:
     Case* getSouth() const { return S; }
     Case* getWest()  const { return W; }
 
-    /**
-     * Parcourt un chemin relatif (ex: "NNE" ou "SW") depuis cette case.
-     * @param path    : chaîne de directions parmi 'N','E','S','W'
-     * @param reverse : si true, on inverse N<->S et E<->W au premier changement de side
-     * @param out     : vecteur de paires (Case* destination, bool reverseFinal)
-     *                  pour chaque extrémité atteinte, avec l'état de reverse correspondant.
-     */
-    void walk(const std::string& path,
-              bool reverse,
-              std::vector<std::pair<Case*,bool>>& out) const;
 
 
-      /**
-     * Calcule toutes les cases atteignables depuis *this* selon un jeu de directions.
-     * @param playerColor : couleur du joueur (Couleur)
-     * @param directions : vecteur de chaînes (ex. {"N","E","S","W"} pour une tour)
-     * @param limit      : nombre max d'itérations dans chaque direction
-     * @param mayCapture : autorise les cases occupées pour capture
-     * @param mustCapture: n'autorise que les cases occupées
-     * @return vecteur de Case* atteignables
-     */
-     //vector<Case*> targets(Couleur playerColor, const std::vector<std::string>& directions, int limit = 10, bool mayCapture = true, bool mustCapture = false) const;
-     vector<Case*> targets(Couleur playerColor, const std::vector<std::string>& directions, int limit = 10, bool mayCapture = true, bool mustCapture = false) const;
 };
 
 #endif
