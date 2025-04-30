@@ -1875,7 +1875,7 @@ On va travailler avec des vecteurs de déplacement, c'est à dire avce des coord
 
 Pourquoi des coordonnées cubiques ? vs position (x,y) grille
 
-- un seul conteneur de déplacements: toutes les directions possibles peuevnt être repréentées par 3 axes de 120° (dx, dy, dz) -> plus simple à itérer et additionner
+- un seul conteneur de déplacements: toutes les directions possibles peuevnt être repréentées par 3 axes  (dx, dy, dz) -> plus simple à itérer et à sommer pour les glissades
 - le faite que x + y+ z = 0 me garantit de rester sur le plan du jeu et évite des erreurs.
 - La possibilité de génerer les glissades avec les pièces, sauts sans me poser de problème avec les bordures compliquées d'un jeu d'echec Yalta
 - Lisibilité et maintenance
@@ -1887,32 +1887,56 @@ Cube nxt = { cur.x + d.x, cur.y + d.y, cur.z + d.z };
 
 - Si on veut ajouter un nouveau type de pièce ou une règle spéciale, on ajoute simplement un vecteur ou une condition, sans retoucher toute la logique de voisinage.
 
-![11](11.jpg)
+<img src="13.jpg" alt="13" style="zoom:50%;" />
+
+
 
 Les coordonnées cubiques sont avant tout un outil mathématique qui simplifie tous les calculs de déplacement sur une grille hexagonale
 
 
 
-**Axe X** (ou Est–Ouest)
+**Axe X** (Rouge)
 
-- Vecteur cubique **(+1,−1,0)** pour aller vers l’Est,
+X⁺ → flèche vers la droite (Est)
 
-- Vecteur cubique**(−1,+1,0)** pour aller vers l’Ouest.
+X⁻ → flèche vers la gauche (Ouest)
 
+X⁺ → **Est** : vecteur cubique **( +1, −1, 0 )**
 
-
-**Axe Z** (ou Sud–Nord)
-
-- Vecteur cubique **(0,−1,+1)** pour aller vers le Nord
-- Vecteur cubique **(0,+1,−1)** pour aller vers le Sud
+X⁻ → **Ouest** : vecteur cubique **( −1, +1, 0 )**
 
 
 
-**Axe Y** (ou diagonale Nord-Est–Sud-Ouest)
+**Axe Y** (Vert)
 
-- Vecteur cubique **(+1,0,−1)** pour aller en diagonale Nord-Est
+Y⁺ → flèche en diagonale vers le Nord-Est
+
+Y⁻ → flèche en diagonale vers le Sud-Ouest
+
+Y⁺ → **Nord-Est** : vecteur cubique **( +1, 0, −1 )**
+
+Y⁻ → **Sud-Ouest** : vecteur cubique **( −1, 0, +1 )**
 
 
+
+**Axe Z** (Bleu)
+
+Z⁺ → flèche vers le haut (Nord)
+
+Z⁻ → flèche vers le bas (Sud)
+
+Z⁺ → **Nord** : vecteur cubique **( 0, −1, +1 )**
+
+Z⁻ → **Sud** : vecteur cubique **( 0, +1, −1 )**
+
+
+
+Quand je clique sur une case, mon Controller va:
+
+- calculer e gridPos (colonne, ligne) de mon clic
+- récupère la `Pièce*` à cette positon
+- appelle ma méthode `getLegalMoves()`sur cette pièce (type de pièce avec sa classe).
+- 
 
 
 
