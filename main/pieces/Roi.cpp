@@ -1,5 +1,5 @@
 #include "Roi.h"
-#include "cases/Case.h"   // pour .getGridPos() et .targets()
+#include "../cases/Case.h"   // pour .getGridPos() et .targets()
 #include "../Model.h"
 #include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <vector>

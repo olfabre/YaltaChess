@@ -1,5 +1,5 @@
 #include "Dame.h"
-#include "cases/Case.h"   // pour .getGridPos() et .targets()
+#include "../cases/Case.h"   // pour .getGridPos() et .targets()
 #include "../Model.h"
 #include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <vector>
@@ -24,69 +24,7 @@ void Dame::dessiner(RenderWindow& window) const {
 
 
 vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
-    vector<Vector2i> res;
-    Cube cur = Hex::grilleVersCube(position);
-    Couleur pieceCouleur = getCouleur();
-
-    // 1. Mouvements de la tour (axes principaux)
-    for (const auto& dir : Hex::directionsTour) {
-        Cube nxt = cur;
-        while (true) {
-            // Avancer d'une case dans la direction actuelle
-            nxt = { nxt.x + dir.x, nxt.y + dir.y, nxt.z + dir.z };
-            Vector2i gridPos = Hex::cubeVersGrille(nxt);
-
-            // Vérifier si la case existe
-            Case* c = model.getCaseAt(gridPos);
-            if (!c) break; // Sortir de la boucle si on sort de l'échiquier
-
-            // Vérifier si la case est occupée
-            if (!model.isOccupied(gridPos)) {
-                // Case vide, on peut y aller
-                res.push_back(gridPos);
-            } else {
-                // Case occupée
-                Piece* p = model.getPieceAt(gridPos);
-                if (p && p->getCouleur() != pieceCouleur) {
-                    // Pièce ennemie, on peut la capturer
-                    res.push_back(gridPos);
-                }
-                // On ne peut pas aller plus loin dans cette direction
-                break;
-            }
-        }
-    }
-
-    // 2. Mouvements du fou (diagonales)
-    for (const auto& dir : Hex::directionsFou) {
-        Cube nxt = cur;
-        while (true) {
-            // Avancer d'une case dans la direction diagonale actuelle
-            nxt = { nxt.x + dir.x, nxt.y + dir.y, nxt.z + dir.z };
-            Vector2i gridPos = Hex::cubeVersGrille(nxt);
-
-            // Vérifier si la case existe
-            Case* c = model.getCaseAt(gridPos);
-            if (!c) break; // Sortir de la boucle si on sort de l'échiquier
-
-            // Vérifier si la case est occupée
-            if (!model.isOccupied(gridPos)) {
-                // Case vide, on peut y aller
-                res.push_back(gridPos);
-            } else {
-                // Case occupée
-                Piece* p = model.getPieceAt(gridPos);
-                if (p && p->getCouleur() != pieceCouleur) {
-                    // Pièce ennemie, on peut la capturer
-                    res.push_back(gridPos);
-                }
-                // On ne peut pas aller plus loin dans cette direction
-                break;
-            }
-        }
-    }
-
-    return res;
+    return Hex::movesDame(position, model, couleur);
 }
 
 

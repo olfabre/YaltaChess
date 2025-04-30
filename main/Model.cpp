@@ -16,9 +16,11 @@ using namespace std;
 
 
 
-// ma table de départ (inspirée ddes infos que j'ai récupérée sur internet
-// en haut de Model.cpp, juste après les includes :
 
+// tableau 12 lignes x 12 colonnes pour le placement des pièces
+// chaqu case contient 2 nombres (couleur, type de pièce)
+// 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
+// 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
 static const pair<int,int> SETUP[12][12] = {
         //  y=0
         { {0,4},{0,2},{0,3},{0,5},{0,4},{0,1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1} },
@@ -46,6 +48,22 @@ static const pair<int,int> SETUP[12][12] = {
         { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
 };
 
+/*
+COLONNES x = 0 … 11
+y
+0   WR  WN  WB  WQ  WR  WP  ·   ·   ·   ·   ·   ·
+1   WP  WP  WP  WP  WN  WP  ·   ·   ·   ·   ·   ·
+2   ·   ·   ·   ·   WB  WP  ·   ·   ·   ·   ·   ·
+3   ·   ·   ·   ·   WK  WP  ·   ·   ·   ·   ·   ·
+4   RR  RP  ·   ·   ·   ·   ·   ·   RR  RN  RB  RQ
+5   RN  RP  ·   ·   ·   ·   ·   ·   RP  RP  RP  RP
+6   RB  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
+7   RK  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
+8   ·   ·   ·   ·   BR  BN  BB  BQ  BR  BP  ·   ·
+9   ·   ·   ·   ·   BP  BP  BP  BP  BN  BP  ·   ·
+10  ·   ·   ·   ·   ·   ·   ·   ·   BB  BP  ·   ·
+11  ·   ·   ·   ·   ·   ·   ·   ·   BK  BP  ·   ·
+*/
 
 
 
@@ -57,9 +75,16 @@ Model::Model() {
     initialiserEchiquier();
     for (int y = 0; y < 12; ++y) {
         for (int x = 0; x < 12; ++x) {
+
+            // desturcturation
             auto [coul, type] = SETUP[y][x];
+
+            //si pas couleur, on passe à la suivante
             if (coul < 0) continue;
+
+            // memorise pour les coordonnées (x,y)
             Vector2i grid{x,y};
+
             Piece* p = nullptr;
             Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
             switch(type) {
@@ -73,6 +98,8 @@ Model::Model() {
             pieces.push_back(p);
         }
     }
+
+
 
     // === DÉBUG : afficher grid → cube pour chaque pièce ===
     std::cout << "=== Debug positions ===\n";

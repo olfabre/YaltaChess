@@ -1,5 +1,5 @@
 #include "Cavalier.h"
-#include "cases/Case.h"   // pour .getGridPos() et .targets()
+#include "../cases/Case.h"   // pour .getGridPos() et .targets()
 #include "../Model.h"
 #include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <vector>
@@ -30,38 +30,7 @@ void Cavalier::dessiner(RenderWindow& window) const {
 
 
 vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
-    vector<Vector2i> res;
-    Cube cur = Hex::grilleVersCube(position);
-    Couleur pieceCouleur = getCouleur();
-
-    // Utiliser les sauts du cavalier définis dans HexagonalCubique.h
-    vector<Cube> jumps = Hex::sautsCavalier();
-
-    // Parcourir tous les sauts possibles du cavalier
-    for (const auto& jump : jumps) {
-        // Calculer la position après le saut
-        Cube nxt = { cur.x + jump.x, cur.y + jump.y, cur.z + jump.z };
-        Vector2i gridPos = Hex::cubeVersGrille(nxt);
-
-        // Vérifier si la case existe
-        Case* c = model.getCaseAt(gridPos);
-        if (!c) continue; // Passer au saut suivant si on sort de l'échiquier
-
-        // Vérifier si la case est occupée
-        if (!model.isOccupied(gridPos)) {
-            // Case vide, on peut y aller
-            res.push_back(gridPos);
-        } else {
-            // Case occupée
-            Piece* p = model.getPieceAt(gridPos);
-            if (p && p->getCouleur() != pieceCouleur) {
-                // Pièce ennemie, on peut la capturer
-                res.push_back(gridPos);
-            }
-        }
-    }
-
-    return res;
+    return Hex::movesCavalier(position, model, couleur);
 }
 
 

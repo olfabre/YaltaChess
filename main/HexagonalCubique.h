@@ -62,36 +62,36 @@ namespace Hex {
 
     // 6 directions possibles pour une tour (axes principaux)
     static constexpr array<Cube,6> directionsTour = {{
-                                                             {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
-                                                             {-1, +1,  0}, {-1,  0, +1}, { 0, -1, +1}
+           {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
+           {-1, +1,  0}, {-1,  0, +1}, { 0, -1, +1}
                                                      }};
 
 // 6 directions possibles pour un fou (diagonales hex)
     static constexpr std::array<Cube,6> directionsFou = {{
-                                                                 {directionsTour[0].x + directionsTour[1].x,
-                                                                  directionsTour[0].y + directionsTour[1].y,
-                                                                  directionsTour[0].z + directionsTour[1].z },
+           {directionsTour[0].x + directionsTour[1].x,
+             directionsTour[0].y + directionsTour[1].y,
+              directionsTour[0].z + directionsTour[1].z },
 
 
-                                                                 {directionsTour[1].x + directionsTour[2].x,
-                                                                  directionsTour[1].y + directionsTour[2].y,
-                                                                  directionsTour[1].z + directionsTour[2].z },
+             {directionsTour[1].x + directionsTour[2].x,
+              directionsTour[1].y + directionsTour[2].y,
+              directionsTour[1].z + directionsTour[2].z },
 
-                                                                 { directionsTour[2].x + directionsTour[3].x,
-                                                                   directionsTour[2].y + directionsTour[3].y,
-                                                                   directionsTour[2].z + directionsTour[3].z },
+              { directionsTour[2].x + directionsTour[3].x,
+                directionsTour[2].y + directionsTour[3].y,
+                directionsTour[2].z + directionsTour[3].z },
 
-                                                                 { directionsTour[3].x + directionsTour[4].x,
-                                                                   directionsTour[3].y + directionsTour[4].y,
-                                                                   directionsTour[3].z + directionsTour[4].z },
+              { directionsTour[3].x + directionsTour[4].x,
+                directionsTour[3].y + directionsTour[4].y,
+                directionsTour[3].z + directionsTour[4].z },
 
-                                                                 { directionsTour[4].x + directionsTour[5].x,
-                                                                   directionsTour[4].y + directionsTour[5].y,
-                                                                   directionsTour[4].z + directionsTour[5].z },
+              { directionsTour[4].x + directionsTour[5].x,
+                directionsTour[4].y + directionsTour[5].y,
+                directionsTour[4].z + directionsTour[5].z },
 
-                                                                 { directionsTour[5].x + directionsTour[0].x,
-                                                                   directionsTour[5].y + directionsTour[0].y,
-                                                                   directionsTour[5].z + directionsTour[0].z }
+              { directionsTour[5].x + directionsTour[0].x,
+                directionsTour[5].y + directionsTour[0].y,
+                directionsTour[5].z + directionsTour[0].z }
                                                          }};
 
     // 12 sauts possibles pour un cavalier en hex-grille
