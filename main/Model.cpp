@@ -116,7 +116,7 @@ Model::Model() {
     std::cout << "=== Debug positions ===\n";
     for (Piece* p : pieces) {
 
-        auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
+        auto c = p->getPositionCube();            // cube (x,y,z)
         std::cout
                 << p->getTypeName()
                 << " couleur=" << p->getCouleur()
@@ -170,8 +170,9 @@ Model::~Model() {
 
 }
 
-void Model::ajouterCase(const vector<Vector2f>& pts, bool estBlanc, const Cube& cubePos, Side side) {
-    Case* c = new Case(pts, estBlanc, cubePos);
+void Model::ajouterCase(const vector<Vector2f>& points, bool estBlanc, const Cube& cubePos, Side side) {
+    Case* c = new Case(points, estBlanc, cubePos);
+    c->setSide(side);
     cases.push_back(c);
     caseMap[cubePos] = c;
 }
@@ -179,6 +180,7 @@ void Model::ajouterCase(const vector<Vector2f>& pts, bool estBlanc, const Cube& 
 void Model::initialiserEchiquier()
 {
     cases.clear();
+    caseMap.clear();
 
     const float WIDTH = 1000.f, HEIGHT = 1000.f;  // Échiquier 1000x1000
     const float OFFSET_X = 50.f, OFFSET_Y = 50.f; // Décalage pour centrer dans une fenêtre 1100x1100
@@ -313,18 +315,26 @@ void Model::initialiserEchiquier()
 
 
 
+// Recherche la pièce dont la positionCube == c
 Piece* Model::getPieceAtCube(const Cube& c) const {
-    return getPieceAt(Hex::cubeVersGrille(c));
-}
+        for (auto p : pieces) {
+                if (p->getPositionCube() == c)
+                        return p;
+            }
+        return nullptr;
+    }
 
+
+// Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-    if (auto en = getPieceAtCube(dest)) removePiece(en);
-    p->setPositionCube(dest);
-    currentPlayerIdx = (currentPlayerIdx+1) % players.size();
-}
+        if (auto en = getPieceAtCube(dest))
+                removePiece(en);
+        p->setPositionCube(dest);
+        currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+    }
 
 bool Model::isOccupied(Vector2i pos) const {
-        return getPieceAt(pos) != nullptr;
+        Cube c = Hex::grilleVersCube(pos);return getPieceAtCube(c) != nullptr;
     }
 
 void Model::removePiece(Piece* p) {
@@ -343,20 +353,9 @@ Case* Model::getCaseAtCube(const Cube& c) const {
 }
 
 
-Piece* Model::getPieceAtCube(const Cube& c) const {
-    // conversion cube → grid puis réutilisation
-    return getPieceAt(Hex::cubeVersGrille(c));
-}
 
-void Model::movePieceCube(Piece* p, const Cube& dest) {
-    // capture
-    if (auto en = getPieceAtCube(dest))
-        removePiece(en);
-    // mise à jour
-    p->setPositionCube(dest);
-    // passage au joueur suivant
-    currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
-}
+
+
 
 
 
@@ -408,7 +407,7 @@ void Model::realignerPieces()
         {
             if (c->contientPoint(centre))
             {
-                p->setPosition(c->getGridPos());   // recale
+                p->setPositionCube(c->getCubePos());   // recale en cube
                 break;
             }
         }

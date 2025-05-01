@@ -19,9 +19,9 @@ public:
     void dessiner(sf::RenderWindow& window) const override;
 
 
-    std::vector<Cube> getLegalMoves(const Model& model) const override;
+    vector<Cube> getLegalMoves(const Model& model) const override;
 
-    std::string getTypeName() const override;
+    string getTypeName() const override;
 
 };
 

@@ -35,7 +35,7 @@ private:
 
 public:
     //Case(const vector<Vec2>& points, bool blanc);
-    Case(const std::vector<sf::Vector2f>& points, bool blanc, const Cube& cubePos);
+    Case(const vector<Vec2>& points, bool blanc, const Cube& cubePos);
 
     virtual ~Case();
 

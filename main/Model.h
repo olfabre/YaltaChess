@@ -4,8 +4,8 @@
 #include <SFML/Graphics.hpp>
 #include <vector>
 
-#include "cases/Case.h"
 #include "HexagonalCubique.h"    // pour Cube, CubeHash
+#include "cases/Case.h"
 #include <unordered_map>
 #include "Piece.h"
 

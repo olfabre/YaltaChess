@@ -28,7 +28,7 @@ public:
     virtual ~Piece() = default;
 
     // Vérifie la validité du déplacement spécifique à chaque pièce
-    virtual bool mouvementValide(Vector2i nouvellePos) const = 0;
+    virtual bool mouvementValide(Cube nouvellePos) const = 0;
 
     // retourne toutes les destinations valides selon le model
     virtual vector<Cube> getLegalMoves(const Model&) const = 0;
@@ -36,9 +36,8 @@ public:
     // Dessine graphiquement la pièce (SFML)
     virtual void dessiner(RenderWindow& window) const = 0;
 
-    // Accesseurs
-    Vector2i getPosition() const;
-    void setPosition(Vector2i nouvellePos);
+
+    void setPosition(Cube nouvellePos);
     Couleur getCouleur() const;
 
     virtual string getTypeName() const = 0;

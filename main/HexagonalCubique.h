@@ -3,7 +3,11 @@
 #include <SFML/System/Vector2.hpp>
 #include <vector>
 #include <array>
-#include "Model.h"    // pour Model et Couleur
+#include <string>           // pour std::string utilisé dans toAlgebrique
+#include "Couleur.h"        // pour enum Couleur
+
+class Model;               // forward-déclaration de Model
+
 
 
 using namespace sf;

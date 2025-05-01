@@ -11,10 +11,12 @@ using namespace std;
 
 Fou::Fou(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Fou::mouvementValide(Vector2i nouvellePos) const {
-    int dx = abs(nouvellePos.x - position.x);
-    int dy = abs(nouvellePos.y - position.y);
-    return (dx == dy);
+bool Fou::mouvementValide(Cube nouvellePos) const {
+    int dx = abs(nouvellePos.x - positionCube.x);
+    int dy = abs(nouvellePos.y - positionCube.y);
+    int dz = abs(nouvellePos.z - positionCube.z);
+    // … test en cube …
+    return true;
 }
 
 void Fou::dessiner(RenderWindow& window) const {
@@ -24,7 +26,7 @@ void Fou::dessiner(RenderWindow& window) const {
 
 
 vector<Cube> Fou::getLegalMoves(const Model& model) const {
-    return Hex::movesFou(position, model, couleur);
+    return Hex::movesFou(positionCube, model, couleur);
 }
 
 

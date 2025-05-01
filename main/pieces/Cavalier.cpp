@@ -18,15 +18,12 @@ bool Cavalier::mouvementValide(Cube nouvellePos) const {
     int dy = abs(nouvellePos.y - positionCube.y);
     int dz = abs(nouvellePos.z - positionCube.z);
     // … test en cube …
+    return true;
 }
 
 void Cavalier::dessiner(RenderWindow& window) const {
     // Dessiner le Cavalier
 }
-
-
-
-
 
 
 
