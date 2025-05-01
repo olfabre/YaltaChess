@@ -12,6 +12,18 @@ using namespace std;
 // Structure représentant une case sur la grille hexagonale en coordonnées cubiques
 struct Cube { int x, y, z; };
 
+// global namespace
+inline bool operator==(const Cube &a, const Cube &b) {
+         return a.x==b.x && a.y==b.y && a.z==b.z;
+    }
+struct CubeHash {
+         size_t operator()(const Cube& c) const noexcept {
+                 return std::hash<int>()(c.x)
+                      ^ (std::hash<int>()(c.y)<<1)
+                      ^ (std::hash<int>()(c.z)<<2);
+             }
+     };
+
 namespace Hex {
 
     // Conversion d'une case en coordonnées "offset odd-r" (grille 2D) vers les coordonnées cubiques
@@ -32,240 +44,95 @@ namespace Hex {
         return {col, r};
     }
 
+
+
+
+
     // helper pour convertir grid → « a1, b1, … l12 »
     // Corrigé pour correspondre à la disposition réelle de l'échiquier Yalta
     inline string toAlgebrique(Vector2i g) {
-        static const char* files = "abcdefghijkl";
+        static const string files = "abcdefghijkl";
+        char file;
+        int rank;
 
-        // Déterminer la zone de l'échiquier (White, Red, Black)
-        int zone;
-        if (g.y >= 8) {
-            // Zone White (bas)
-            zone = 0;
-            char file = files[g.x];
-            int rank = 12 - g.y;
-            return string(1, file) + to_string(rank);
-        } else if (g.x < 4) {
+        // Calcul de la notation de base (orientation BLANC) selon les zones de l'échiquier
+        if (g.x < 4) {
             // Zone Red (haut-gauche)
-            zone = 1;
-            char file = files[g.x];
-            int rank = 8 - (g.y - 4);
-            return string(1, file) + to_string(rank);
-        } else {
-            // Zone Black (haut-droite)
-            zone = 2;
-            char file = files[g.x];
-            int rank = 12 - g.y;
-            return string(1, file) + to_string(rank);
+            file = files[g.x];
+            rank = g.y + 1;
         }
-    }
-
-    // 6 directions possibles pour une tour (axes principaux)
-    static constexpr array<Cube,6> directionsTour = {{
-           {+1, -1,  0}, {+1,  0, -1}, { 0, +1, -1},
-           {-1, +1,  0}, {-1,  0, +1}, { 0, -1, +1}
-                                                     }};
-
-// 6 directions possibles pour un fou (diagonales hex)
-    static constexpr std::array<Cube,6> directionsFou = {{
-           {directionsTour[0].x + directionsTour[1].x,
-             directionsTour[0].y + directionsTour[1].y,
-              directionsTour[0].z + directionsTour[1].z },
-
-
-             {directionsTour[1].x + directionsTour[2].x,
-              directionsTour[1].y + directionsTour[2].y,
-              directionsTour[1].z + directionsTour[2].z },
-
-              { directionsTour[2].x + directionsTour[3].x,
-                directionsTour[2].y + directionsTour[3].y,
-                directionsTour[2].z + directionsTour[3].z },
-
-              { directionsTour[3].x + directionsTour[4].x,
-                directionsTour[3].y + directionsTour[4].y,
-                directionsTour[3].z + directionsTour[4].z },
-
-              { directionsTour[4].x + directionsTour[5].x,
-                directionsTour[4].y + directionsTour[5].y,
-                directionsTour[4].z + directionsTour[5].z },
-
-              { directionsTour[5].x + directionsTour[0].x,
-                directionsTour[5].y + directionsTour[0].y,
-                directionsTour[5].z + directionsTour[0].z }
-                                                         }};
-
-    // 12 sauts possibles pour un cavalier en hex-grille
-    inline vector<Cube> sautsCavalier() {
-        vector<Cube> sauts;
-        for (int i = 0; i < 6; ++i) {
-            int v1 = (i + 1) % 6;
-            int v2 = (i + 5) % 6;
-            sauts.push_back({
-                                    directionsTour[i].x*2 + directionsTour[v1].x,
-                                    directionsTour[i].y*2 + directionsTour[v1].y,
-                                    directionsTour[i].z*2 + directionsTour[v1].z
-                            });
-
-            sauts.push_back({
-                                    directionsTour[i].x*2 + directionsTour[v2].x,
-                                    directionsTour[i].y*2 + directionsTour[v2].y,
-                                    directionsTour[i].z*2 + directionsTour[v2].z
-                            });
+        else if (g.y < 4) {
+            // Zone Black bas-droite (rangées inférieures)
+            int offsetX = (g.x >= 5) ? 1 : 0;
+            int fileIndex = g.x + (3 - g.y) - offsetX;
+            file = files[fileIndex];
+            rank = g.x - 3;
         }
-        return sauts;
+        else if (g.y < 8) {
+            // Zone Black centrale
+            file = files[g.x];
+            rank = 12 - g.y;
+        }
+        else {
+            // Zone White (bas)
+            file = files[g.x];
+            rank = 12 - g.y;
+        }
+        if (g.y >= 8) {
+            // inversion 180°
+        }
+
+
+        return string(1, file) + to_string(rank);
     }
 
 
-    // ----- Helpers pour tous els types de pièces -----
 
-    inline vector<Vector2i> movesTour(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
-    {
-        vector<Vector2i> res;
-        Cube cur = grilleVersCube(pos);
-        for (auto& d : directionsTour) {
-            Cube nxt = cur;
-            while (true) {
-                nxt = { nxt.x + d.x, nxt.y + d.y, nxt.z + d.z };
-                auto g = cubeVersGrille(nxt);
-                if (auto c = model.getCaseAt(g)) {
-                    if (!model.isOccupied(g)) {
-                        res.push_back(g);
-                    } else {
-                        if (model.getPieceAt(g)->getCouleur() != couleur)
-                            res.push_back(g);
-                        break;
-                    }
-                } else break;
-            }
-        }
+
+
+    inline vector<Cube> movesCavalier(const Cube pos,const Model& model,Couleur couleur) {
+        vector<Cube> res{ {0, 0, 0} };
         return res;
     }
 
-    inline vector<Vector2i> movesFou(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
+    inline vector<Cube> movesTour(const Cube pos,const Model& model,Couleur couleur)
     {
-        vector<Vector2i> res;
-        Cube cur = grilleVersCube(pos);
-        for (auto& d : directionsFou) {
-            Cube nxt = cur;
-            while (true) {
-                nxt = { nxt.x + d.x, nxt.y + d.y, nxt.z + d.z };
-                auto g = cubeVersGrille(nxt);
-                if (auto c = model.getCaseAt(g)) {
-                    if (!model.isOccupied(g)) {
-                        res.push_back(g);
-                    } else {
-                        if (model.getPieceAt(g)->getCouleur() != couleur)
-                            res.push_back(g);
-                        break;
-                    }
-                } else break;
-            }
-        }
+
+        vector<Cube> res{ {0, 0, 0} };
         return res;
     }
 
-    inline vector<Vector2i> movesDame(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
+    inline vector<Cube> movesFou(const Cube pos,const Model& model,Couleur couleur)
     {
-        auto r = movesTour(pos, model, couleur);
-        auto f = movesFou (pos, model, couleur);
-        r.insert(r.end(), f.begin(), f.end());
-        return r;
-    }
-
-    inline vector<Vector2i> movesCavalier(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
-    {
-        vector<Vector2i> res;
-        Cube cur = grilleVersCube(pos);
-        static const auto& jumps = sautsCavalier();
-        for (auto& j : jumps) {
-            Cube nxt{ cur.x + j.x, cur.y + j.y, cur.z + j.z };
-            auto g = cubeVersGrille(nxt);
-            if (auto c = model.getCaseAt(g)) {
-                if (!model.isOccupied(g) ||
-                    model.getPieceAt(g)->getCouleur() != couleur)
-                    res.push_back(g);
-            }
-        }
+        vector<Cube> res{ {0, 0, 0} };
         return res;
     }
 
-    inline vector<Vector2i> movesRoi(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
+
+    inline vector<Cube> movesDame(const Cube pos,const Model& model,Couleur couleur)
     {
-        vector<Vector2i> res;
-        Cube cur = grilleVersCube(pos);
-        for (auto& d : directionsTour) {
-            Cube nxt{cur.x+d.x, cur.y+d.y, cur.z+d.z};
-            auto g = cubeVersGrille(nxt);
-            if (auto c = model.getCaseAt(g)) {
-                if (!model.isOccupied(g) ||
-                    model.getPieceAt(g)->getCouleur() != couleur)
-                    res.push_back(g);
-            }
-        }
-        for (auto& d : directionsFou) {
-            Cube nxt{cur.x+d.x, cur.y+d.y, cur.z+d.z};
-            auto g = cubeVersGrille(nxt);
-            if (auto c = model.getCaseAt(g)) {
-                if (!model.isOccupied(g) ||
-                    model.getPieceAt(g)->getCouleur() != couleur)
-                    res.push_back(g);
-            }
-        }
+        vector<Cube> res{ {0, 0, 0} };
         return res;
     }
 
-    // Correction des indices de direction "avant" pour chaque couleur
-    // Couleur BLANC=0 -> axis 5  (grid (0,+1))
-    //        NOIR =1 -> axis 1  (grid (0,-1))
-    //        ROUGE=2 -> axis 0  (grid (+1,0))
-    static constexpr int pawnDirIdx[3] = {
-            5,  // BLANC
-            1,  // NOIR
-            0   // ROUGE
-    };
 
-    inline vector<Vector2i> movesPion(
-            const Vector2i& pos,
-            const Model& model,
-            Couleur couleur)
+
+
+    inline vector<Cube> movesRoi(const Cube pos,const Model& model,Couleur couleur)
     {
-        vector<Vector2i> res;
-        Cube cur = grilleVersCube(pos);
-
-        // un pas "avant"
-        Cube forward = directionsTour[pawnDirIdx[couleur]];
-        Cube one = { cur.x+forward.x, cur.y+forward.y, cur.z+forward.z };
-        auto g1 = cubeVersGrille(one);
-        if (auto c = model.getCaseAt(g1))
-            if (!model.isOccupied(g1))
-                res.push_back(g1);
-
-        // captures diagonales autour de "forward"
-        for (auto& d : directionsFou) {
-            int dot = d.x*forward.x + d.y*forward.y + d.z*forward.z;
-            if (dot > 0) {
-                Cube cap{cur.x+d.x, cur.y+d.y, cur.z+d.z};
-                auto g2 = cubeVersGrille(cap);
-                if (auto p2 = model.getPieceAt(g2))
-                    if (p2->getCouleur() != couleur)
-                        res.push_back(g2);
-            }
-        }
+        vector<Cube> res{ {0, 0, 0} };
         return res;
     }
+
+    inline vector<Cube> movesPion(const Cube pos,const Model& model,Couleur couleur)
+    {
+        vector<Cube> res{ {0, 0, 0} };
+        return res;
+    }
+
+
+
+
+
+
 }

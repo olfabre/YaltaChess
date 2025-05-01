@@ -11,6 +11,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+
 using namespace sf;
 using namespace std;
 
@@ -69,8 +70,7 @@ y
 
 Model::Model() {
 
-    initialiserEchiquier();
-    initialiserJoueurs();
+
 
 
 
@@ -85,7 +85,8 @@ Model::Model() {
             if (coul < 0) continue;
 
             // memorise pour les coordonnées (x,y)
-            Vector2i grid{x,y};
+            //Vector2i grid{x,y};
+            Cube c = Hex::grilleVersCube({x,y});
 
             // convertion en enum couleur
             Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
@@ -94,12 +95,12 @@ Model::Model() {
 
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
-                case 0: p = new Roi(grid, cc);       break;
-                case 1: p = new Pion(grid, cc);      break;
-                case 2: p = new Cavalier(grid, cc);  break;
-                case 3: p = new Fou(grid, cc);       break;
-                case 4: p = new Tour(grid, cc);      break;
-                case 5: p = new Dame(grid, cc);      break;
+                case 0: p = new Roi(c, cc);       break;
+                case 1: p = new Pion(c, cc);      break;
+                case 2: p = new Cavalier(c, cc);  break;
+                case 3: p = new Fou(c, cc);       break;
+                case 4: p = new Tour(c, cc);      break;
+                case 5: p = new Dame(c, cc);      break;
             }
             pieces.push_back(p);
         }
@@ -107,19 +108,29 @@ Model::Model() {
 
 
 
+    realignerPieces();
+
+
+
     // === DÉBUG : afficher grid → cube pour chaque pièce ===
     std::cout << "=== Debug positions ===\n";
     for (Piece* p : pieces) {
-        auto g = p->getPosition();                  // grid (col,row)
-        //auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
+
+        auto c = Hex::grilleVersCube(g);            // cube (x,y,z)
         std::cout
                 << p->getTypeName()
                 << " couleur=" << p->getCouleur()
-                << "  grid("   << g.x << "," << g.y << ")"
-                //<< "  cube("   << c.x << "," << c.y << "," << c.z << ")"
+
+                << "  cube("   << c.x << "," << c.y << "," << c.z << ")"
                 << "\n";
     }
     std::cout << "========================\n";
+
+
+
+//initialiserEchiquier();
+    initialiserJoueurs();
+
 
 }
 
@@ -159,16 +170,10 @@ Model::~Model() {
 
 }
 
-void Model::ajouterCase(const vector<Vector2f>& points,
-                        bool estBlanc,
-                        Vector2i gridPos,
-                        Side side
-                        )
-{
-    /* cases.push_back(new Case(points, estBlanc, gridPos)); */
-    Case* c = new Case(points, estBlanc, gridPos);
-    c->setSide(side);       // on renseigne ici le Side de la case
+void Model::ajouterCase(const vector<Vector2f>& pts, bool estBlanc, const Cube& cubePos, Side side) {
+    Case* c = new Case(pts, estBlanc, cubePos);
     cases.push_back(c);
+    caseMap[cubePos] = c;
 }
 
 void Model::initialiserEchiquier()
@@ -234,7 +239,9 @@ void Model::initialiserEchiquier()
                 if (zone==4 || zone==5)      s = Side::White;  // bas du plateau
                 else if (zone==0 || zone==1) s = Side::Red;    // en haut-gauche
                 else s = Side::Black;  // en haut-droite
-                ajouterCase({p1,p2,p3,p4}, estBlanc, {x,y}, s);
+                //ajouterCase({p1,p2,p3,p4}, estBlanc, {x,y}, s);
+                Cube c = Hex::grilleVersCube({x,y});
+                ajouterCase({p1,p2,p3,p4}, estBlanc, c, s);
 
             }
     }
@@ -303,13 +310,18 @@ void Model::initialiserEchiquier()
 
 }
 
-Piece* Model::getPieceAt(Vector2i pos) const {
-        for (Piece* p : pieces) {
-                if (p->getPosition() == pos)
-                        return p;
-            }
-        return nullptr;
-    }
+
+
+
+Piece* Model::getPieceAtCube(const Cube& c) const {
+    return getPieceAt(Hex::cubeVersGrille(c));
+}
+
+void Model::movePieceCube(Piece* p, const Cube& dest) {
+    if (auto en = getPieceAtCube(dest)) removePiece(en);
+    p->setPositionCube(dest);
+    currentPlayerIdx = (currentPlayerIdx+1) % players.size();
+}
 
 bool Model::isOccupied(Vector2i pos) const {
         return getPieceAt(pos) != nullptr;
@@ -323,23 +335,29 @@ void Model::removePiece(Piece* p) {
     delete p;
 }
 
-void Model::movePiece(Piece* p, Vector2i dest) {
+
+
+Case* Model::getCaseAtCube(const Cube& c) const {
+    auto it = caseMap.find(c);
+    return it==caseMap.end() ? nullptr : it->second;
+}
+
+
+Piece* Model::getPieceAtCube(const Cube& c) const {
+    // conversion cube → grid puis réutilisation
+    return getPieceAt(Hex::cubeVersGrille(c));
+}
+
+void Model::movePieceCube(Piece* p, const Cube& dest) {
     // capture
-    if (Piece* enemi = getPieceAt(dest))
-        removePiece(enemi);
-    // met à jour la position de p
-    p->setPosition(dest);
-    // change de joueur
+    if (auto en = getPieceAtCube(dest))
+        removePiece(en);
+    // mise à jour
+    p->setPositionCube(dest);
+    // passage au joueur suivant
     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 }
 
-Case* Model::getCaseAt(const sf::Vector2i& pos) const {
-    for (Case* c : cases) {
-        if (c->getGridPos() == pos)
-            return c;
-    }
-    return nullptr;
-}
 
 
 // ------------------------------------------------------------------

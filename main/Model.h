@@ -5,6 +5,8 @@
 #include <vector>
 
 #include "cases/Case.h"
+#include "HexagonalCubique.h"    // pour Cube, CubeHash
+#include <unordered_map>
 #include "Piece.h"
 
 using namespace sf;
@@ -35,10 +37,14 @@ private:
                         bool estBlanc,
                         sf::Vector2i gridPos);
                         */
-    void ajouterCase(const std::vector<sf::Vector2f>& points,
-                        bool estBlanc,
-                        sf::Vector2i gridPos,
-                        Side side);
+    void ajouterCase(const vector<Vector2f>& pts, bool estBlanc, const Cube& cubePos, Side side);
+
+    // accès O(1) à la case par cube
+    std::unordered_map<Cube, Case*, CubeHash> caseMap;
+    Case* getCaseAtCube(const Cube& c) const;
+
+
+
     void initialiserJoueurs();
 
     // Supprime p de `pieces` et libère la mémoire
@@ -51,16 +57,19 @@ public:
     const vector<PlayerInfo>& getPlayers() const { return players; }
 
     // Retourne la Case* correspondant à une position grille (ou nullptr)
-    Case* getCaseAt(const sf::Vector2i& pos) const;
+    //Case* getCaseAt(const sf::Vector2i& pos) const;
+
 
     int getCurrentPlayerIdx() const { return currentPlayerIdx; }
     void initialiserEchiquier();
     const vector<Case *> &getCases() const { return cases; }
     const auto& getPieces() const { return pieces; }
     // Renvoie la pièce à la position grille donnée (ou nullptr)
-    Piece* getPieceAt(sf::Vector2i pos) const;
+
+    Piece* getPieceAtCube(const Cube&) const;
     // Déplace p vers dest, gère capture et passe au joueur suivant
-    void movePiece(Piece* p, sf::Vector2i dest);
+
+    void movePieceCube(Piece* p, const Cube& dest);
     // Vrai si une pièce occupe la case
     bool isOccupied(sf::Vector2i pos) const;
 };

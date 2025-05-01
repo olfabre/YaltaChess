@@ -9,7 +9,7 @@
 using namespace sf;
 using namespace std;
 
-Fou::Fou(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Fou::Fou(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
 bool Fou::mouvementValide(Vector2i nouvellePos) const {
     int dx = abs(nouvellePos.x - position.x);
@@ -23,7 +23,7 @@ void Fou::dessiner(RenderWindow& window) const {
 
 
 
-vector<Vector2i> Fou::getLegalMoves(const Model& model) const {
+vector<Cube> Fou::getLegalMoves(const Model& model) const {
     return Hex::movesFou(position, model, couleur);
 }
 

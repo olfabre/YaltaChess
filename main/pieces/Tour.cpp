@@ -7,7 +7,7 @@
 using namespace sf;
 using namespace std;
 
-Tour::Tour(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Tour::Tour(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
 bool Tour::mouvementValide(Vector2i nouvellePos) const {
     // Cette fonction n'est pas utilisée pour getLegalMoves, donc nous la laissons telle quelle
@@ -19,7 +19,7 @@ void Tour::dessiner(RenderWindow& window) const {
     // Dessiner la Tour
 }
 
-vector<Vector2i> Tour::getLegalMoves(const Model& model) const {
+vector<Cube> Tour::getLegalMoves(const Model& model) const {
     return Hex::movesTour(position, model, couleur);
 }
 

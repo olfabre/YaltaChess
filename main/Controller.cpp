@@ -12,7 +12,7 @@ Controller::Controller(Model &m, YaltaChessView &v) : model(m), view(v) {}
 
 
 
-// gestion des évènements côté l'interface
+// gestion des évènements côté interface
 void Controller::handleEvent(const sf::Event& event)
 {
 
@@ -50,12 +50,10 @@ void Controller::handleEvent(const sf::Event& event)
                     }
                 view.setHoveredCase(hoveredCase);
     }
-    //sf::Vector2i grid = clickedCase->getGridPos();
-    // … autres événements (clic, touches…) …
 
 
 
-    // --- Clic pour sélection / déplacement ---
+    // Quand je clique sur une pièce
     if (event.is<sf::Event::MouseButtonPressed>()) {
         auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
         if (!mb || mb->button != Mouse::Button::Left) return;
@@ -70,30 +68,27 @@ void Controller::handleEvent(const sf::Event& event)
                 break;
             }
         }
-        if (!clickedCase) return;
+        if (!clickedCase) return; // quand je reclic
 
         // position logique
-        Vector2i grid = clickedCase->getGridPos();
+        //Vector2i grid = clickedCase->getGridPos();
+        Cube cube = clickedCase->getCubePos();
         auto const& players = model.getPlayers();
         int cur = model.getCurrentPlayerIdx();
 
-        // 1) Sélection de la pièce
+        // Quand je sélectionne la pièce
         if (!selectedPiece) {
-            Piece* p = model.getPieceAt(grid);
+            //Piece* p = model.getPieceAt(grid);
+            Piece* p = model.getPieceAtCube(cube);
             if (p && p->getCouleur() == players[cur].color) {
                 selectedPiece = p;
                 legalMoves = p->getLegalMoves(model);
-                auto g = p->getPosition();
-                // ——— DEBUG : affiche les coups légaux
+                auto cpos = p->getPositionCube();
 
 
-                cout
-                        // << p->getTypeName()
-                        << "(" << g.x << "," << g.y << ")"
-                        << " en " << Hex::toAlgebrique(grid)
-                        << " -> legalMoves:";
-                for (auto& mv : legalMoves)
-                    cout << " " <<  Hex::toAlgebrique(mv);
+
+                // ——— DEBUG : affiche les coorodonnées cube
+                cout << "cube(" << cpos.x << "," << cpos.y << "," << cpos.z << ")";
                 cout << "\n";
 
 
@@ -103,9 +98,9 @@ void Controller::handleEvent(const sf::Event& event)
                 // 1.a) la case où se trouvait la pièce sélectionnée
                 highlights.push_back(clickedCase);
                 // 1.b) les cases de destination légales
-                for (auto& mv : legalMoves) {
-                    for (Case* c : model.getCases()) {
-                        if (c->getGridPos() == mv) {
+                for (const Cube& mv : legalMoves) {
+                        for (Case* c : model.getCases()) {
+                          if (c->getCubePos() == mv) {
                             highlights.push_back(c);
                             break;
                         }
@@ -117,8 +112,8 @@ void Controller::handleEvent(const sf::Event& event)
 
             // 2) Deuxième clic : déplacement ou annulation
         else {
-            if (find(legalMoves.begin(), legalMoves.end(), grid) != legalMoves.end()) {
-                model.movePiece(selectedPiece, grid);
+            if (std::find(legalMoves.begin(), legalMoves.end(), cube) != legalMoves.end()) {
+                model.movePieceCube(selectedPiece, cube);
             }
             // reset quoi qu’il arrive
             selectedPiece = nullptr;

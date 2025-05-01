@@ -1,6 +1,6 @@
 #ifndef CAVALIER_H
 #define CAVALIER_H
-
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include "Piece.h"
 #include <vector>
 
@@ -14,12 +14,12 @@ class Model;  // forward declaration
 // Classe Cavalier héritant de Piece
 class Cavalier : public Piece {
 public:
-    Cavalier(Vector2i pos, Couleur coul);
-    bool mouvementValide(Vector2i nouvellePos) const override;
-    void dessiner(RenderWindow& window) const override;
+    Cavalier(Cube pos, Couleur coul);
+    bool mouvementValide(Cube nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
 
-    // implémentation de la pure-virtual de Piece
-    std::vector<sf::Vector2i> getLegalMoves(const Model& model) const override;
+
+    std::vector<Cube> getLegalMoves(const Model& model) const override;
 
     std::string getTypeName() const override;
 

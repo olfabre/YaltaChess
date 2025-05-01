@@ -257,7 +257,8 @@ void YaltaChessView::draw()
        for (Piece* p : model.getPieces())
             {
                         // centre de la case en pixels
-                                Vector2f center = gridToPixel(p->getPosition());
+                Cube c = p->getPositionCube();
+                Vector2f center = gridToPixel(Hex::cubeVersGrille(c));
                         // recherche de la case qui contient ce centre
                         for (Case* c : model.getCases())
                         {
@@ -391,7 +392,8 @@ void YaltaChessView::draw()
         auto ts = tex.getSize();
         // SFML3 : setOrigin prend un Vector2f
         spr.setOrigin({ ts.x/2.f, ts.y/2.f });
-        Vector2f pos = gridToPixel(p->getPosition());
+        Cube c = p->getPositionCube();
+        Vector2f pos = gridToPixel(Hex::cubeVersGrille(c));
         spr.setPosition(pos);
         if (p->getCouleur() == ROUGE)
             spr.setColor(Color(195,83,51));
