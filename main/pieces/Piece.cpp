@@ -5,15 +5,15 @@
 using namespace sf;
 using namespace std;
 
-Piece::Piece(Vector2i pos, Couleur coul)
-        : position(pos), couleur(coul) {}
+Piece::Piece(Cube pos, Couleur coul)
+        : positionCube(pos), couleur(coul) {}
 
-Vector2i Piece::getPosition() const {
+Cube Piece::getPosition() const {
     return position;
 }
 
-void Piece::setPosition(Vector2i nouvellePos) {
-    position = nouvellePos;
+void Piece::setPosition(Cube nouvellePos) {
+    positionCube = nouvellePos;
 }
 
 Couleur Piece::getCouleur() const {

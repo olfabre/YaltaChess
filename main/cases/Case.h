@@ -2,8 +2,9 @@
 #define CASE_H
 
 #include <SFML/Graphics.hpp>
+#include "../HexagonalCubique.h"
 #include "../Couleur.h"
-#include "Piece.h"           // pour avoir la définition complète de Piece et de Couleur
+#include "../pieces/Piece.h"           // pour avoir la définition complète de Piece et de Couleur
 #include <vector>
 #include <string>
 #include <utility>
@@ -24,7 +25,7 @@ private:
     ConvexShape forme; // Quadrilatère
     bool estBlanc;
     Piece *piece;
-    sf::Vector2i gridPos;
+    Cube cubePos;
     // --- NOUVEAUX MEMBRES pour la topo du plateau ---
     Side side = White;      // Le « groupe » (White, Red ou Black) dont fait partie cette case
     Case* N = nullptr;      // voisin Nord (du point de vue de `side`)
@@ -34,13 +35,13 @@ private:
 
 public:
     //Case(const vector<Vec2>& points, bool blanc);
-    Case(const std::vector<sf::Vector2f>& points, bool blanc, sf::Vector2i gridPos);
+    Case(const std::vector<sf::Vector2f>& points, bool blanc, const Cube& cubePos);
 
     virtual ~Case();
 
     virtual void draw(RenderTarget &target, RenderStates states) const override;
     bool contientPoint(const Vector2f &point) const;
-    sf::Vector2i getGridPos() const { return gridPos; }
+
 
     // Getters
     bool estOccupee() const { return piece != nullptr; }
@@ -67,6 +68,13 @@ public:
     Case* getEast()  const { return E; }
     Case* getSouth() const { return S; }
     Case* getWest()  const { return W; }
+
+
+    // nouveaux getters (tout gérer cube)
+    // nouveau
+    const Cube& getCubePos() const { return cubePos; }
+    // utilitaire IHM si tu veux encore des grid :
+    Vector2i getGridPos() const { return Hex::cubeVersGrille(cubePos); }
 
 
 

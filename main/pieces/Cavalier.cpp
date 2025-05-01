@@ -11,12 +11,13 @@ using namespace std;
 
 
 
-Cavalier::Cavalier(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Cavalier::Cavalier(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Cavalier::mouvementValide(Vector2i nouvellePos) const {
-    int dx = abs(nouvellePos.x - position.x);
-    int dy = abs(nouvellePos.y - position.y);
-    return ((dx == 1 && dy == 2) || (dx == 2 && dy == 1));
+bool Cavalier::mouvementValide(Cube nouvellePos) const {
+    int dx = abs(nouvellePos.x - positionCube.x);
+    int dy = abs(nouvellePos.y - positionCube.y);
+    int dz = abs(nouvellePos.z - positionCube.z);
+    // … test en cube …
 }
 
 void Cavalier::dessiner(RenderWindow& window) const {
@@ -29,8 +30,8 @@ void Cavalier::dessiner(RenderWindow& window) const {
 
 
 
-vector<Vector2i> Cavalier::getLegalMoves(const Model& model) const {
-    return Hex::movesCavalier(position, model, couleur);
+vector<Cube> Cavalier::getLegalMoves(const Model& model) const {
+    return Hex::movesCavalier(positionCube, model, couleur);
 }
 
 

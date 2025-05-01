@@ -10,6 +10,8 @@ void ResourceManager::loadAll() {
     for (auto color : {"White","Black"}) {
         for (auto name : {"Pion","Tour","Fou","Cavalier","Dame","Roi"}) {
             string key = string(name) + "_" + color;
+
+
             // 1) chargement de la texture originale
             Texture tex;
             if (!tex.loadFromFile(key + ".png"))

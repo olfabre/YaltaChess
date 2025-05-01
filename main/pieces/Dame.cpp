@@ -9,7 +9,7 @@
 using namespace sf;
 using namespace std;
 
-Dame::Dame(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Dame::Dame(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
 bool Dame::mouvementValide(Vector2i nouvellePos) const {
     int dx = abs(nouvellePos.x - position.x);
@@ -23,7 +23,7 @@ void Dame::dessiner(RenderWindow& window) const {
 }
 
 
-vector<Vector2i> Dame::getLegalMoves(const Model& model) const {
+vector<Cube> Dame::getLegalMoves(const Model& model) const {
     return Hex::movesDame(position, model, couleur);
 }
 

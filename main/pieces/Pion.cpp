@@ -7,7 +7,7 @@
 using namespace sf;
 using namespace std;
 
-Pion::Pion(Vector2i pos, Couleur coul) : Piece(pos, coul) {}
+Pion::Pion(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
 void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
@@ -26,7 +26,7 @@ bool Pion::mouvementValide(Vector2i nouvellePos) const {
 
 
 
-vector<Vector2i> Pion::getLegalMoves(const Model& model) const {
+vector<Cube> Pion::getLegalMoves(const Model& model) const {
     return Hex::movesPion(position, model, couleur);
 }
 
