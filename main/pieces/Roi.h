@@ -1,6 +1,6 @@
 #ifndef ROI_H
 #define ROI_H
-
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include "Piece.h"
 #include <vector>
 
@@ -13,15 +13,15 @@ class Model;  // forward declaration
 // Classe Roi héritant de Piece
 class Roi : public Piece {
 public:
-    Roi(Vector2i pos, Couleur coul);
-    bool mouvementValide(Vector2i nouvellePos) const override;
-    void dessiner(RenderWindow& window) const override;
+    Roi(Cube pos, Couleur coul);
+    bool mouvementValide(Cube nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
 
-    // Renvoie tous les déplacements valides (1 case, captures incluses)
-    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
-    // Nom de la pièce pour chargement de texture, etc.
+    vector<Cube> getLegalMoves(const Model& model) const override;
+
     string getTypeName() const override;
+
 };
 
 #endif

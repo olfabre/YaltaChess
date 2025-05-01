@@ -1,4 +1,5 @@
 #include "Case.h"
+#include "../HexagonalCubique.h"
 #include "Piece.h"           // pour avoir la définition complète de Piece et de Couleur
 #include <vector>
 
@@ -8,7 +9,7 @@ using namespace std;
 
 
 
-Case::Case(const vector<Vector2f>& points, bool blanc, Cube cubePos)
+Case::Case(const vector<Vector2f>& points, bool blanc, const Cube& cubePos)
      : estBlanc(blanc), piece(nullptr), cubePos(cubePos)
 {
     forme.setPointCount(points.size());

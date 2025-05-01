@@ -4,6 +4,7 @@
 #include "HexagonalCubique.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
+#include <algorithm>
 
 using namespace sf;
 using namespace std;

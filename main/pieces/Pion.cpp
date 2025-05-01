@@ -3,6 +3,8 @@
 #include "../Model.h"
 #include "../HexagonalCubique.h"  // on utilise les coordonnées cube
 #include <vector>
+#include <array>
+#include <cmath>
 
 using namespace sf;
 using namespace std;
@@ -13,21 +15,18 @@ void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
 }
 
-bool Pion::mouvementValide(Vector2i nouvellePos) const {
-    // Cette fonction n'est pas utilisée pour getLegalMoves, donc nous la laissons telle quelle
-    Vector2i delta = nouvellePos - position;
-    switch (couleur) {
-        case BLANC: return delta == Vector2i{0, +1};
-        case NOIR:  return delta == Vector2i{0, -1};
-        case ROUGE: return delta == Vector2i{+1, 0};
-    }
-    return false;
+bool Pion::mouvementValide(Cube nouvellePos) const {
+    int dx = abs(nouvellePos.x - positionCube.x);
+    int dy = abs(nouvellePos.y - positionCube.y);
+    int dz = abs(nouvellePos.z - positionCube.z);
+    // … test en cube …
+    return true;
 }
 
 
 
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
-    return Hex::movesPion(position, model, couleur);
+    return Hex::movesPion(positionCube, model, couleur);
 }
 
 string Pion::getTypeName() const {

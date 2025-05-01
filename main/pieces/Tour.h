@@ -1,6 +1,6 @@
 #ifndef TOUR_H
 #define TOUR_H
-
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include "Piece.h"
 #include <vector>
 
@@ -12,15 +12,15 @@ class Model;  // forward declaration
 // Classe Tour héritant de Piece
 class Tour : public Piece {
 public:
-    Tour(Vector2i pos, Couleur coul);
-    bool mouvementValide(Vector2i nouvellePos) const override;
-    void dessiner(RenderWindow& window) const override;
+    Tour(Cube pos, Couleur coul);
+    bool mouvementValide(Cube nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
 
-    // génère tous les déplacements valides en glissant
-    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
-    // nom pour identification / chargement texture
+    vector<Cube> getLegalMoves(const Model& model) const override;
+
     string getTypeName() const override;
+
 };
 
 #endif

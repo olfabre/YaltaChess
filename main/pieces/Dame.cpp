@@ -9,22 +9,24 @@
 using namespace sf;
 using namespace std;
 
+
 Dame::Dame(Cube pos, Couleur coul) : Piece(pos, coul) {}
 
-bool Dame::mouvementValide(Vector2i nouvellePos) const {
-    int dx = abs(nouvellePos.x - position.x);
-    int dy = abs(nouvellePos.y - position.y);
-    // diagonale ou ligne/colonness
-    return (dx == dy || dx == 0 || dy == 0);
+bool Dame::mouvementValide(Cube nouvellePos) const {
+    int dx = abs(nouvellePos.x - positionCube.x);
+    int dy = abs(nouvellePos.y - positionCube.y);
+    int dz = abs(nouvellePos.z - positionCube.z);
+    // … test en cube …
+    return true;
 }
+
 
 void Dame::dessiner(RenderWindow& window) const {
     // Dessiner la Dame
 }
 
-
 vector<Cube> Dame::getLegalMoves(const Model& model) const {
-    return Hex::movesDame(position, model, couleur);
+    return Hex::movesDame(positionCube, model, couleur);
 }
 
 

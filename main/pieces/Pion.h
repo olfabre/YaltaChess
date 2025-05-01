@@ -1,6 +1,6 @@
 #ifndef PION_H
 #define PION_H
-
+#include "../HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include "Piece.h"
 #include <vector>
 
@@ -12,15 +12,15 @@ class Model;  // forward declaration
 // Classe Pion héritant de Piece
 class Pion : public Piece {
 public:
-    Pion(Vector2i pos, Couleur coul);
-    bool mouvementValide(Vector2i nouvellePos) const override;
-    void dessiner(RenderWindow& window) const override;
+    Pion(Cube pos, Couleur coul);
+    bool mouvementValide(Cube nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
 
-    // génération des coups légaux
-    vector<Vector2i> getLegalMoves(const Model& model) const override;
 
-    // nom pour l’infrastructure
+    vector<Cube> getLegalMoves(const Model& model) const override;
+
     string getTypeName() const override;
+
 };
 
 #endif

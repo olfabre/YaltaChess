@@ -1,11 +1,13 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "HexagonalCubique.h"  // pour Cube
 #include <SFML/Graphics.hpp>
 #include "Piece.h"
 #include "Model.h"
 #include "View.h"
 #include "cases/Case.h"
+
 
 using namespace sf;
 using namespace std;
