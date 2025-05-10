@@ -90,7 +90,21 @@ namespace Hex {
         return string(1, file) + to_string(rank);
     }
 
+    // 6 poinst cardiaux d’un hexagone en coords cubiques  (E, NE, NW, W, SW, SE)
+    static constexpr array<Cube,6> DIR = {
+            Cube{+1,-1, 0},   // 0 : Est
+            Cube{+1, 0,-1},   // 1 : Nord-Est
+            Cube{ 0,+1,-1},   // 2 : Nord-Ouest
+            Cube{-1,+1, 0},   // 3 : Ouest
+            Cube{-1, 0,+1},   // 4 : Sud-Ouest
+            Cube{ 0,-1,+1}    // 5 : Sud-Est
+    };
 
+    inline bool interieurEchiquier(const Cube& c)
+    {
+        Vector2i g = cubeVersGrille(c);
+        return g.x >= 0 && g.x < 12 && g.y >= 0 && g.y < 12;
+    }
 
 
 

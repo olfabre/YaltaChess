@@ -1936,7 +1936,19 @@ Quand je clique sur une case, mon Controller va:
 - calculer e gridPos (colonne, ligne) de mon clic
 - récupère la `Pièce*` à cette positon
 - appelle ma méthode `getLegalMoves()`sur cette pièce (type de pièce avec sa classe).
-- 
+
+
+
+Rappel pour compiler
+
+```bash
+cmake -B build_main -S main
+cmake --build build_main
+
+./build_main/bin/SFML_MVC_YaltaChess 
+```
+
+
 
 
 
