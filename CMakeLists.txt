@@ -13,9 +13,9 @@ FetchContent_MakeAvailable(SFML)
 
 # Inclusion de tous les fichiers .cpp du dossier courant ET des sous-dossiers (pieces et cases)
 file(GLOB_RECURSE SRC_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/pieces/*.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/cases/*.cpp
+        main/*.cpp
+        pieces/*.cpp
+        cases/*.cpp
         )
 
 # Création de l'exécutable avec tous les fichiers sources
@@ -32,6 +32,7 @@ target_compile_options(SFML_MVC_YaltaChess PRIVATE -fvisibility=default)
 # Inclusion des répertoires pour les headers (y compris sous-dossiers)
 target_include_directories(SFML_MVC_YaltaChess PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/main
         ${CMAKE_CURRENT_SOURCE_DIR}/pieces
         ${CMAKE_CURRENT_SOURCE_DIR}/cases
         )

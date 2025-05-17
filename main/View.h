@@ -4,7 +4,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/System/Clock.hpp>
 #include "Model.h"
-#include "Piece.h"
+#include "pieces/Piece.h"
 #include "cases/Case.h"
 #include <vector>
 

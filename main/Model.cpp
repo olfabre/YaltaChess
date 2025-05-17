@@ -1,11 +1,11 @@
 #include "Model.h"
 #include "cases/Case.h"
-#include "Pion.h"     // tes classes
-#include "Tour.h"
-#include "Fou.h"
-#include "Cavalier.h"
-#include "Dame.h"
-#include "Roi.h"
+#include "pieces/Pion.h"     // tes classes
+#include "pieces/Tour.h"
+#include "pieces/Fou.h"
+#include "pieces/Cavalier.h"
+#include "pieces/Dame.h"
+#include "pieces/Roi.h"
 #include <iostream>
 #include "HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <cmath>

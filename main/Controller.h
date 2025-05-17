@@ -3,7 +3,7 @@
 
 #include "HexagonalCubique.h"  // pour Cube
 #include <SFML/Graphics.hpp>
-#include "Piece.h"
+#include "pieces/Piece.h"
 #include "Model.h"
 #include "View.h"
 #include "cases/Case.h"
