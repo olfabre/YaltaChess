@@ -6,7 +6,10 @@
 #include <string>           // pour std::string utilisé dans toAlgebrique
 #include "Couleur.h"        // pour enum Couleur
 
-class Model;               // forward-déclaration de Model
+
+
+// pour les signatures — on ne définit pas Model ici
+class Model;
 
 
 
@@ -28,7 +31,11 @@ struct CubeHash {
              }
      };
 
+
+
+
 namespace Hex {
+
 
     // Conversion d'une case en coordonnées "offset odd-r" (grille 2D) vers les coordonnées cubiques
     inline Cube grilleVersCube(const Vector2i &g) {
@@ -48,6 +55,26 @@ namespace Hex {
         return {col, r};
     }
 
+} // ← je ferme temporairement Hex
+
+
+
+namespace Hex {
+    // 6 poinst cardiaux d’un hexagone en coords cubiques  (E, NE, NW, W, SW, SE)
+    static constexpr array<Cube,6> DIR = {
+            Cube{+1,-1, 0},   // 0 : Est
+            Cube{+1, 0,-1},   // 1 : Nord-Est
+            Cube{ 0,+1,-1},   // 2 : Nord-Ouest
+            Cube{-1,+1, 0},   // 3 : Ouest
+            Cube{-1, 0,+1},   // 4 : Sud-Ouest
+            Cube{ 0,-1,+1}    // 5 : Sud-Est
+    };
+
+    inline bool interieurEchiquier(const Cube& c)
+    {
+        Vector2i g = cubeVersGrille(c);
+        return g.x >= 0 && g.x < 12 && g.y >= 0 && g.y < 12;
+    }
 
 
 
@@ -90,63 +117,16 @@ namespace Hex {
         return string(1, file) + to_string(rank);
     }
 
-    // 6 poinst cardiaux d’un hexagone en coords cubiques  (E, NE, NW, W, SW, SE)
-    static constexpr array<Cube,6> DIR = {
-            Cube{+1,-1, 0},   // 0 : Est
-            Cube{+1, 0,-1},   // 1 : Nord-Est
-            Cube{ 0,+1,-1},   // 2 : Nord-Ouest
-            Cube{-1,+1, 0},   // 3 : Ouest
-            Cube{-1, 0,+1},   // 4 : Sud-Ouest
-            Cube{ 0,-1,+1}    // 5 : Sud-Est
-    };
-
-    inline bool interieurEchiquier(const Cube& c)
-    {
-        Vector2i g = cubeVersGrille(c);
-        return g.x >= 0 && g.x < 12 && g.y >= 0 && g.y < 12;
-    }
 
 
-
-    inline vector<Cube> movesCavalier(const Cube pos,const Model& model,Couleur couleur) {
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
-
-    inline vector<Cube> movesTour(const Cube pos,const Model& model,Couleur couleur)
-    {
-
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
-
-    inline vector<Cube> movesFou(const Cube pos,const Model& model,Couleur couleur)
-    {
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
+    vector<Cube> movesCavalier(const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> movesTour   (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> movesFou    (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> movesDame   (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> movesRoi    (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> movesPion   (const Cube pos,const Model& model,Couleur couleur);
 
 
-    inline vector<Cube> movesDame(const Cube pos,const Model& model,Couleur couleur)
-    {
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
-
-
-
-
-    inline vector<Cube> movesRoi(const Cube pos,const Model& model,Couleur couleur)
-    {
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
-
-    inline vector<Cube> movesPion(const Cube pos,const Model& model,Couleur couleur)
-    {
-        vector<Cube> res{ {0, 0, 0} };
-        return res;
-    }
 
 
 

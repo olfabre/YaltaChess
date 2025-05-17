@@ -1,5 +1,5 @@
-#include "Piece.h"
 #include "../HexagonalCubique.h"   // pour struct Cube, operator==, CubeHash
+#include "Piece.h"
 #include "../Model.h"
 #include "../cases/Case.h"
 #include "../Couleur.h"

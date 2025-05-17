@@ -96,7 +96,7 @@ Model::Model() {
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
                 case 0: p = new Roi(c, cc);       break;
-                case 1: p = new Pion(c, cc);      break;
+                case 1: p = new Pion(c, cc, this);      break;
                 case 2: p = new Cavalier(c, cc);  break;
                 case 3: p = new Fou(c, cc);       break;
                 case 4: p = new Tour(c, cc);      break;
