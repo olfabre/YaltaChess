@@ -1,6 +1,6 @@
 #include "Case.h"
 #include "../HexagonalCubique.h"
-#include "Piece.h"           // pour avoir la définition complète de Piece et de Couleur
+#include "../pieces/Piece.h"           // pour avoir la définition complète de Piece et de Couleur
 #include <vector>
 
 

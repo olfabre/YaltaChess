@@ -7,7 +7,7 @@
 #include "HexagonalCubique.h"    // pour Cube, CubeHash
 #include "cases/Case.h"
 #include <unordered_map>
-#include "Piece.h"
+#include "pieces/Piece.h"
 
 using namespace sf;
 using namespace std;
@@ -41,7 +41,7 @@ private:
 
     // accès O(1) à la case par cube
     std::unordered_map<Cube, Case*, CubeHash> caseMap;
-    Case* getCaseAtCube(const Cube& c) const;
+
 
 
 
@@ -55,6 +55,7 @@ public:
     ~Model();
     void realignerPieces();
     const vector<PlayerInfo>& getPlayers() const { return players; }
+    Case* getCaseAtCube(const Cube& c) const;
 
     // Retourne la Case* correspondant à une position grille (ou nullptr)
     //Case* getCaseAt(const sf::Vector2i& pos) const;

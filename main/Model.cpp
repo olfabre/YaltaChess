@@ -1,11 +1,11 @@
 #include "Model.h"
 #include "cases/Case.h"
-#include "Pion.h"     // tes classes
-#include "Tour.h"
-#include "Fou.h"
-#include "Cavalier.h"
-#include "Dame.h"
-#include "Roi.h"
+#include "pieces/Pion.h"     // tes classes
+#include "pieces/Tour.h"
+#include "pieces/Fou.h"
+#include "pieces/Cavalier.h"
+#include "pieces/Dame.h"
+#include "pieces/Roi.h"
 #include <iostream>
 #include "HexagonalCubique.h" // Inclure pour utiliser les fonctions de Hex
 #include <cmath>
@@ -96,7 +96,7 @@ Model::Model() {
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
                 case 0: p = new Roi(c, cc);       break;
-                case 1: p = new Pion(c, cc);      break;
+                case 1: p = new Pion(c, cc, this);      break;
                 case 2: p = new Cavalier(c, cc);  break;
                 case 3: p = new Fou(c, cc);       break;
                 case 4: p = new Tour(c, cc);      break;
