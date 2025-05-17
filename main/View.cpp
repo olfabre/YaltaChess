@@ -5,8 +5,21 @@
 #include "cases/Case.h"
 #include "ResourceManager.h"
 #include <array>
+#include <cmath> // pour std::cos et std::sin
 using namespace sf;
 using namespace std;
+
+sf::Vector2f rotateAroundCenter(const sf::Vector2f& point, const sf::Vector2f& center, float angleRad) {
+    float dx = point.x - center.x;
+    float dy = point.y - center.y;
+    float cosA = std::cos(angleRad);
+    float sinA = std::sin(angleRad);
+    return sf::Vector2f{
+            center.x + dx * cosA - dy * sinA,
+            center.y + dx * sinA + dy * cosA
+    };
+}
+
 namespace {
     void drawOutlinedSprite(RenderTarget& target,
                             const Sprite& sprite,
@@ -198,7 +211,12 @@ Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
             Vector2f U1 = vabc[(z + 1) % 6] * ry1 - s1 * ry1 + s2;
             Vector2f midU = vabc[(z + 1) % 6] * mid_r_y - s1 * mid_r_y + s2;
 
-            return corner + s1 * mid_r_y + midU * mid_r_x;
+            //return corner + s1 * mid_r_y + midU * mid_r_x;
+            Vector2f pos = corner + s1 * mid_r_y + midU * mid_r_x;
+// Rotation de -90° autour du centre
+            const float angle = M_PI / 3; // -90° en radians
+            pos = rotateAroundCenter(pos, mid, angle);
+            return pos;
         }
     }
 
