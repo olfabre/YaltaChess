@@ -11,13 +11,69 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+#include <iomanip>
 
 using namespace sf;
 using namespace std;
 
+// Génère un SETUP où chaque case affiche la couleur correspondant à son secteur
+void genereSetupValide(const Model& model) {
+    std::cout << "static const pair<int,int> SETUP[12][12] = {\n";
+    for (int y = 0; y < 12; ++y) {
+        std::cout << "    { ";
+        for (int x = 0; x < 12; ++x) {
+            Cube c = Hex::grilleVersCube({x, y});
+            Case* ca = model.getCaseAtCube(c);
+            int couleur = -1;
+            int type = -1;
+            if (ca) {
+                int side = ca->getSide();
+                if (side == 0) couleur = 0; // Blanc
+                else if (side == 1) couleur = 1; // Rouge
+                else if (side == 2) couleur = 2; // Noir
+                // Option : type = 1 pour pion, ou -1 pour vide
+            }
+            std::cout << "{" << std::setw(2) << couleur << "," << std::setw(2) << type << "}";
+            if (x != 11) std::cout << ", ";
+        }
+        std::cout << " },\n";
+    }
+    std::cout << "};\n";
+}
 
+void genereSetupValide2(const Model& model) {
+    std::cout << "static const pair<int,int> SETUP[12][12] = {\n";
+    // Si vous voulez que SETUP[0] soit la rangée du bas (blanc),
+    // parcourez y de 11 à 0 :
+    for (int y = 11; y >= 0; --y) {
+        std::cout << "    { ";
+        for (int x = 0; x < 12; ++x) {
+            Cube c = Hex::grilleVersCube({x, y});
+            Case* ca = model.getCaseAtCube(c);
+            int couleur = -1, type = -1;
+            if (ca && ca->estOccupee()) {
+                Piece* p = ca->getPiece();
+                // 0 = Blanc, 1 = Rouge, 2 = Noir
+                couleur = static_cast<int>(p->getCouleur());
+                // Par exemple : 1 = Pion, 2 = Cavalier, … à adapter
+                std::string tn = p->getTypeName();
+                if      (tn == "Pion")    type = 1;
+                else if (tn == "Cavalier") type = 2;
+                else if (tn == "Fou")      type = 3;
+                else if (tn == "Dame")     type = 4;
+                else if (tn == "Roi")      type = 5;
+                else if (tn == "Tour")     type = 6;
+            }
+            std::cout << "{" << std::setw(2) << couleur
+                      << ","  << std::setw(2) << type << "}";
+            if (x != 11) std::cout << ", ";
+        }
+        std::cout << " }, // y=" << y << "\n";
+    }
+    std::cout << "};\n";
+}
 
-
+/*
 // tableau 12 lignes x 12 colonnes pour le placement des pièces
 // chaqu case contient 2 nombres (couleur, type de pièce)
 // 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
@@ -48,6 +104,87 @@ static const pair<int,int> SETUP[12][12] = {
         // y=11
         { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
 };
+*/
+
+// tableau 12 lignes x 12 colonnes pour le placement des pièces
+// chaque case contient 2 nombres (couleur, type de pièce)
+// 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
+// 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
+/*
+static const pair<int,int> SETUP[12][12] = {
+        // y=0
+        { { 1,1}, { 1,1}, { 1,1}, { 1,1}, { 0,4}, { 0,2}, { 0,3}, { 0,5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=1
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, { 0,4}, { 0,1}, { 0,1}, { 0,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=2
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, { 0,1}, { 0,2}, { 0,1}, { 0,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=3
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 0,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=4
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=5
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=6
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=7
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=8
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=9
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=10
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        // y=11
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+};
+
+
+static const std::pair<int,int> SETUP[12][12] = {
+        // y=0
+        { {1,1}, {1,1}, {1,1}, {1,1}, {0,4}, {0,2}, {0,3}, {0,5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=1
+        { {1,1}, {1,1}, {1,1}, {1,1}, {0,4}, {0,1}, {0,1}, {0,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=2
+        { {1,1}, {1,1}, {1,1}, {1,1}, {0,1}, {0,2}, {0,1}, {0,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=3
+        { {1,1}, {1,1}, {1,1}, {1,1}, {0,1}, {0,1}, {0,1}, {0,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        // y=4
+        { {1,1}, {1,1}, {1,1}, {1,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=5
+        { {1,1}, {1,1}, {1,1}, {1,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=6
+        { {1,1}, {1,1}, {1,1}, {1,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=7
+        { {1,1}, {1,1}, {1,1}, {1,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=8
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=9
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=10
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        // y=11
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} }
+};
+
+ */
+
+static const std::pair<int,int> SETUP[12][12] = {
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+};
+
+
+
 
 /*
 COLONNES x = 0 … 11
@@ -75,6 +212,10 @@ Model::Model() {
 
 
     initialiserEchiquier();
+
+    // GÉNÉRATION MATRICE SETUP ADAPTÉE (copie le résultat console)
+    genereSetupValide(*this);
+
     for (int y = 0; y < 12; ++y) { // ligne
         for (int x = 0; x < 12; ++x) { // colonne
 
@@ -108,21 +249,22 @@ Model::Model() {
 
 
 
+
     realignerPieces();
 
 
 
     // === DÉBUG : afficher grid → cube pour chaque pièce ===
-    std::cout << "=== Debug positions ===\n";
+    std::cout << "=== Debug positions et sides ===\n";
     for (Piece* p : pieces) {
-
-        auto c = p->getPositionCube();            // cube (x,y,z)
+        auto c = p->getPositionCube();
+        Case* ca = getCaseAtCube(c);
         std::cout
                 << p->getTypeName()
                 << " couleur=" << p->getCouleur()
-
-                << "  cube("   << c.x << "," << c.y << "," << c.z << ")"
-                << "\n";
+                << "  cube(" << c.x << "," << c.y << "," << c.z << ")"
+                << "  SIDE=" << (ca ? ca->getSide() : -1)
+                << std::endl;
     }
     std::cout << "========================\n";
 
@@ -400,16 +542,20 @@ void Model::realignerPieces()
 
     for (Piece* p : pieces)
     {
+        if (!p) continue; //
+        if (p == nullptr) {
+            std::cout << "Piece nullptr detectee !" << std::endl;
+            continue;
+        }
         Vector2f centre = gridToPixel(p->getPosition());
-
-        // retrouve la case qui contient ce centre
         for (Case* c : cases)
         {
-            if (c->contientPoint(centre))
+            if (c && c->contientPoint(centre))
             {
-                p->setPositionCube(c->getCubePos());   // recale en cube
+                p->setPositionCube(c->getCubePos());
                 break;
             }
         }
     }
+
 }

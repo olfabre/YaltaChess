@@ -5,9 +5,21 @@
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
 #include <algorithm>
+#include <cmath>
 
 using namespace sf;
 using namespace std;
+
+sf::Vector2f rotateAroundCenter2(const sf::Vector2f& point, const sf::Vector2f& center, float angleRad) {
+    float dx = point.x - center.x;
+    float dy = point.y - center.y;
+    float cosA = std::cos(angleRad);
+    float sinA = std::sin(angleRad);
+    return sf::Vector2f{
+            center.x + dx * cosA - dy * sinA,
+            center.y + dx * sinA + dy * cosA
+    };
+}
 
 Controller::Controller(Model &m, YaltaChessView &v) : model(m), view(v) {}
 
@@ -62,13 +74,25 @@ void Controller::handleEvent(const sf::Event& event)
         // pixel → monde → case
         Vector2i pixel{ mb->position.x, mb->position.y };
         Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+        const float W = 1000.f;
+        const float O = 50.f;
+        sf::Vector2f mid(W/2.f + O, W/2.f + O);
+        const float angle = -M_PI / 3; // INVERSE de ton affichage (+60° -> -60°)
+        world = rotateAroundCenter2(world, mid, angle);
+
         Case* clickedCase = nullptr;
+
+
         for (Case* c : model.getCases()) {
             if (c->contientPoint(world)) {
                 clickedCase = c;
                 break;
             }
         }
+
+
+
+
         if (!clickedCase) return; // quand je reclic
 
         // position logique
