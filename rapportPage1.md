@@ -1942,8 +1942,8 @@ Quand je clique sur une case, mon Controller va:
 Rappel pour compiler
 
 ```bash
-cmake -B build_main -S main
-cmake --build build_main
+
+cmake --build build_main  
 
 ./build_main/bin/SFML_MVC_YaltaChess 
 ```
