@@ -104,13 +104,13 @@ static const pair<int,int> SETUP[12][12] = {
         // y=11
         { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
 };
-*/
+
 
 // tableau 12 lignes x 12 colonnes pour le placement des pièces
 // chaque case contient 2 nombres (couleur, type de pièce)
 // 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
 // 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
-/*
+
 static const pair<int,int> SETUP[12][12] = {
         // y=0
         { { 1,1}, { 1,1}, { 1,1}, { 1,1}, { 0,4}, { 0,2}, { 0,3}, { 0,5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
@@ -166,7 +166,7 @@ static const std::pair<int,int> SETUP[12][12] = {
         { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} }
 };
 
- */
+*/
 // 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
 // 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
 static const std::pair<int,int> SETUP[12][12] = {
@@ -227,11 +227,21 @@ Model::Model() {
             if (coul < 0 || type < 0) continue;
 
             // memorise pour les coordonnées (x,y)
-            //Vector2i grid{x,y};
+            //Vector2i grid{x,y};V
+            // 1) Calcule la position cube et récupère la Case
             Cube c = Hex::grilleVersCube({x,y});
+            Case* ca = getCaseAtCube(c);
 
-            // convertion en enum couleur
-            Couleur cc = (coul==0? BLANC : coul==1? ROUGE : NOIR);
+            // 2) Prends le side de la Case
+            Side side = ca ? ca->getSide() : Side::White;  // par défaut blanc
+
+            // 3) Mappe le Side sur la bonne couleur
+            Couleur cc;
+            switch (side) {
+                case Side::White: cc = BLANC; break;
+                case Side::Red:   cc = ROUGE; break;
+                case Side::Black: cc = NOIR;  break;
+            }
 
             Piece* p = nullptr;
 

@@ -298,7 +298,8 @@ void YaltaChessView::draw()
 // 2) dessin des cases surlignées (sélection + coups légaux) en vert semi-transparent
     for (Case* c : highlightedCases) {
         ConvexShape highlight = c->getShape();   // copie
-        highlight.setFillColor(Color(  0, 255,   0, 128)); // vert 50% alpha
+        //highlight.setFillColor(Color(  0, 255,   0, 128)); // vert 50% alpha
+        highlight.setFillColor(Color(  255, 165,   0, 240));
         highlight.setOutlineColor(Color::Black);
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
@@ -307,7 +308,7 @@ void YaltaChessView::draw()
 // 3) dessin de la case sous le curseur en orange
     if (hoveredCase) {
         ConvexShape highlight = hoveredCase->getShape();   // copie
-        highlight.setFillColor(Color(255, 165,   0, 240)); // orange
+        highlight.setFillColor(Color(255, 220, 130, 240)); // orange
         highlight.setOutlineColor(Color::Black);
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
@@ -459,8 +460,12 @@ void YaltaChessView::draw()
 
 
 
+
     window.display();
 }
 
 
-
+// View.cpp
+void YaltaChessView::setHighlightedCases(const std::vector<Case*>& cases) {
+    highlightedCases = cases;
+}
