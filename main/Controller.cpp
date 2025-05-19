@@ -122,6 +122,20 @@ void Controller::handleEvent(const sf::Event& event)
                     << " type=" << typePiece
                       << std::endl;
         }
+
+
+        if (selectedCase && selectedCase->getPiece()) {
+            const Cube& cube = selectedCase->getCubePos();
+            int side = selectedCase->getSide();
+            int couleur = selectedCase->getPiece()->getCouleur();
+            std::string typePiece = selectedCase->getPiece()->getTypeName();
+            std::cout << "Case sélectionnée : "
+                      << "cube(" << cube.x << "," << cube.y << "," << cube.z << ") "
+                      << "couleur=" << couleur
+                      << " side=" << side
+                      << " type=" << typePiece
+                      << std::endl;
+        }
         // === fin affcichage
 
     }

@@ -12,6 +12,9 @@
 #include <random>
 #include <algorithm>
 #include <iomanip>
+#include <map>
+#include <tuple>
+
 
 using namespace sf;
 using namespace std;
@@ -157,7 +160,7 @@ static const std::pair<int,int> SETUP[12][12] = {
         // y=7
         { {1,1}, {1,1}, {1,1}, {1,1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {2,1}, {2,1}, {2,1}, {2,1} },
         // y=8
-        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
+        { {-1s,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
         // y=9
         { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {0,1}, {0,1}, {0,1}, {0,1}, {2,1}, {2,1}, {2,1}, {2,1} },
         // y=10
@@ -167,21 +170,21 @@ static const std::pair<int,int> SETUP[12][12] = {
 };
 
 */
-// 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
+// 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vides
 // 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
 static const std::pair<int,int> SETUP[12][12] = {
-        { { 1, 4}, { 1, 1}, { 1, -1}, { 1, -1}, { 0, 4}, { 0, 2}, { 0, 3}, { 0, 5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
-        { { 1, 2}, { 1, 1}, { 1, -1}, { 1, -1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
-        { { 1, 3}, { 1, 1}, { 1, -1}, { 1, -1}, { 0, -1}, { 0, -1}, { 0, -1}, { 0, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
-        { { 1, 0}, { 1, 1}, { 1, -1}, { 1, -1}, { 0, -1}, { 0, -1}, { 0, -1}, { 0, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
-        { { 1, 4}, { 1, 2}, { 1, 3}, { 1, 5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 4}, { 2, 1}, { 2, -1}, { 2, -1} },
-        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 2}, { 2, 1}, { 2, -1}, { 2, -1} },
-        { { 1, -1}, { 1, -1}, { 1, -1}, { 1, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 3}, { 2, 1}, { 2, -1}, { 2, -1} },
-        { { 1, -1}, { 1, -1}, { 1, -1}, { 1, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 0}, { 2, 1}, { 2, -1}, { 2, -1} },
-        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 4}, { 0, 1}, { 0, -1}, { 0, -1}, { 2, 4}, { 2, 2}, { 2, 3}, { 2, 5} },
-        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 2}, { 0, 1}, { 0, -1}, { 0, -1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
-        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 3}, { 0, 1}, { 0, -1}, { 0, -1}, { 2, -1}, { 2, -1}, { 2, -1}, { 2, -1} },
-        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 0}, { 0, 1}, { 0, -1}, { 0, -1}, { 2, -1}, { 2, -1}, { 2, -1}, { 2, -1} },
+        { { 1, 4}, { 1, 1}, { 1,-1}, { 1,-1}, { 0, 4}, { 0, 2}, { 0, 3}, { 0, 5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 2}, { 1, 1}, { 1,-1}, { 1,-1}, { 0, 1}, { 0, 1}, { 0, 1}, { 0, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 3}, { 1, 1}, { 1,-1}, { 1,-1}, { 0,-1}, { 0, -1}, { 0, -1}, { 0, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 0}, { 1, 1}, { 1,-1}, { 1,-1}, { 0,-1}, { 0, -1}, { 0, -1}, { 0, -1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },
+        { { 1, 4}, { 1, 2}, { 1, 3}, { 1, 5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 4}, { 2, 1}, { 2,-1}, { 2,-1} },
+        { { 1, 1}, { 1, 1}, { 1, 1}, { 1, 1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 2}, { 2, 1}, { 2,-1}, { 2,-1} },
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 3}, { 2, 1}, { 2,-1}, { 2,-1} },
+        { { 1,-1}, { 1,-1}, { 1,-1}, { 1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 2, 0}, { 2, 1}, { 2,-1}, { 2,-1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 4}, { 0, 1}, { 0, -1}, { 0,-1}, { 2, 4}, { 2, 2}, { 2, 3}, { 2, 5} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 2}, { 0, 1}, { 0, -1}, { 0,-1}, { 2, 1}, { 2, 1}, { 2, 1}, { 2, 1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 3}, { 0, 1}, { 0, -1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
+        { {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1}, { 0, 0}, { 0, 1}, { 0, -1}, { 0,-1}, { 2,-1}, { 2,-1}, { 2,-1}, { 2,-1} },
 };
 
 
@@ -215,7 +218,7 @@ Model::Model() {
     initialiserEchiquier();
 
     // GÉNÉRATION MATRICE SETUP ADAPTÉE (copie le résultat console)
-    genereSetupValide(*this);
+    //genereSetupValide(*this);
 
     for (int y = 0; y < 12; ++y) { // ligne
         for (int x = 0; x < 12; ++x) { // colonne
@@ -233,18 +236,25 @@ Model::Model() {
             Case* ca = getCaseAtCube(c);
 
             // 2) Prends le side de la Case
-            Side side = ca ? ca->getSide() : Side::White;  // par défaut blanc
+           // Side side = ca ? ca->getSide() : Side::White;  // par défaut blanc
 
             // 3) Mappe le Side sur la bonne couleur
-            Couleur cc;
+            /*Couleur cc;
             switch (side) {
                 case Side::White: cc = BLANC; break;
                 case Side::Red:   cc = ROUGE; break;
                 case Side::Black: cc = NOIR;  break;
+            }*/
+            // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
+            Couleur cc = (Couleur)coul;
+            switch (coul) {
+                case 0: cc = BLANC; break;
+                case 1: cc = ROUGE; break;
+                case 2: cc = NOIR;  break;
+                default: cc = BLANC;
             }
 
             Piece* p = nullptr;
-
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
                 case 0: p = new Roi(c, cc);       break;
@@ -254,14 +264,41 @@ Model::Model() {
                 case 4: p = new Tour(c, cc);      break;
                 case 5: p = new Dame(c, cc);      break;
             }
+
+            // 4) Diagnostic : Y a-t-il déjà une pièce à cette case ?
+            if (ca->getPiece() != nullptr) {
+                std::cout << "!!! DOUBLON PIECE SUR LA MEME CASE : cube("
+                          << c.x << "," << c.y << "," << c.z << ")"
+                          << " Ancien: " << ca->getPiece()->getTypeName()
+                          << " / Nouveau: " << p->getTypeName() << std::endl;
+            }
+
             pieces.push_back(p);
+            ca->setPiece(p);
+
+
+
+        }
+    }
+
+// === Vérification complète de doublons de cubes dans le vecteur pieces ===
+    std::map<std::tuple<int, int, int>, Piece*> piecesParCube;
+    for (Piece* p : pieces) {
+        auto c = p->getPositionCube();
+        auto t = std::make_tuple(c.x, c.y, c.z);
+
+        if (piecesParCube.count(t)) {
+            std::cout << "!!! DOUBLON TROUVE DANS VECTEUR PIECES : "
+                      << "cube(" << c.x << "," << c.y << "," << c.z << ") : "
+                      << p->getTypeName() << " et "
+                      << piecesParCube[t]->getTypeName() << std::endl;
+        } else {
+            piecesParCube[t] = p;
         }
     }
 
 
-
-
-    realignerPieces();
+   //realignerPieces();
 
 
 
