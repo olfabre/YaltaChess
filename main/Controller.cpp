@@ -1,3 +1,4 @@
+#include "pieces/Pion.h"
 #include <iostream>
 #include "Controller.h"
 #include "View.h"
@@ -70,79 +71,59 @@ void Controller::handleEvent(const sf::Event& event)
 
 
 
-    if (event.is<sf::Event::MouseButtonPressed>()) {
-        auto const* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>();
-        if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left)
-            return;
+    auto const* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left)
+        return;
 
-        sf::Vector2i pixel(mouseBtn->position.x, mouseBtn->position.y);
-        sf::Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+    sf::Vector2i pixel(mouseBtn->position.x, mouseBtn->position.y);
+    sf::Vector2f world = view.getWindow().mapPixelToCoords(pixel);
 
-        // On récupère la couleur du joueur qui doit jouer
-        auto const& players = model.getPlayers();
-        Couleur couleurCourante = players[model.getCurrentPlayerIdx()].color;
+    // On cherche la case cliquée (appartenant au joueur courant)
+    Case* clickedCase = nullptr;
 
-        Case* clickedCase = nullptr;
-        for (Case* c : model.getCases()) {
-            // On vérifie : la case contient un point ET une pièce du joueur courant
-            if (c->contientPoint(world) && c->estOccupee() && c->getPiece()->getCouleur() == couleurCourante) {
-                clickedCase = c;
-                break;
+    // On récupère la couleur du joueur courant
+    Couleur couleurCourante = model.getPlayers()[model.getCurrentPlayerIdx()].color;
+
+
+    for (Case* c : model.getCases()) {
+        // On veut uniquement une case avec une pièce du joueur courant
+        if (c->contientPoint(world) && c->estOccupee() && c->getPiece()->getCouleur() == couleurCourante) {
+            clickedCase = c;
+            break;
+        }
+    }
+    if (!clickedCase) return;
+
+    // ----- Sélection / Désélection -----
+    if (selectedCase == clickedCase) {
+        selectedCase = nullptr;
+        view.setHighlightedCases({});
+        return;
+    }
+    selectedCase = clickedCase;
+
+
+
+    // 3. Surligner les coups légaux (pion seulement)
+    std::vector<Case*> toHighlight;
+    // On surligne toujours la case du pion sélectionné
+    toHighlight.push_back(selectedCase);
+
+    // Et les coups légaux si c'est un pion
+    if (selectedCase->getPiece() && selectedCase->getPiece()->getTypeName() == "Pion") {
+        auto* pion = dynamic_cast<Pion*>(selectedCase->getPiece());
+        if (pion) {
+            auto legalMoves = pion->getLegalMoves(model);
+            for (const auto& cube : legalMoves) {
+                Case* targetCase = model.getCaseAtCube(cube);
+                if (targetCase) toHighlight.push_back(targetCase);
             }
         }
-
-        if (!clickedCase) return;
-
-        // Sélection / désélection logique classique
-        if (selectedCase == clickedCase) {
-            selectedCase = nullptr;
-        } else {
-            selectedCase = clickedCase;
-        }
-
-        std::vector<Case*> toHighlight;
-        if (selectedCase)
-            toHighlight.push_back(selectedCase);
-        view.setHighlightedCases(toHighlight);
-
-        // affichage infos de la case sélectionnée
-        if (selectedCase) {
-            const Cube& cube = selectedCase->getCubePos();
-            int side = selectedCase->getSide();
-
-            // Ici, on utilise le side comme "couleur" (0, 1, 2)
-            int couleur = selectedCase->getPiece()->getCouleur();
-            std::string typePiece = "Aucune";
-
-            typePiece = selectedCase->getPiece()->getTypeName();
-            std::cout << "Case sélectionnée : "
-                      << "cube(" << cube.x << "," << cube.y << "," << cube.z << ") "
-                      << "couleur=" << couleur
-                      << " side=" << side
-                    << " type=" << typePiece
-                      << std::endl;
-        }
-
-
-        if (selectedCase && selectedCase->getPiece()) {
-            const Cube& cube = selectedCase->getCubePos();
-            int side = selectedCase->getSide();
-            int couleur = selectedCase->getPiece()->getCouleur();
-            std::string typePiece = selectedCase->getPiece()->getTypeName();
-            std::cout << "Case sélectionnée : "
-                      << "cube(" << cube.x << "," << cube.y << "," << cube.z << ") "
-                      << "couleur=" << couleur
-                      << " side=" << side
-                      << " type=" << typePiece
-                      << std::endl;
-        }
-        // === fin affcichage
-
     }
-    // fin dela selection des cases
 
-
-
-
-
+    view.setHighlightedCases(toHighlight);
 }
+
+// fin dela selection des cases
+
+

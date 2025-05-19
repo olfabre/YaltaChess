@@ -303,6 +303,7 @@ Model::Model() {
 
 
     // === DÉBUG : afficher grid → cube pour chaque pièce ===
+    /*
     std::cout << "=== Debug positions et sides ===\n";
     for (Piece* p : pieces) {
         auto c = p->getPositionCube();
@@ -315,7 +316,7 @@ Model::Model() {
                 << std::endl;
     }
     std::cout << "========================\n";
-
+*/
 
 
 //initialiserEchiquier();
