@@ -104,13 +104,13 @@ static const pair<int,int> SETUP[12][12] = {
         // y=11
         { {-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{-1,-1},{2,0},{2,1},{-1,-1},{-1,-1} }
 };
-*/
+
 
 // tableau 12 lignes x 12 colonnes pour le placement des pièces
 // chaque case contient 2 nombres (couleur, type de pièce)
 // 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vide
 // 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
-/*
+
 static const pair<int,int> SETUP[12][12] = {
         // y=0
         { { 1,1}, { 1,1}, { 1,1}, { 1,1}, { 0,4}, { 0,2}, { 0,3}, { 0,5}, {-1,-1}, {-1,-1}, {-1,-1}, {-1,-1} },

@@ -1,3 +1,4 @@
+#include "constants.h"
 #include <SFML/Graphics.hpp>
 #include "Intro.h"
 #include "ResourceManager.h"
@@ -12,7 +13,9 @@ using namespace std;
 
 int main()
 {
-    RenderWindow window(VideoMode({1100u, 1100u}), "Yalta Chess");
+    //RenderWindow window(VideoMode({1100u, 1100u}), "Yalta Chess");
+    RenderWindow window(VideoMode({static_cast<unsigned int>(WINDOW_WIDTH), static_cast<unsigned int>(WINDOW_HEIGHT)}), "Yalta Chess");
+
     window.setFramerateLimit(60);
 
     // Initialisation de l'intro

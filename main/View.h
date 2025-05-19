@@ -36,9 +36,10 @@ public:
     RenderWindow& getWindow() { return window; }
     //void setHoveredPiece(Piece* p) { hoveredPiece = p; }
     void setHoveredCase(Case* c)  { hoveredCase = c; }
-    void setHighlightedCases(const std::vector<Case*>& c) { highlightedCases = c; }
+
     void clearHighlights() { highlightedCases.clear(); }
     void draw();
+    void setHighlightedCases(const std::vector<Case*>& cases);
 };
 
 #endif

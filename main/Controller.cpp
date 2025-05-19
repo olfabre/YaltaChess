@@ -52,6 +52,7 @@ void Controller::handleEvent(const sf::Event& event)
                         mouseMoved->position.y };
         Vector2f world = view.getWindow().mapPixelToCoords(pixel);
 
+
         // on cherche la *case* sous le curseur
                 hoveredCase = nullptr;
                for (Case* c : model.getCases()) {
@@ -62,89 +63,72 @@ void Controller::handleEvent(const sf::Event& event)
                             }
                     }
                 view.setHoveredCase(hoveredCase);
-    }
+    }  // je passe la souris au dessus de mes pieces
 
 
 
-    // Quand je clique sur une pièce
+
+
+
     if (event.is<sf::Event::MouseButtonPressed>()) {
-        auto const* mb = event.getIf<sf::Event::MouseButtonPressed>();
-        if (!mb || mb->button != Mouse::Button::Left) return;
+        auto const* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>();
+        if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left)
+            return;
 
-        // pixel → monde → case
-        Vector2i pixel{ mb->position.x, mb->position.y };
-        Vector2f world = view.getWindow().mapPixelToCoords(pixel);
-        const float W = 1000.f;
-        const float O = 50.f;
-        sf::Vector2f mid(W/2.f + O, W/2.f + O);
-        const float angle = -M_PI / 3; // INVERSE de ton affichage (+60° -> -60°)
-        world = rotateAroundCenter2(world, mid, angle);
+        sf::Vector2i pixel(mouseBtn->position.x, mouseBtn->position.y);
+        sf::Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+
+        // On récupère la couleur du joueur qui doit jouer
+        auto const& players = model.getPlayers();
+        Couleur couleurCourante = players[model.getCurrentPlayerIdx()].color;
 
         Case* clickedCase = nullptr;
-
-
         for (Case* c : model.getCases()) {
-            if (c->contientPoint(world)) {
+            // On vérifie : la case contient un point ET une pièce du joueur courant
+            if (c->contientPoint(world) && c->estOccupee() && c->getPiece()->getCouleur() == couleurCourante) {
                 clickedCase = c;
                 break;
             }
         }
 
+        if (!clickedCase) return;
 
-
-
-        if (!clickedCase) return; // quand je reclic
-
-        // position logique
-        //Vector2i grid = clickedCase->getGridPos();
-        Cube cube = clickedCase->getCubePos();
-        auto const& players = model.getPlayers();
-        int cur = model.getCurrentPlayerIdx();
-
-        // Quand je sélectionne la pièce
-        if (!selectedPiece) {
-            //Piece* p = model.getPieceAt(grid);
-            Piece* p = model.getPieceAtCube(cube);
-            if (p && p->getCouleur() == players[cur].color) {
-                selectedPiece = p;
-                legalMoves = p->getLegalMoves(model);
-                auto cpos = p->getPositionCube();
-
-
-
-                // ——— DEBUG : affiche les coorodonnées cube
-                cout << "cube(" << cpos.x << "," << cpos.y << "," << cpos.z << ")";
-                cout << "\n";
-
-
-
-                // construire la liste de Case* à surligner (sélection + coups légaux)
-                vector<Case*> highlights;
-                // 1.a) la case où se trouvait la pièce sélectionnée
-                highlights.push_back(clickedCase);
-                // 1.b) les cases de destination légales
-                for (const Cube& mv : legalMoves) {
-                        for (Case* c : model.getCases()) {
-                          if (c->getCubePos() == mv) {
-                            highlights.push_back(c);
-                            break;
-                        }
-                    }
-                }
-                view.setHighlightedCases(highlights);
-            }
+        // Sélection / désélection logique classique
+        if (selectedCase == clickedCase) {
+            selectedCase = nullptr;
+        } else {
+            selectedCase = clickedCase;
         }
 
-            // 2) Deuxième clic : déplacement ou annulation
-        else {
-            if (std::find(legalMoves.begin(), legalMoves.end(), cube) != legalMoves.end()) {
-                model.movePieceCube(selectedPiece, cube);
-            }
-            // reset quoi qu’il arrive
-            selectedPiece = nullptr;
-            legalMoves.clear();
-            view.clearHighlights();
-            view.setHoveredCase(nullptr);
+        std::vector<Case*> toHighlight;
+        if (selectedCase)
+            toHighlight.push_back(selectedCase);
+        view.setHighlightedCases(toHighlight);
+
+        // affichage infos de la case sélectionnée
+        if (selectedCase) {
+            const Cube& cube = selectedCase->getCubePos();
+            int side = selectedCase->getSide();
+
+            // Ici, on utilise le side comme "couleur" (0, 1, 2)
+            int couleur = selectedCase->getPiece()->getCouleur();
+            std::string typePiece = "Aucune";
+
+            typePiece = selectedCase->getPiece()->getTypeName();
+            std::cout << "Case sélectionnée : "
+                      << "cube(" << cube.x << "," << cube.y << "," << cube.z << ") "
+                      << "couleur=" << couleur
+                      << " side=" << side
+                    << " type=" << typePiece
+                      << std::endl;
         }
+        // === fin affcichage
+
     }
+    // fin dela selection des cases
+
+
+
+
+
 }
