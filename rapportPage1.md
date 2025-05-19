@@ -1952,6 +1952,48 @@ cmake --build build_main
 
 
 
+## **Pièce et Case — les méthodes doivent rester synchrones**
+
+Dans `Case.cpp` et `Piece.cpp`, rien de spécial à changer si tu fais bien le lien pièce/case avec `ca->setPiece(p)` à chaque création de pièce.
+
+------
+
+## 4. **Pièges à éviter**
+
+- **Ne jamais créer deux pièces sur la même Case** (vérifie avec un print si besoin).
+- **Ne jamais utiliser le Side pour déterminer la couleur d'une pièce à la création !** Utilise uniquement la couleur du SETUP (très fréquent comme bug !).
+- **Toujours mettre à jour le pointeur de pièce dans la Case avec `ca->setPiece(p)`**.
+
+------
+
+## 5. **Résumé des fichiers concernés**
+
+- **Model.cpp** (partie création de pièces, comme ci-dessus)
+- **Controller.cpp** (affichage des infos à la sélection)
+- **Case.cpp** (rien à changer si getPiece/setPiece sont simples)
+- **Piece.cpp** (rien à changer sauf si `getTypeName` est mal implémenté pour tes pièces)
+
+
+
+# **En résumé — point clé pour la suite**
+
+- **La matrice SETUP sert UNIQUEMENT à l’initialisation du plateau** (pour poser les pièces de départ).
+- **TOUTE la logique de jeu, de sélection, de déplacement, doit utiliser les objets vivants** (cases, pièces, etc.), pas la matrice SETUP.
+- **Si ce que tu obtiens en sélection est correct (case, type, couleur), TU PEUX AVANCER SEREINEMENT** pour l’algorithme de déplacement.
+
+
+
+Les positions de départ sur l'échiquier:
+
+Noir (couleur = 1) côté gauche (side = 0) :
+
+
+
+
+
+
+
+
 
 
 
