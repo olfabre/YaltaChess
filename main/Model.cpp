@@ -275,7 +275,9 @@ Model::Model() {
 
             pieces.push_back(p);
             ca->setPiece(p);
-
+            if (p) {
+                p->setPositionCube(ca->getCubePos());
+            }
 
 
         }
@@ -607,4 +609,36 @@ void Model::realignerPieces()
         }
     }
 
+}
+
+
+
+
+
+// Dans Model.cpp
+void Model::deplacerPiece(Piece* piece, const Cube& destination) {
+    if (!piece) return;
+
+    // 1. Enlever la pièce de son ancienne case
+    Cube oldPos = piece->getPositionCube();
+    Case* oldCase = getCaseAtCube(oldPos);
+    if (oldCase && oldCase->getPiece() == piece) {
+        oldCase->setPiece(nullptr);
+    }
+
+    // 2. Si une pièce adverse est présente sur la case destination, la retirer
+    Case* newCase = getCaseAtCube(destination);
+    if (!newCase) return;
+    if (newCase->estOccupee()) {
+        Piece* adversaire = newCase->getPiece();
+        // À adapter selon ta logique de capture !
+        // removePiece(adversaire); // Si tu as une telle fonction
+        newCase->setPiece(nullptr);
+    }
+
+    // 3. Déplacer la pièce (mettre à jour sa position)
+    piece->setPositionCube(destination);
+
+    // 4. Mettre à jour la case de destination
+    newCase->setPiece(piece);
 }

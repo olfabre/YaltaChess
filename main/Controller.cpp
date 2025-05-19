@@ -131,6 +131,23 @@ void Controller::handleEvent(const sf::Event& event)
     view.setSelectedCase(selectedCase);
     view.setHighlightedCases(highlightCases);
     view.setHighlightedCases(highlightCases);
+
+
+    // === AJOUT : affichage infos de la case sélectionnée + type de pièce ===
+    if (selectedCase && selectedCase->getPiece()) {
+        auto* piece = selectedCase->getPiece();
+        Cube cubeCase = selectedCase->getCubePos();
+        Cube cubePiece = piece->getPositionCube();
+        std::cout << "[Controller] Case : cube("
+                  << cubeCase.x << "," << cubeCase.y << "," << cubeCase.z << ")"
+                  << " | Piece: " << piece->getTypeName()
+                  << " | posPiece: cube("
+                  << cubePiece.x << "," << cubePiece.y << "," << cubePiece.z << ")"
+                  << " | couleur=" << piece->getCouleur()
+                  << std::endl;
+    }
+
+
 }
 
 // fin dela selection des cases
