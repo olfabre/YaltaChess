@@ -25,6 +25,7 @@ private:
     Case* selectedCase = nullptr;
     Piece*   selectedPiece = nullptr;   // pièce en cours de sélection
     std::vector<Cube> legalMoves;    // ses coups légaux
+    std::vector<Case*> legalMoveCases;
 
 
 public:

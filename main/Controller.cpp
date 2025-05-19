@@ -81,6 +81,7 @@ void Controller::handleEvent(const sf::Event& event)
     // On cherche la case cliquée (appartenant au joueur courant)
     Case* clickedCase = nullptr;
 
+
     // On récupère la couleur du joueur courant
     Couleur couleurCourante = model.getPlayers()[model.getCurrentPlayerIdx()].color;
 
@@ -92,36 +93,44 @@ void Controller::handleEvent(const sf::Event& event)
             break;
         }
     }
+
+
     if (!clickedCase) return;
 
-    // ----- Sélection / Désélection -----
+    // --- Sélection / désélection ---
     if (selectedCase == clickedCase) {
         selectedCase = nullptr;
+        legalMoveCases.clear();
+        view.setSelectedCase(nullptr);
         view.setHighlightedCases({});
         return;
     }
     selectedCase = clickedCase;
+    legalMoveCases.clear();
 
 
 
-    // 3. Surligner les coups légaux (pion seulement)
-    std::vector<Case*> toHighlight;
-    // On surligne toujours la case du pion sélectionné
-    toHighlight.push_back(selectedCase);
-
-    // Et les coups légaux si c'est un pion
+// Surligner uniquement si c'est un pion
     if (selectedCase->getPiece() && selectedCase->getPiece()->getTypeName() == "Pion") {
         auto* pion = dynamic_cast<Pion*>(selectedCase->getPiece());
         if (pion) {
             auto legalMoves = pion->getLegalMoves(model);
             for (const auto& cube : legalMoves) {
                 Case* targetCase = model.getCaseAtCube(cube);
-                if (targetCase) toHighlight.push_back(targetCase);
+                if (targetCase && targetCase != selectedCase)
+                    legalMoveCases.push_back(targetCase);
             }
         }
     }
+// On passe toutes les cases à surligner à la vue : coups légaux + sélection
+    std::vector<Case*> highlightCases = legalMoveCases;
+    if (selectedCase) {
+        highlightCases.push_back(selectedCase); // toujours ajouter la sélection
+    }
 
-    view.setHighlightedCases(toHighlight);
+    view.setSelectedCase(selectedCase);
+    view.setHighlightedCases(highlightCases);
+    view.setHighlightedCases(highlightCases);
 }
 
 // fin dela selection des cases
