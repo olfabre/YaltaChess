@@ -148,6 +148,8 @@ void Controller::handleEvent(const sf::Event& event)
     }
 
 
+
+
 }
 
 // fin dela selection des cases
