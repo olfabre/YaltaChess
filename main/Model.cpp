@@ -105,25 +105,15 @@ void Model::initialiserPieces() {
             }
 
             // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
-            Couleur cc = static_cast<Couleur>(coul);
-            /*
+
+            Couleur cc;
             switch (coul) {
                 case 0: cc = BLANC; break;
                 case 1: cc = ROUGE; break;
                 case 2: cc = NOIR;  break;
                 default: cc = BLANC;
-            }*/
-
-            // debug
-            string couleur;
-            switch(coul){
-                case 0: couleur = "BLANC"; break;
-                case 1: couleur = "ROUGE"; break;
-                case 2: couleur = "NOIR";  break;
-                default: couleur = "BLANC";
             }
-            cout << "N° " << compteur << ", " << couleur << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
-            // fin debug
+
 
 
             Piece* p = nullptr;
@@ -136,6 +126,22 @@ void Model::initialiserPieces() {
                 case 4: p = new Tour(c, cc);      break;
                 case 5: p = new Dame(c, cc);      break;
             }
+
+            if (!p) continue;
+
+            // debug
+            string couleur;
+            switch(coul){
+                case 0: couleur = "BLANC"; break;
+                case 1: couleur = "ROUGE"; break;
+                case 2: couleur = "NOIR";  break;
+                default: couleur = "BLANC";
+            }
+            cout << "N° " << compteur << ", " << couleur << " " << p->getTypeName() << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
+            // fin debug
+
+
+
 
             // 4) Diagnostic : Y a-t-il déjà une pièce à cette case ?
             if (ca->getPiece() != nullptr) {
