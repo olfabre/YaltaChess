@@ -1,6 +1,6 @@
 #ifndef COULEUR_H
 #define COULEUR_H
-
-enum Couleur { BLANC, NOIR, ROUGE };
+// premier bug trouvé! respecter l'ordre
+enum Couleur { BLANC, ROUGE, NOIR };
 
 #endif
