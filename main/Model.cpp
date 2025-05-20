@@ -124,7 +124,7 @@ void Model::initialiserPieces() {
             ++compteur;
             // 1) Calcule la position cube et récupère la Case
             Cube c = Hex::grilleVersCube({x,y});
-            cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->" << c.x << " " << c.y << endl;
+            cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << sendl;
             Case* ca = getCaseAtCube(c);
 
 
