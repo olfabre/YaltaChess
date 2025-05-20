@@ -110,6 +110,8 @@ Model::Model() {
 
 void Model::initialiserPieces() {
 
+    int compteur = 0;
+
     for (int y = 0; y < 12; ++y) { // ligne
         for (int x = 0; x < 12; ++x) { // colonne
 
@@ -119,10 +121,10 @@ void Model::initialiserPieces() {
             //si pas couleur, on passe à la suivante
             if (coul < 0 || type < 0) continue;
 
-
-
+            ++compteur;
             // 1) Calcule la position cube et récupère la Case
             Cube c = Hex::grilleVersCube({x,y});
+            cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->" << c.x << " " << c.y << endl;
             Case* ca = getCaseAtCube(c);
 
 
