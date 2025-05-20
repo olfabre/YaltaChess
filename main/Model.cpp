@@ -71,6 +71,7 @@ static const std::pair<int,int> SETUP[12][12] = {
 
 Model::Model() {
     initialiserEchiquier();
+    //realignerPieces();
     initialiserPieces();
     initialiserJoueurs();
 }
@@ -142,21 +143,19 @@ void Model::initialiserPieces() {
 
 
 
-
-            // 4) Diagnostic : Y a-t-il déjà une pièce à cette case ?
-            if (ca->getPiece() != nullptr) {
-                std::cout << "!!! DOUBLON PIECE SUR LA MEME CASE : cube("
-                          << c.x << "," << c.y << "," << c.z << ")"
-                          << " Ancien: " << ca->getPiece()->getTypeName()
-                          << " / Nouveau: " << p->getTypeName() << std::endl;
-            }
-
+            // je place le pointeur de la piece dans la liste du jeu
             pieces.push_back(p);
+
+            // on associe la piece avec la case
             ca->setPiece(p);
+
+
+/*
+
             if (p) {
                 p->setPositionCube(ca->getCubePos());
             }
-
+*/
 
         }
     }
