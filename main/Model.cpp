@@ -190,114 +190,89 @@ static const std::pair<int,int> SETUP[12][12] = {
 
 
 
-/*
-COLONNES x = 0 … 11
-y
-0   WR  WN  WB  WQ  WR  WP  ·   ·   ·   ·   ·   ·
-1   WP  WP  WP  WP  WN  WP  ·   ·   ·   ·   ·   ·
-2   ·   ·   ·   ·   WB  WP  ·   ·   ·   ·   ·   ·
-3   ·   ·   ·   ·   WK  WP  ·   ·   ·   ·   ·   ·
-4   RR  RP  ·   ·   ·   ·   ·   ·   RR  RN  RB  RQ
-5   RN  RP  ·   ·   ·   ·   ·   ·   RP  RP  RP  RP
-6   RB  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
-7   RK  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
-8   ·   ·   ·   ·   BR  BN  BB  BQ  BR  BP  ·   ·
-9   ·   ·   ·   ·   BP  BP  BP  BP  BN  BP  ·   ·
-10  ·   ·   ·   ·   ·   ·   ·   ·   BB  BP  ·   ·
-11  ·   ·   ·   ·   ·   ·   ·   ·   BK  BP  ·   ·
-*/
-
 
 
 Model::Model() {
-
-
-
-
-
     initialiserEchiquier();
-
-    // GÉNÉRATION MATRICE SETUP ADAPTÉE (copie le résultat console)
-    //genereSetupValide(*this);
-
-    for (int y = 0; y < 12; ++y) { // ligne
-        for (int x = 0; x < 12; ++x) { // colonne
-
-            // desturcturation
-            auto [coul, type] = SETUP[y][x];
-
-            //si pas couleur, on passe à la suivante
-            if (coul < 0 || type < 0) continue;
-
-            // memorise pour les coordonnées (x,y)
-            //Vector2i grid{x,y};V
-            // 1) Calcule la position cube et récupère la Case
-            Cube c = Hex::grilleVersCube({x,y});
-            Case* ca = getCaseAtCube(c);
-
-            // 2) Prends le side de la Case
-           // Side side = ca ? ca->getSide() : Side::White;  // par défaut blanc
-
-            // 3) Mappe le Side sur la bonne couleur
-            /*Couleur cc;
-            switch (side) {
-                case Side::White: cc = BLANC; break;
-                case Side::Red:   cc = ROUGE; break;
-                case Side::Black: cc = NOIR;  break;
-            }*/
-            // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
-            Couleur cc = (Couleur)coul;
-            switch (coul) {
-                case 0: cc = BLANC; break;
-                case 1: cc = ROUGE; break;
-                case 2: cc = NOIR;  break;
-                default: cc = BLANC;
-            }
-
-            Piece* p = nullptr;
-            // on crée la piece qui reçoit ses coordonnées et sa couleur
-            switch(type) {
-                case 0: p = new Roi(c, cc);       break;
-                case 1: p = new Pion(c, cc, this);      break;
-                case 2: p = new Cavalier(c, cc);  break;
-                case 3: p = new Fou(c, cc);       break;
-                case 4: p = new Tour(c, cc);      break;
-                case 5: p = new Dame(c, cc);      break;
-            }
-
-            // 4) Diagnostic : Y a-t-il déjà une pièce à cette case ?
-            if (ca->getPiece() != nullptr) {
-                std::cout << "!!! DOUBLON PIECE SUR LA MEME CASE : cube("
-                          << c.x << "," << c.y << "," << c.z << ")"
-                          << " Ancien: " << ca->getPiece()->getTypeName()
-                          << " / Nouveau: " << p->getTypeName() << std::endl;
-            }
-
-            pieces.push_back(p);
-            ca->setPiece(p);
-            if (p) {
-                p->setPositionCube(ca->getCubePos());
-            }
+    initialiserPieces();
+    initialiserJoueurs();
+}
 
 
-        }
-    }
 
-// === Vérification complète de doublons de cubes dans le vecteur pieces ===
-    std::map<std::tuple<int, int, int>, Piece*> piecesParCube;
-    for (Piece* p : pieces) {
-        auto c = p->getPositionCube();
-        auto t = std::make_tuple(c.x, c.y, c.z);
+    void Model::initialiserPieces() {
+        for (int y = 0; y < 12; ++y) { // ligne
+            for (int x = 0; x < 12; ++x) { // colonne
 
-        if (piecesParCube.count(t)) {
-            std::cout << "!!! DOUBLON TROUVE DANS VECTEUR PIECES : "
-                      << "cube(" << c.x << "," << c.y << "," << c.z << ") : "
-                      << p->getTypeName() << " et "
-                      << piecesParCube[t]->getTypeName() << std::endl;
-        } else {
-            piecesParCube[t] = p;
-        }
-    }
+                // desturcturation
+                auto [coul, type] = SETUP[y][x];
+
+                //si pas couleur, on passe à la suivante
+                if (coul < 0 || type < 0) continue;
+
+                // memorise pour les coordonnées (x,y)
+                //Vector2i grid{x,y};V
+                // 1) Calcule la position cube et récupère la Case
+                Cube c = Hex::grilleVersCube({x, y});
+                Case *ca = getCaseAtCube(c);
+                if (!ca) {
+                    std::cout << "ERREUR: Pas de case trouvée pour la position (" << x << "," << y << ")" << std::endl;
+                    std::cout << "Position cube calculée: " << c.x << "," << c.y << "," << c.z << std::endl;
+                    continue;
+                }
+
+                Couleur cc = static_cast<Couleur>(coul);
+                Piece *p = nullptr;
+
+
+                // on crée la piece qui reçoit ses coordonnées et sa couleur
+                switch (type) {
+                    case 0:
+                        p = new Roi(ca->getCubePos(), cc);
+                        break;
+                    case 1:
+                        p = new Pion(ca->getCubePos(), cc, this);
+                        break;
+                    case 2:
+                        p = new Cavalier(ca->getCubePos(), cc);
+                        break;
+                    case 3:
+                        p = new Fou(ca->getCubePos(), cc);
+                        break;
+                    case 4:
+                        p = new Tour(ca->getCubePos(), cc);
+                        break;
+                    case 5:
+                        p = new Dame(ca->getCubePos(), cc);
+                        break;
+                }
+
+                if (!p) continue;
+
+
+                pieces.push_back(p);
+                ca->setPiece(p);
+
+                // 5) Vérification finale
+                if (p->getPositionCube() != ca->getCubePos()) {
+                    std::cout << "ERREUR: Désynchronisation après placement!" << std::endl;
+                    std::cout << "Position de la case: " << ca->getCubePos().x << ","
+                              << ca->getCubePos().y << "," << ca->getCubePos().z << std::endl;
+                    std::cout << "Position de la pièce: " << p->getPositionCube().x << ","
+                              << p->getPositionCube().y << "," << p->getPositionCube().z << std::endl;
+                    std::cout << "Position grille: (" << x << "," << y << ")" << std::endl;
+                    pieces.pop_back();
+                    ca->setPiece(nullptr);
+                    delete p;
+                }
+
+            } //colonne
+        } // ligne
+
+
+} // initialiser pieces
+
+
 
 
    //realignerPieces();
@@ -322,10 +297,10 @@ Model::Model() {
 
 
 //initialiserEchiquier();
-    initialiserJoueurs();
 
 
-}
+
+
 
 
 

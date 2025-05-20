@@ -4,47 +4,79 @@
 #include <vector>
 #include <array>
 #include <string>           // pour std::string utilisé dans toAlgebrique
+#include <iostream>
 #include "Couleur.h"        // pour enum Couleur
-
+#include <cmath>
+#include <tuple>
 
 
 // pour les signatures — on ne définit pas Model ici
 class Model;
-
+class Case;
+class Piece;
 
 
 using namespace sf;
 using namespace std;
 
 // Structure représentant une case sur la grille hexagonale en coordonnées cubiques
-struct Cube { int x, y, z; };
+struct Cube {
+    int x, y, z;
 
-// global namespace
-inline bool operator==(const Cube &a, const Cube &b) {
-         return a.x==b.x && a.y==b.y && a.z==b.z;
+    constexpr Cube(int _x = 0, int _y = 0, int _z = 0) : x(_x), y(_y), z(_z) {}
+
+    constexpr bool operator==(const Cube& other) const {
+        return x == other.x && y == other.y && z == other.z;
     }
+
+    constexpr bool operator<(const Cube& other) const {
+        return std::tie(x, y, z) < std::tie(other.x, other.y, other.z);
+    }
+};
+
+
+inline bool operator!=(const Cube &a, const Cube &b) {
+    return !(a == b);
+}
+
 struct CubeHash {
-         size_t operator()(const Cube& c) const noexcept {
-                 return std::hash<int>()(c.x)
-                      ^ (std::hash<int>()(c.y)<<1)
-                      ^ (std::hash<int>()(c.z)<<2);
-             }
-     };
+    size_t operator()(const Cube& c) const noexcept {
+        return std::hash<int>()(c.x)
+               ^ (std::hash<int>()(c.y)<<1)
+               ^ (std::hash<int>()(c.z)<<2);
+    }
+};
 
 
 
 
 namespace Hex {
+    // Définition des zones de l'échiquier
+    enum Zone {
+        ZONE_ROUGE = 0,    // Zone supérieure gauche (0-3)
+        ZONE_NOIRE = 1,    // Zone supérieure droite (4-7)
+        ZONE_BLANCHE = 2   // Zone inférieure (8-11)
+    };
 
-
-    // Conversion d'une case en coordonnées "offset odd-r" (grille 2D) vers les coordonnées cubiques
+    // Conversion grille vers cube
     inline Cube grilleVersCube(const Vector2i &g) {
-        int q = g.x - (g.y - (g.y & 1)) / 2;
-        int r = g.y;
-        int x = q;
-        int z = r;
-        int y = -x - z;
-        return {x, y, z};
+        int q, r, s;
+
+        // Détermination de la zone
+        if (g.y < 4) {  // Zone Rouge
+            q = g.x - 2;
+            r = g.y;
+        } else if (g.y < 8) {  // Zone Noire
+            q = g.x - 6;
+            r = g.y - 4;
+        } else {  // Zone Blanche
+            q = g.x - 6;
+            r = g.y - 8;
+        }
+
+        s = -q - r;  // q + r + s = 0
+
+        return {q, r, s};
     }
 
     // Conversion inverse : d'une position cubique vers la grille 2D "offset odd-r"

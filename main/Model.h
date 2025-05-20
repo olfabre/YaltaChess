@@ -3,7 +3,8 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
-
+#include <map>
+#include <string>
 #include "HexagonalCubique.h"    // pour Cube, CubeHash
 #include "cases/Case.h"
 #include <unordered_map>
@@ -44,7 +45,7 @@ private:
 
 
 
-
+    void initialiserPieces();
     void initialiserJoueurs();
 
     // Supprime p de `pieces` et libère la mémoire
