@@ -56,6 +56,7 @@ public:
     void realignerPieces();
     const vector<PlayerInfo>& getPlayers() const { return players; }
     Case* getCaseAtCube(const Cube& c) const;
+    void deplacerPiece(Piece* piece, const Cube& destination);
 
     // Retourne la Case* correspondant à une position grille (ou nullptr)
     //Case* getCaseAt(const sf::Vector2i& pos) const;

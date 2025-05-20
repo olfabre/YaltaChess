@@ -297,13 +297,19 @@ void YaltaChessView::draw()
 
 // 2) dessin des cases surlignées (sélection + coups légaux) en vert semi-transparent
     for (Case* c : highlightedCases) {
-        ConvexShape highlight = c->getShape();   // copie
-        highlight.setFillColor(Color(  0, 255,   0, 128)); // vert 50% alpha
-        //highlight.setFillColor(Color(  255, 165,   0, 240));
+        ConvexShape highlight = c->getShape(); // copie
+        if (selectedCase && c == selectedCase) {
+            // Orange pour la sélection
+            highlight.setFillColor(Color(255, 165, 0, 230)); // orange opaque
+        } else {
+            // Vert pour les coups légaux
+            highlight.setFillColor(Color(0, 255, 0, 128)); // vert semi-transparent
+        }
         highlight.setOutlineColor(Color::Black);
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
     }
+
 
 
 

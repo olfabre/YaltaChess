@@ -18,6 +18,7 @@ class YaltaChessView
 private:
     //Piece* hoveredPiece = nullptr; // une pièce sous la souris ou pas alors null du pointeur(nullptr)
     Case* hoveredCase = nullptr;
+    Case* selectedCase = nullptr;
     RenderWindow &window;
     const Model &model;
     Clock blinkClock; // mesure le temps pour le clignotement
@@ -36,7 +37,7 @@ public:
     RenderWindow& getWindow() { return window; }
     //void setHoveredPiece(Piece* p) { hoveredPiece = p; }
     void setHoveredCase(Case* c)  { hoveredCase = c; }
-
+    void setSelectedCase(Case* c) { selectedCase = c; }
     void clearHighlights() { highlightedCases.clear(); }
     void draw();
     void setHighlightedCases(const std::vector<Case*>& cases);
