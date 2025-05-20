@@ -106,14 +106,26 @@ void Model::initialiserPieces() {
 
             // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
             Couleur cc = static_cast<Couleur>(coul);
+            /*
             switch (coul) {
                 case 0: cc = BLANC; break;
                 case 1: cc = ROUGE; break;
                 case 2: cc = NOIR;  break;
                 default: cc = BLANC;
-            }
+            }*/
 
-            cout << "N° " << compteur << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
+            // debug
+            string couleur;
+            switch(coul){
+                case 0: couleur = "BLANC"; break;
+                case 1: couleur = "ROUGE"; break;
+                case 2: couleur = "NOIR";  break;
+                default: couleur = "BLANC";
+            }
+            cout << "N° " << compteur << ", " << couleur << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
+            // fin debug
+
+
             Piece* p = nullptr;
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
