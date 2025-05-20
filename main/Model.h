@@ -44,7 +44,8 @@ private:
 
 
 
-
+    void initialiserEchiquier();
+    void initialiserPieces();
     void initialiserJoueurs();
 
     // Supprime p de `pieces` et libère la mémoire
@@ -63,7 +64,7 @@ public:
 
 
     int getCurrentPlayerIdx() const { return currentPlayerIdx; }
-    void initialiserEchiquier();
+
     const vector<Case *> &getCases() const { return cases; }
     const auto& getPieces() const { return pieces; }
     // Renvoie la pièce à la position grille donnée (ou nullptr)
