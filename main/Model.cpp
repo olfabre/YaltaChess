@@ -190,36 +190,17 @@ static const std::pair<int,int> SETUP[12][12] = {
 
 
 
-/*
-COLONNES x = 0 … 11
-y
-0   WR  WN  WB  WQ  WR  WP  ·   ·   ·   ·   ·   ·
-1   WP  WP  WP  WP  WN  WP  ·   ·   ·   ·   ·   ·
-2   ·   ·   ·   ·   WB  WP  ·   ·   ·   ·   ·   ·
-3   ·   ·   ·   ·   WK  WP  ·   ·   ·   ·   ·   ·
-4   RR  RP  ·   ·   ·   ·   ·   ·   RR  RN  RB  RQ
-5   RN  RP  ·   ·   ·   ·   ·   ·   RP  RP  RP  RP
-6   RB  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
-7   RK  RP  ·   ·   ·   ·   ·   ·   ·   ·   ·   ·
-8   ·   ·   ·   ·   BR  BN  BB  BQ  BR  BP  ·   ·
-9   ·   ·   ·   ·   BP  BP  BP  BP  BN  BP  ·   ·
-10  ·   ·   ·   ·   ·   ·   ·   ·   BB  BP  ·   ·
-11  ·   ·   ·   ·   ·   ·   ·   ·   BK  BP  ·   ·
-*/
-
 
 
 Model::Model() {
-
-
-
-
-
     initialiserEchiquier();
+    initialiserPieces();
+    initialiserJoueurs();
+}
 
-    // GÉNÉRATION MATRICE SETUP ADAPTÉE (copie le résultat console)
-    //genereSetupValide(*this);
 
+
+void Model::initialiserPieces() {
     for (int y = 0; y < 12; ++y) { // ligne
         for (int x = 0; x < 12; ++x) { // colonne
 
@@ -232,98 +213,94 @@ Model::Model() {
             // memorise pour les coordonnées (x,y)
             //Vector2i grid{x,y};V
             // 1) Calcule la position cube et récupère la Case
-            Cube c = Hex::grilleVersCube({x,y});
-            Case* ca = getCaseAtCube(c);
-
-            // 2) Prends le side de la Case
-           // Side side = ca ? ca->getSide() : Side::White;  // par défaut blanc
-
-            // 3) Mappe le Side sur la bonne couleur
-            /*Couleur cc;
-            switch (side) {
-                case Side::White: cc = BLANC; break;
-                case Side::Red:   cc = ROUGE; break;
-                case Side::Black: cc = NOIR;  break;
-            }*/
-            // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
-            Couleur cc = (Couleur)coul;
-            switch (coul) {
-                case 0: cc = BLANC; break;
-                case 1: cc = ROUGE; break;
-                case 2: cc = NOIR;  break;
-                default: cc = BLANC;
+            Cube c = Hex::grilleVersCube({x, y});
+            Case *ca = getCaseAtCube(c);
+            if (!ca) {
+                std::cout << "ERREUR: Pas de case trouvée pour la position (" << x << "," << y << ")" << std::endl;
+                std::cout << "Position cube calculée: " << c.x << "," << c.y << "," << c.z << std::endl;
+                continue;
             }
 
-            Piece* p = nullptr;
+            Couleur cc = static_cast<Couleur>(coul);
+            Piece *p = nullptr;
+
+
             // on crée la piece qui reçoit ses coordonnées et sa couleur
-            switch(type) {
-                case 0: p = new Roi(c, cc);       break;
-                case 1: p = new Pion(c, cc, this);      break;
-                case 2: p = new Cavalier(c, cc);  break;
-                case 3: p = new Fou(c, cc);       break;
-                case 4: p = new Tour(c, cc);      break;
-                case 5: p = new Dame(c, cc);      break;
+            switch (type) {
+                case 0:
+                    p = new Roi(ca->getCubePos(), cc);
+                    break;
+                case 1:
+                    p = new Pion(ca->getCubePos(), cc, this);
+                    break;
+                case 2:
+                    p = new Cavalier(ca->getCubePos(), cc);
+                    break;
+                case 3:
+                    p = new Fou(ca->getCubePos(), cc);
+                    break;
+                case 4:
+                    p = new Tour(ca->getCubePos(), cc);
+                    break;
+                case 5:
+                    p = new Dame(ca->getCubePos(), cc);
+                    break;
             }
 
-            // 4) Diagnostic : Y a-t-il déjà une pièce à cette case ?
-            if (ca->getPiece() != nullptr) {
-                std::cout << "!!! DOUBLON PIECE SUR LA MEME CASE : cube("
-                          << c.x << "," << c.y << "," << c.z << ")"
-                          << " Ancien: " << ca->getPiece()->getTypeName()
-                          << " / Nouveau: " << p->getTypeName() << std::endl;
-            }
+            if (!p) continue;
+
 
             pieces.push_back(p);
             ca->setPiece(p);
 
+            // 5) Vérification finale
+            if (p->getPositionCube() != ca->getCubePos()) {
+                std::cout << "ERREUR: Désynchronisation après placement!" << std::endl;
+                std::cout << "Position de la case: " << ca->getCubePos().x << ","
+                          << ca->getCubePos().y << "," << ca->getCubePos().z << std::endl;
+                std::cout << "Position de la pièce: " << p->getPositionCube().x << ","
+                          << p->getPositionCube().y << "," << p->getPositionCube().z << std::endl;
+                std::cout << "Position grille: (" << x << "," << y << ")" << std::endl;
+                pieces.pop_back();
+                ca->setPiece(nullptr);
+                delete p;
+            }
+
+        } //colonne
+    } // ligne
 
 
-        }
-    }
-
-// === Vérification complète de doublons de cubes dans le vecteur pieces ===
-    std::map<std::tuple<int, int, int>, Piece*> piecesParCube;
-    for (Piece* p : pieces) {
-        auto c = p->getPositionCube();
-        auto t = std::make_tuple(c.x, c.y, c.z);
-
-        if (piecesParCube.count(t)) {
-            std::cout << "!!! DOUBLON TROUVE DANS VECTEUR PIECES : "
-                      << "cube(" << c.x << "," << c.y << "," << c.z << ") : "
-                      << p->getTypeName() << " et "
-                      << piecesParCube[t]->getTypeName() << std::endl;
-        } else {
-            piecesParCube[t] = p;
-        }
-    }
-
-
-   //realignerPieces();
+} // initialiser pieces
 
 
 
-    // === DÉBUG : afficher grid → cube pour chaque pièce ===
-    /*
-    std::cout << "=== Debug positions et sides ===\n";
-    for (Piece* p : pieces) {
-        auto c = p->getPositionCube();
-        Case* ca = getCaseAtCube(c);
-        std::cout
-                << p->getTypeName()
-                << " couleur=" << p->getCouleur()
-                << "  cube(" << c.x << "," << c.y << "," << c.z << ")"
-                << "  SIDE=" << (ca ? ca->getSide() : -1)
-                << std::endl;
-    }
-    std::cout << "========================\n";
+
+//realignerPieces();
+
+
+
+// === DÉBUG : afficher grid → cube pour chaque pièce ===
+/*
+std::cout << "=== Debug positions et sides ===\n";
+for (Piece* p : pieces) {
+    auto c = p->getPositionCube();
+    Case* ca = getCaseAtCube(c);
+    std::cout
+            << p->getTypeName()
+            << " couleur=" << p->getCouleur()
+            << "  cube(" << c.x << "," << c.y << "," << c.z << ")"
+            << "  SIDE=" << (ca ? ca->getSide() : -1)
+            << std::endl;
+}
+std::cout << "========================\n";
 */
 
 
 //initialiserEchiquier();
-    initialiserJoueurs();
 
 
-}
+
+
 
 
 
@@ -508,25 +485,25 @@ void Model::initialiserEchiquier()
 
 // Recherche la pièce dont la positionCube == c
 Piece* Model::getPieceAtCube(const Cube& c) const {
-        for (auto p : pieces) {
-                if (p->getPositionCube() == c)
-                        return p;
-            }
-        return nullptr;
+    for (auto p : pieces) {
+        if (p->getPositionCube() == c)
+            return p;
     }
+    return nullptr;
+}
 
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-        if (auto en = getPieceAtCube(dest))
-                removePiece(en);
-        p->setPositionCube(dest);
-        currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
-    }
+    if (auto en = getPieceAtCube(dest))
+        removePiece(en);
+    p->setPositionCube(dest);
+    currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+}
 
 bool Model::isOccupied(Vector2i pos) const {
-        Cube c = Hex::grilleVersCube(pos);return getPieceAtCube(c) != nullptr;
-    }
+    Cube c = Hex::grilleVersCube(pos);return getPieceAtCube(c) != nullptr;
+}
 
 void Model::removePiece(Piece* p) {
     pieces.erase(
@@ -568,14 +545,14 @@ void Model::realignerPieces()
                                             { size*0.5f, h},{-size*0.5f, h},{-size,0}
                                     }};
         std::array<std::pair<Vector2i,Vector2i>,6> inter = {{
-            {{0,4},{0,4}},{{0,4},{4,8}},{{8,12},{4,8}},
-            {{8,12},{8,12}},{{4,8},{8,12}},{{4,8},{0,4}}
-             }};
+                                                                    {{0,4},{0,4}},{{0,4},{4,8}},{{8,12},{4,8}},
+                                                                    {{8,12},{8,12}},{{4,8},{8,12}},{{4,8},{0,4}}
+                                                            }};
 
         for(int z=0;z<6;++z){
             auto [ix,iy]=inter[z];
             if (g.x >= ix.x && g.x < ix.y && g.y >= iy.x && g.y < iy.y) {
-            //if(g.x>=ix.first&&g.x<ix.second&&g.y>=iy.first&&g.y<iy.second){
+                //if(g.x>=ix.first&&g.x<ix.second&&g.y>=iy.first&&g.y<iy.second){
                 float rx=(g.x%4+0.5f)/4.f, ry=(g.y%4+0.5f)/4.f;
                 Vector2f s1=v[z]*0.5f, s2=v[(z+2)%6]*0.5f;
                 Vector2f corner=mid+v[(z+4)%6];
@@ -607,4 +584,36 @@ void Model::realignerPieces()
         }
     }
 
+}
+
+
+
+
+
+// Dans Model.cpp
+void Model::deplacerPiece(Piece* piece, const Cube& destination) {
+    if (!piece) return;
+
+    // 1. Enlever la pièce de son ancienne case
+    Cube oldPos = piece->getPositionCube();
+    Case* oldCase = getCaseAtCube(oldPos);
+    if (oldCase && oldCase->getPiece() == piece) {
+        oldCase->setPiece(nullptr);
+    }
+
+    // 2. Si une pièce adverse est présente sur la case destination, la retirer
+    Case* newCase = getCaseAtCube(destination);
+    if (!newCase) return;
+    if (newCase->estOccupee()) {
+        Piece* adversaire = newCase->getPiece();
+        // À adapter selon ta logique de capture !
+        // removePiece(adversaire); // Si tu as une telle fonction
+        newCase->setPiece(nullptr);
+    }
+
+    // 3. Déplacer la pièce (mettre à jour sa position)
+    piece->setPositionCube(destination);
+
+    // 4. Mettre à jour la case de destination
+    newCase->setPiece(piece);
 }
