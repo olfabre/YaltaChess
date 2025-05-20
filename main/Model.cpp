@@ -125,7 +125,7 @@ void Model::initialiserPieces() {
             Cube c = Hex::grilleVersCube({x,y});
             Case* ca = getCaseAtCube(c);
 
-            
+
             if (!ca) {
                 std::cout << "ERREUR: Pas de case trouvée pour la position (" << x << "," << y << ")" << std::endl;
                 std::cout << "Position cube calculée: " << c.x << "," << c.y << "," << c.z << std::endl;
