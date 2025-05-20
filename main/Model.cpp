@@ -77,7 +77,18 @@ Model::Model() {
 }
 
 
-
+/*
+ *
+ * Les coordonnées {x,y} → {cube.x,cube.y,cube.z} sont d’abord passées à la création de chaque Case.
+ *
+ * Lors de l’initialisation des pièces, on recherche simplement la Case correspondante avec ces mêmes
+ * coordonnées, qu’on n’a pas besoin de redonner à la Case (elle les connaît déjà).
+ *
+ * On ne « donne » ces coords aux pièces qu’au moment où on crée la Piece et/ou où on
+ * appelle p->setPositionCube(...).
+ *
+ *
+ */
 
 void Model::initialiserPieces() {
 
@@ -138,7 +149,7 @@ void Model::initialiserPieces() {
                 case 2: couleur = "NOIR";  break;
                 default: couleur = "BLANC";
             }
-            cout << "N° " << compteur << ", " << couleur << " " << p->getTypeName() << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
+            //cout << "N° " << compteur << ", " << couleur << " " << p->getTypeName() << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
             // fin debug
 
 
@@ -148,33 +159,20 @@ void Model::initialiserPieces() {
 
             // on associe la piece avec la case
             ca->setPiece(p);
+            p->setPositionCube(ca->getCubePos());
 
 
-/*
 
-            if (p) {
-                p->setPositionCube(ca->getCubePos());
-            }
-*/
+            // debug
+            cout << "Coord. Piece:" << p->getTypeName() << "(" << p->getPositionCube().x << "," << p->getPositionCube().y << "," << p->getPositionCube().z << ")" << endl;
+            cout << "Coord. Case:" << ca->getPiece()->getTypeName() <<  "(" << ca->getCubePos().x << "," << ca->getCubePos().y << "," << ca->getCubePos().z << ")" << endl << endl;
 
-        }
-    }
 
-// === Vérification complète de doublons de cubes dans le vecteur pieces ===
-    std::map<std::tuple<int, int, int>, Piece*> piecesParCube;
-    for (Piece* p : pieces) {
-        auto c = p->getPositionCube();
-        auto t = std::make_tuple(c.x, c.y, c.z);
 
-        if (piecesParCube.count(t)) {
-            std::cout << "!!! DOUBLON TROUVE DANS VECTEUR PIECES : "
-                      << "cube(" << c.x << "," << c.y << "," << c.z << ") : "
-                      << p->getTypeName() << " et "
-                      << piecesParCube[t]->getTypeName() << std::endl;
-        } else {
-            piecesParCube[t] = p;
-        }
-    }
+        } // colonne
+    } // ligne
+
+
 
 
    //realignerPieces();
