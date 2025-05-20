@@ -44,37 +44,7 @@ void genereSetupValide(const Model& model) {
     std::cout << "};\n";
 }
 
-void genereSetupValide2(const Model& model) {
-    std::cout << "static const pair<int,int> SETUP[12][12] = {\n";
-    // Si vous voulez que SETUP[0] soit la rangée du bas (blanc),
-    // parcourez y de 11 à 0 :
-    for (int y = 11; y >= 0; --y) {
-        std::cout << "    { ";
-        for (int x = 0; x < 12; ++x) {
-            Cube c = Hex::grilleVersCube({x, y});
-            Case* ca = model.getCaseAtCube(c);
-            int couleur = -1, type = -1;
-            if (ca && ca->estOccupee()) {
-                Piece* p = ca->getPiece();
-                // 0 = Blanc, 1 = Rouge, 2 = Noir
-                couleur = static_cast<int>(p->getCouleur());
-                // Par exemple : 1 = Pion, 2 = Cavalier, … à adapter
-                std::string tn = p->getTypeName();
-                if      (tn == "Pion")    type = 1;
-                else if (tn == "Cavalier") type = 2;
-                else if (tn == "Fou")      type = 3;
-                else if (tn == "Dame")     type = 4;
-                else if (tn == "Roi")      type = 5;
-                else if (tn == "Tour")     type = 6;
-            }
-            std::cout << "{" << std::setw(2) << couleur
-                      << ","  << std::setw(2) << type << "}";
-            if (x != 11) std::cout << ", ";
-        }
-        std::cout << " }, // y=" << y << "\n";
-    }
-    std::cout << "};\n";
-}
+
 
 // 0 = Blanc, 1 = Rouge, 2 = Noir, -1 = Vides
 // 0 = Roi, 1 = Pion, 2 = Cavalier, 3 = Fou, 4 = Tour, 5 = Dame, -1 = vide
@@ -124,7 +94,7 @@ void Model::initialiserPieces() {
             ++compteur;
             // 1) Calcule la position cube et récupère la Case
             Cube c = Hex::grilleVersCube({x,y});
-            cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << sendl;
+            //cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
             Case* ca = getCaseAtCube(c);
 
 
@@ -135,7 +105,7 @@ void Model::initialiserPieces() {
             }
 
             // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
-            Couleur cc = (Couleur)coul;
+            Couleur cc = static_cast<Couleur>(coul);
             switch (coul) {
                 case 0: cc = BLANC; break;
                 case 1: cc = ROUGE; break;
@@ -143,6 +113,7 @@ void Model::initialiserPieces() {
                 default: cc = BLANC;
             }
 
+            cout << "N° " << compteur << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
             Piece* p = nullptr;
             // on crée la piece qui reçoit ses coordonnées et sa couleur
             switch(type) {
