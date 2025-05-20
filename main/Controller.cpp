@@ -111,7 +111,9 @@ void Controller::handleEvent(const sf::Event& event)
 
 
 // Surligner uniquement si c'est un pion
-    if (selectedCase->getPiece() && selectedCase->getPiece()->getTypeName() == "Pion") {
+
+
+if (selectedCase->getPiece() && selectedCase->getPiece()->getTypeName() == "Pion") {
         auto* pion = dynamic_cast<Pion*>(selectedCase->getPiece());
         if (pion) {
             auto legalMoves = pion->getLegalMoves(model);
@@ -136,6 +138,7 @@ void Controller::handleEvent(const sf::Event& event)
     // === AJOUT : affichage infos de la case sélectionnée + type de pièce ===
     if (selectedCase && selectedCase->getPiece()) {
         auto* piece = selectedCase->getPiece();
+
         Cube cubeCase = selectedCase->getCubePos();
         Cube cubePiece = piece->getPositionCube();
         std::cout << "[Controller] Case : cube("

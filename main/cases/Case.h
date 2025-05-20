@@ -22,6 +22,7 @@ enum Side { White=0, Red=1, Black=2 };
 class Case : public Drawable
 {
 private:
+    std::vector<sf::Vector2f> points;
     ConvexShape forme; // Quadrilatère
     bool estBlanc;
     Piece *piece;
