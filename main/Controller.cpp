@@ -3,6 +3,7 @@
 #include "Controller.h"
 #include "View.h"
 #include "HexagonalCubique.h"
+#include "CubeToLabel.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
 #include <algorithm>
@@ -29,130 +30,110 @@ Controller::Controller(Model &m, YaltaChessView &v) : model(m), view(v) {}
 // gestion des évènements côté interface
 void Controller::handleEvent(const sf::Event& event)
 {
-
-    // Quand je passe la souris sur mes cases -> hover
+    // Gestion du survol de la souris
     if (event.is<sf::Event::MouseMoved>()) {
-
-        // Récupère l’événement MouseMoved
         auto const* mouseMoved = event.getIf<sf::Event::MouseMoved>();
-        if (!mouseMoved)
-            return;
+        if (!mouseMoved) return;
 
-        // 3) Pull out your players vector before using it
+        // Vérifie si c'est le tour du joueur humain
         auto const& players = model.getPlayers();
-
-        // Only proceed if it's the human’s turn
         if (!players[model.getCurrentPlayerIdx()].isHuman) {
             hoveredCase = nullptr;
             view.setHoveredCase(nullptr);
             return;
         }
 
-        // 4) Use the `position` member, not `.x`/`.y` on the old union
-        Vector2i pixel{ mouseMoved->position.x,
-                        mouseMoved->position.y };
+        // Convertit la position de la souris en coordonnées monde
+        Vector2i pixel{ mouseMoved->position.x, mouseMoved->position.y };
         Vector2f world = view.getWindow().mapPixelToCoords(pixel);
 
+        // Cherche la case sous le curseur
+        hoveredCase = nullptr;
+        for (Case* c : model.getCases()) {
+            if (c->contientPoint(world) && c->estOccupee()) {
+                if (c->getPiece()->getCouleur() == players[model.getCurrentPlayerIdx()].color) {
+                    hoveredCase = c;
+                }
+                break;
+            }
+        }
+        view.setHoveredCase(hoveredCase);
+    }
 
-        // on cherche la *case* sous le curseur
-                hoveredCase = nullptr;
-               for (Case* c : model.getCases()) {
-                        if (c->contientPoint(world) && c->estOccupee()) {
-                                if (c->getPiece()->getCouleur() == players[model.getCurrentPlayerIdx()].color)
-                                        hoveredCase = c;
-                                break;
-                            }
-                    }
-                view.setHoveredCase(hoveredCase);
-    }  // je passe la souris au dessus de mes pieces
-
-
-
-
-
-
+    // Gestion des clics
     auto const* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>();
-    if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left)
-        return;
+    if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left) return;
 
-    sf::Vector2i pixel(mouseBtn->position.x, mouseBtn->position.y);
-    sf::Vector2f world = view.getWindow().mapPixelToCoords(pixel);
+    // Convertit la position du clic en coordonnées monde
+    Vector2i pixel(mouseBtn->position.x, mouseBtn->position.y);
+    Vector2f world = view.getWindow().mapPixelToCoords(pixel);
 
-    // On cherche la case cliquée (appartenant au joueur courant)
+    // Cherche la case cliquée
     Case* clickedCase = nullptr;
-
-
-    // On récupère la couleur du joueur courant
-    Couleur couleurCourante = model.getPlayers()[model.getCurrentPlayerIdx()].color;
-
-
     for (Case* c : model.getCases()) {
-        // On veut uniquement une case avec une pièce du joueur courant
-        if (c->contientPoint(world) && c->estOccupee() && c->getPiece()->getCouleur() == couleurCourante) {
+        if (c->contientPoint(world)) {
             clickedCase = c;
             break;
         }
     }
-
-
     if (!clickedCase) return;
 
-    // --- Sélection / désélection ---
-    if (selectedCase == clickedCase) {
-        selectedCase = nullptr;
-        legalMoveCases.clear();
-        view.setSelectedCase(nullptr);
-        view.setHighlightedCases({});
+    // Affiche les coordonnées cube et le label de la case cliquée
+    Cube cubePos = clickedCase->getCubePos();
+    std::cout << "Case cliquée - Coordonnées cube : (" 
+              << cubePos.x << ", " << cubePos.y << ", " << cubePos.z << ")"
+              << " → Label : " << cubeToLabel(cubePos) << std::endl;
+
+    // Récupère la couleur du joueur courant
+    Couleur couleurCourante = model.getPlayers()[model.getCurrentPlayerIdx()].color;
+
+    // Si on a déjà une pièce sélectionnée
+    if (selectedCase) {
+        // Si on clique sur la même case, on désélectionne
+        if (clickedCase == selectedCase) {
+            selectedCase = nullptr;
+            view.setSelectedCase(nullptr);
+            view.setHighlightedCases({});
+            return;
+        }
+
+        // Vérifie si la case de destination est occupée par une pièce du joueur courant
+        if (clickedCase->estOccupee() && clickedCase->getPiece()->getCouleur() == couleurCourante) {
+            return; // On ne peut pas déplacer une pièce sur une case occupée par une pièce de même couleur
+        }
+
+        // Sinon on déplace la pièce vers la nouvelle case
+        Piece* pieceToMove = selectedCase->getPiece();
+        if (pieceToMove) {
+            // On déplace la pièce
+            model.movePieceCube(pieceToMove, clickedCase->getCubePos());
+            
+            // On met à jour le message d'événement
+            string message = string("Le joueur ") + 
+                           (pieceToMove->getCouleur() == BLANC ? "Blanc" : 
+                            pieceToMove->getCouleur() == NOIR ? "Noir" : "Rouge") +
+                           " a déplacé son " + pieceToMove->getTypeName() + 
+                           " de " + cubeToLabel(selectedCase->getCubePos()) + 
+                           " vers " + cubeToLabel(clickedCase->getCubePos());
+            view.setEventMessage(message);
+            
+            // On réinitialise la sélection
+            selectedCase = nullptr;
+            view.setSelectedCase(nullptr);
+            view.setHighlightedCases({});
+        }
         return;
     }
-    selectedCase = clickedCase;
-    legalMoveCases.clear();
 
-
-
-// Surligner uniquement si c'est un pion
-
-
-if (selectedCase->getPiece() && selectedCase->getPiece()->getTypeName() == "Pion") {
-        auto* pion = dynamic_cast<Pion*>(selectedCase->getPiece());
-        if (pion) {
-            auto legalMoves = pion->getLegalMoves(model);
-            for (const auto& cube : legalMoves) {
-                Case* targetCase = model.getCaseAtCube(cube);
-                if (targetCase && targetCase != selectedCase)
-                    legalMoveCases.push_back(targetCase);
-            }
+    // Si on n'a pas de pièce sélectionnée, on vérifie si on clique sur une pièce du joueur courant
+    if (clickedCase->estOccupee()) {
+        Piece* clickedPiece = clickedCase->getPiece();
+        if (clickedPiece && clickedPiece->getCouleur() == couleurCourante) {
+            selectedCase = clickedCase;
+            view.setSelectedCase(selectedCase);
+            view.setHighlightedCases({selectedCase});
         }
     }
-// On passe toutes les cases à surligner à la vue : coups légaux + sélection
-    std::vector<Case*> highlightCases = legalMoveCases;
-    if (selectedCase) {
-        highlightCases.push_back(selectedCase); // toujours ajouter la sélection
-    }
-
-    view.setSelectedCase(selectedCase);
-    view.setHighlightedCases(highlightCases);
-    view.setHighlightedCases(highlightCases);
-
-
-    // === AJOUT : affichage infos de la case sélectionnée + type de pièce ===
-    if (selectedCase && selectedCase->getPiece()) {
-        auto* piece = selectedCase->getPiece();
-
-        Cube cubeCase = selectedCase->getCubePos();
-        Cube cubePiece = piece->getPositionCube();
-        std::cout << "[Controller] Case : cube("
-                  << cubeCase.x << "," << cubeCase.y << "," << cubeCase.z << ")"
-                  << " | Piece: " << piece->getTypeName()
-                  << " | posPiece: cube("
-                  << cubePiece.x << "," << cubePiece.y << "," << cubePiece.z << ")"
-                  << " | couleur=" << piece->getCouleur()
-                  << std::endl;
-    }
-
-
-
-
 }
 
 // fin dela selection des cases

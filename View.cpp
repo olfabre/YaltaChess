@@ -6,6 +6,7 @@
 #include "ResourceManager.h"
 #include <array>
 #include <cmath> // pour std::cos et std::sin
+#include <iostream>
 
 
 
@@ -53,7 +54,7 @@ namespace {
 
 
 YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
-        : window(win), model(mod), eventText(tempFont)
+        : window(win), model(mod)
 {
     // Charge la police (unique, tirée de ton dossier de ressources)
     // Charge la police (SFML 3)
@@ -64,13 +65,6 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
     auto fontPath = execPath / "Roboto-Regular.ttf";
     if (!coordFont.openFromFile(fontPath.string()))
         throw runtime_error("Impossible de charger Roboto-Regular.ttf");
-
-    // Configure le texte d'événement
-    eventText.setFont(coordFont);
-    eventText.setString("Bienvenue dans Yalta Chess !");
-    eventText.setCharacterSize(24);
-    eventText.setFillColor(Color::White);
-    eventText.setPosition(Vector2f(20.f, 20.f)); // Position en haut à gauche
 
     // Initialise tous les labels
     initBorderLabels();
@@ -138,21 +132,21 @@ void YaltaChessView::initBorderLabels()
         const auto& sideLabels = labels[k];
         int count = int(sideLabels.size());
 
-        // Extrémités de l'arête k
+        // Extrémités de l’arête k
         Vector2f A   = mid + v123[k];
         Vector2f B   = mid + v123[(k+1)%6];
         Vector2f dir = B - A;
 
-        // Angle « naturel » de l'arête
+        // Angle « naturel » de l’arête
         float baseAngle = atan2(dir.y, dir.x) * 180.f / 3.14159265f + 90.f;
 
         for (int j = 0; j < count; ++j)
         {
-            // position sur l'arête
+            // position sur l’arête
             float t   = (j + 0.5f) / float(count);
             Vector2f pos = A + dir * t;
 
-            // décale vers l'extérieur de OUTSET px
+            // décale vers l’extérieur de OUTSET px
             Vector2f out = pos - mid;
             float len = sqrt(out.x*out.x + out.y*out.y);
             if (len > 0.f) {
@@ -164,7 +158,7 @@ void YaltaChessView::initBorderLabels()
             Text txt(coordFont, sideLabels[j], 18);
             txt.setFillColor(Color::Black);
 
-            // centre l'origine du texte
+            // centre l’origine du texte
             auto b = txt.getLocalBounds();
             txt.setOrigin(
                     Vector2f{
@@ -190,7 +184,7 @@ void YaltaChessView::initBorderLabels()
 }
 
 
-// Version "brute" sans rotation finale
+// Version “brute” sans rotation finale
 sf::Vector2f YaltaChessView::gridToPixelRaw(const Vector2i& g) const
 {
     const float W = 1000.f;
@@ -224,13 +218,13 @@ sf::Vector2f YaltaChessView::gridToPixelRaw(const Vector2i& g) const
     for (int z = 0; z < 6; ++z) {
         auto [ix, iy] = intervals[z];
         if (g.x >= ix.x && g.x < ix.y && g.y >= iy.x && g.y < iy.y) {
-            // fraction à l'intérieur du sextant
+            // fraction à l’intérieur du sextant
             float rx1 = (g.x % 4)     /4.f;
             float ry1 = (g.y % 4)     /4.f;
             float mid_r_x = (rx1 + (rx1+1/4.f))*0.5f;
             float mid_r_y = (ry1 + (ry1+1/4.f))*0.5f;
 
-            // calcul de la position "à plat"
+            // calcul de la position « à plat »
             Vector2f s1 = v123[z] * 0.5f;
             Vector2f s2 = v123[(z + 2) % 6] * 0.5f;
             Vector2f corner = mid + v123[(z + 4) % 6];
@@ -340,11 +334,6 @@ void YaltaChessView::draw()
     window.setView(boardView);
     window.clear(Color::Black);
 
-    // Dessin du texte d'événement (en mode coordonnées fenêtre)
-    window.setView(window.getDefaultView());
-    window.draw(eventText);
-    window.setView(boardView);
-
     // Dessin du plateau et des labels (inchangé)
     ConvexShape whiteBorder;
     whiteBorder.setPointCount(6);
@@ -410,7 +399,7 @@ void YaltaChessView::draw()
             Case* caseTest = model.getCases()[k];
             if (caseTest->contientPoint(positionPixel)) {
                 caseTest->setPiece(pieceActuelle);
-                break;  // on sort dès qu'on a trouvé
+                break;  // on sort dès qu’on a trouvé
             }
         }
     }
@@ -425,19 +414,38 @@ void YaltaChessView::draw()
         window.draw(*c);
     }
 
-// dessin des cases surlignées (sélection uniquement) en orange
+// dessin des cases surlignées (sélection + coups légaux) en vert semi-transparent
     for (Case* c : highlightedCases) {
+
+        // === DÉBUT DU DEBUG ===
+        // cube-coordinate de la case
+        Cube cube = c->getCubePos();
+        // récupération du premier point du hexagone (coin 0)
+        auto pts = c->getShape().getPoint(0);
+        std::cout << "[DEBUG View] highlight cube=("
+        << cube.x << "," << cube.y << "," << cube.z << ") "
+        << "pixel_point0=("
+        << pts.x << "," << pts.y << ")\n";
+        // === FIN DU DEBUG ===
+
+        ConvexShape highlight = c->getShape(); // copie
         if (selectedCase && c == selectedCase) {
-            ConvexShape highlight = c->getShape(); // copie
             // Orange pour la sélection
             highlight.setFillColor(Color(255, 165, 0, 230)); // orange opaque
-            highlight.setOutlineColor(Color::Black);
-            highlight.setOutlineThickness(2.f);
-            window.draw(highlight);
+        } else {
+            // Vert pour les coups légaux
+            highlight.setFillColor(Color(0, 255, 0, 128)); // vert semi-transparent
         }
+        highlight.setOutlineColor(Color::Black);
+        highlight.setOutlineThickness(2.f);
+        window.draw(highlight);
     }
 
-    // dessin de la case sous le curseur en orange
+
+
+
+
+// dessin de la case sous le curseur en orange
     if (hoveredCase) {
         ConvexShape highlight = hoveredCase->getShape();   // copie
         highlight.setFillColor(Color(255, 220, 130, 240)); // orange
@@ -447,12 +455,12 @@ void YaltaChessView::draw()
     }
 
 
-    // =========== NOUVEAU ===========
-    // On a fini tout ce qui doit être dans la vue « échiquier ».
-    // On repasse maintenant au repère normal pour les labels,
-    // les noms de joueurs, les menus, etc.
-    //window.setView(window.getDefaultView());
-    // ===============================
+// =========== NOUVEAU ===========
+       // On a fini tout ce qui doit être dans la vue « échiquier ».
+                // On repasse maintenant au repère normal pour les labels,
+                        // les noms de joueurs, les menus, etc.
+                                //window.setView(window.getDefaultView());
+        // ===============================
 
     for (auto& txt : borderLabels)
         window.draw(txt);
@@ -470,7 +478,7 @@ void YaltaChessView::draw()
     //Vector2f mid(OFFSET + BOARD_SIZE/2.f, OFFSET + BOARD_SIZE/2.f);
     float    infoRadius = BOARD_SIZE/2.f + 30.f;
 
-    // Durée d'un cycle (en secondes)
+    // Durée d’un cycle (en secondes)
     const float blinkPeriod = 0.5f;
 // true pendant la première moitié du cycle, false pendant la seconde
     bool blinkOn = fmod(blinkClock.getElapsedTime().asSeconds(), blinkPeriod*2.f) < blinkPeriod;
@@ -620,8 +628,4 @@ void YaltaChessView::draw()
 // View.cpp
 void YaltaChessView::setHighlightedCases(const std::vector<Case*>& cases) {
     highlightedCases = cases;
-}
-
-void YaltaChessView::setEventMessage(const string& message) {
-    eventText.setString(message);
 }

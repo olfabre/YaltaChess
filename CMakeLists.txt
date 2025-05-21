@@ -11,15 +11,44 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(SFML)
 
-# Inclusion de tous les fichiers .cpp du dossier courant ET des sous-dossiers (pieces et cases)
-file(GLOB_RECURSE SRC_FILES
-        main/*.cpp
-        pieces/*.cpp
-        cases/*.cpp
-        )
+# Liste des fichiers sources
+set(SOURCES
+    main/main.cpp
+    main/Model.cpp
+    main/View.cpp
+    main/Controller.cpp
+    main/HexagonalCubique.cpp
+    main/CubeToLabel.cpp
+    main/pieces/Pion.cpp
+    main/pieces/Cavalier.cpp
+    main/pieces/Tour.cpp
+    main/pieces/Fou.cpp
+    main/pieces/Dame.cpp
+    main/pieces/Roi.cpp
+    main/cases/Case.cpp
+    main/pieces/Piece.cpp
+    main/Intro.cpp
+    main/ResourceManager.cpp
+)
+
+# Liste des fichiers d'en-tête
+set(HEADERS
+    main/Model.h
+    main/View.h
+    main/Controller.h
+    main/HexagonalCubique.h
+    main/CubeToLabel.h
+    main/pieces/Piece.h
+    main/pieces/Pion.h
+    main/pieces/Cavalier.h
+    main/pieces/Tour.h
+    main/pieces/Fou.h
+    main/pieces/Dame.h
+    main/pieces/Roi.h
+)
 
 # Création de l'exécutable avec tous les fichiers sources
-add_executable(SFML_MVC_YaltaChess ${SRC_FILES})
+add_executable(SFML_MVC_YaltaChess ${SOURCES})
 
 # Ajout des bibliothèques SFML
 target_link_libraries(SFML_MVC_YaltaChess PRIVATE sfml-graphics sfml-window sfml-system sfml-audio)

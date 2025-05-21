@@ -10,6 +10,18 @@
 using namespace sf;
 using namespace std;
 
+// Définition quelque part en scope global ou static dans Pion.cpp
+static const std::array<Cube,3> dirAvance = {
+        Cube{+1,  0, -1},   // pour BLANC
+        Cube{ 0, +1, -1},   // pour ROUGE
+        Cube{-1,  0, +1}    // pour NOIR
+};
+static const std::array<std::array<Cube,2>,3> dirCapture = {{
+                                                                    { Cube{+1,-1, 0}, Cube{ 0,-1,+1} },  // capturer pour BLANC
+                                                                    { Cube{+1, 0,-1}, Cube{-1,+1, 0} },  // pour ROUGE
+                                                                    { Cube{ 0,+1,-1}, Cube{-1, 0,+1} }   // pour NOIR
+                                                            }};
+
 //Pion::Pion(Cube pos, Couleur coul) : Piece(pos, coul) {}
 Pion::Pion(Cube pos, Couleur coul, Model* modelPtr)
         : Piece(pos, coul)
@@ -27,51 +39,11 @@ bool Pion::mouvementValide(Cube nouvellePos) const
     return std::find(moves.begin(), moves.end(), nouvellePos) != moves.end();
 }
 
-
-
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
-    //return Hex::movesPion(positionCube, model, couleur);
-
-    std::vector<Cube> moves;
-    Cube pos = this->getPositionCube();
-    int couleur = this->getCouleur();
-
-    Case* caseAssociee = model.getCaseAtCube(pos);
-    if (caseAssociee) {
-        std::cout << "[getLegalMoves] Case de la pièce : cube("
-                  << caseAssociee->getCubePos().x << ","
-                  << caseAssociee->getCubePos().y << ","
-                  << caseAssociee->getCubePos().z << ") "
-                  << "side=" << caseAssociee->getSide()
-                  << " type=" << (caseAssociee->getPiece() ? caseAssociee->getPiece()->getTypeName() : "Aucune")
-                  << std::endl;
-    }
-    std::cout << "[getLegalMoves] Position interne de la pièce : cube("
-              << pos.x << "," << pos.y << "," << pos.z << ") "
-              << "couleur=" << this->getCouleur()
-              << " type=" << this->getTypeName()
-              << std::endl;
-
-    // *** Exemple de logique simple, à personnaliser selon ton hexagone ***
-    if (couleur == 0) { // BLANC
-        Cube dest = {pos.x + 1, pos.y - 0, pos.z};
-        Case* target = model.getCaseAtCube(dest);
-        if (target && !target->getPiece())
-            moves.push_back(dest);
-    } else if (couleur == 1) { // ROUGE
-        Cube dest = {pos.x, pos.y + 1, pos.z - 1};
-        Case* target = model.getCaseAtCube(dest);
-        if (target && !target->getPiece())
-            moves.push_back(dest);
-    } else if (couleur == 2) { // NOIR
-        Cube dest = {pos.x - 1, pos.y, pos.z + 1};
-        Case* target = model.getCaseAtCube(dest);
-        if (target && !target->getPiece())
-            moves.push_back(dest);
-    }
-    // Pour l’instant, on fait juste "avance simple" (à améliorer après)
-    return moves;
-
+    std::cout << "[getLegalMoves] posCube=(" << positionCube.x << "," 
+              << positionCube.y << "," << positionCube.z 
+              << ") couleur=" << static_cast<int>(couleur) << "\n";
+    return Hex::movesPion(positionCube, model, couleur);
 }
 
 string Pion::getTypeName() const {
