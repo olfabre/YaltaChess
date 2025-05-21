@@ -74,17 +74,18 @@ Model::Model() {
     //ÒrealignerPieces();
     initialiserPieces();
     initialiserJoueurs();
+    lastMove = Cube{0, 0, 0};  // Initialisation du dernier mouvement
 }
 
 
 /*
  *
- * Les coordonnées {x,y} → {cube.x,cube.y,cube.z} sont d’abord passées à la création de chaque Case.
+ * Les coordonnées {x,y} → {cube.x,cube.y,cube.z} sont d'abord passées à la création de chaque Case.
  *
- * Lors de l’initialisation des pièces, on recherche simplement la Case correspondante avec ces mêmes
- * coordonnées, qu’on n’a pas besoin de redonner à la Case (elle les connaît déjà).
+ * Lors de l'initialisation des pièces, on recherche simplement la Case correspondante avec ces mêmes
+ * coordonnées, qu'on n'a pas besoin de redonner à la Case (elle les connaît déjà).
  *
- * On ne « donne » ces coords aux pièces qu’au moment où on crée la Piece et/ou où on
+ * On ne « donne » ces coords aux pièces qu'au moment où on crée la Piece et/ou où on
  * appelle p->setPositionCube(...).
  *
  *
@@ -335,8 +336,8 @@ void Model::initialiserEchiquier()
         auto& cur = bySide[s];
         auto& nxt = bySide[(s + 1) % 3];
 
-        // Trier chaque vecteur pour isoler les 8 cases de l’arête :
-        // On ordonne d’abord par "distance au joueur" (row % 4), puis par "half-col" (col % 4).
+        // Trier chaque vecteur pour isoler les 8 cases de l'arête :
+        // On ordonne d'abord par "distance au joueur" (row % 4), puis par "half-col" (col % 4).
         auto comp = [](Case* a, Case* b){
             auto ga = a->getGridPos(), gb = b->getGridPos();
             int rowA = ga.y % 4, rowB = gb.y % 4;
@@ -377,11 +378,29 @@ Piece* Model::getPieceAtCube(const Cube& c) const {
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-        if (auto en = getPieceAtCube(dest))
-                removePiece(en);
-        p->setPositionCube(dest);
-        currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+    if (!p) return;
+    
+    // Calculer le mouvement effectué
+    Cube move = {
+        dest.x - p->getPositionCube().x,
+        dest.y - p->getPositionCube().y,
+        dest.z - p->getPositionCube().z
+    };
+    
+    // Mettre à jour le dernier mouvement
+    setLastMove(move);
+    
+    // Gérer la capture si nécessaire
+    if (auto captured = getPieceAtCube(dest)) {
+        removePiece(captured);
     }
+    
+    // Déplacer la pièce
+    deplacerPiece(p, dest);
+    
+    // Passer au joueur suivant
+    currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+}
 
 bool Model::isOccupied(Vector2i pos) const {
         Cube c = Hex::grilleVersCube(pos);return getPieceAtCube(c) != nullptr;
@@ -433,7 +452,7 @@ void Model::realignerPieces()
         Vector2f vabc[] = {
                 {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
                 {0.f, -height},
-                {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))},
+                {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(-height*sin(M_PI/6))},
                 {static_cast<float>(height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))},
                 {0.f, height},
                 {static_cast<float>(-height*cos(M_PI/6)), static_cast<float>(height*sin(M_PI/6))}
@@ -511,4 +530,16 @@ void Model::deplacerPiece(Piece* piece, const Cube& destination) {
 
     // 4. Mettre à jour la case de destination
     newCase->setPiece(piece);
+}
+
+void Model::movePiece(Piece* piece, const Cube& destination) {
+    if (!piece) return;
+
+    // On met à jour la position de la pièce
+    piece->setPositionCube(destination);
+}
+
+void Model::nextPlayer() {
+    // On passe au joueur suivant en boucle
+    currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
 }
