@@ -40,8 +40,8 @@ bool Pion::mouvementValide(Cube nouvellePos) const
 }
 
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
-    std::cout << "[getLegalMoves] posCube=(" << positionCube.x << ","
-              << positionCube.y << "," << positionCube.z
+    std::cout << "[getLegalMoves] posCube=(" << positionCube.x << "," 
+              << positionCube.y << "," << positionCube.z 
               << ") couleur=" << static_cast<int>(couleur) << "\n";
     return Hex::movesPion(positionCube, model, couleur);
 }
