@@ -30,6 +30,8 @@ private:
     void initBorderLabels();
     // helper pour convertir une position grille (x,y) en pixel centre de case
     Vector2f gridToPixel(const Vector2i &g) const;
+    // même conversion **sans** la rotation appliquée dans gridToPixel()
+    Vector2f gridToPixelRaw(const Vector2i &g) const;
     vector<Case*> highlightedCases;
 
 public:

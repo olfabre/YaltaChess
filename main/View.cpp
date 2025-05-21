@@ -150,6 +150,59 @@ void YaltaChessView::initBorderLabels()
 }
 
 
+// Version “brute” sans rotation finale
+sf::Vector2f YaltaChessView::gridToPixelRaw(const Vector2i& g) const
+{
+    const float W = 1000.f;
+    const float O = 50.f;
+    // même calcul que gridToPixel **avant** la rotation
+    Vector2f mid(W/2.f + O, W/2.f + O);
+    float size   = W/2.f;
+    float side   = size/2.f;
+    float height = std::sqrt(size*size - side*side);
+
+    // vecteurs vers les 6 sommets (flat-top)
+    std::array<Vector2f,6> v123 = {{
+                                           {-size*0.5f, -height},
+                                           { size*0.5f, -height},
+                                           { size,        0      },
+                                           { size*0.5f,  height},
+                                           {-size*0.5f,  height},
+                                           {-size,       0      }
+                                   }};
+
+    // même logique de sextant que dans gridToPixel
+    static const std::array<std::pair<Vector2i,Vector2i>,6> intervals = {{
+                                                                                 {{0,4},{0,4}},
+                                                                                 {{0,4},{4,8}},
+                                                                                 {{8,12},{4,8}},
+                                                                                 {{8,12},{8,12}},
+                                                                                 {{4,8},{8,12}},
+                                                                                 {{4,8},{0,4}}
+                                                                         }};
+
+    for (int z = 0; z < 6; ++z) {
+        auto [ix, iy] = intervals[z];
+        if (g.x >= ix.x && g.x < ix.y && g.y >= iy.x && g.y < iy.y) {
+            // fraction à l’intérieur du sextant
+            float rx1 = (g.x % 4)     /4.f;
+            float ry1 = (g.y % 4)     /4.f;
+            float mid_r_x = (rx1 + (rx1+1/4.f))*0.5f;
+            float mid_r_y = (ry1 + (ry1+1/4.f))*0.5f;
+
+            // calcul de la position « à plat »
+            Vector2f s1 = v123[z] * 0.5f;
+            Vector2f s2 = v123[(z + 2) % 6] * 0.5f;
+            Vector2f corner = mid + v123[(z + 4) % 6];
+            Vector2f U1 = v123[(z + 1) % 6] * ry1 - s1 * ry1 + s2;
+            Vector2f midU = v123[(z + 1) % 6] * mid_r_y - s1 * mid_r_y + s2;
+            return corner + s1 * mid_r_y + midU * mid_r_x;
+        }
+    }
+    return mid; // fallback
+}
+
+
 
 // 1) Ce helper instantie les mêmes v123, vabc, intervals que Model
 Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
@@ -215,7 +268,7 @@ Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
             Vector2f pos = corner + s1 * mid_r_y + midU * mid_r_x;
 // Rotation de -90° autour du centre
             const float angle = M_PI / 3; // -90° en radians
-            pos = rotateAroundCenter(pos, mid, angle);
+           pos = rotateAroundCenter(pos, mid, angle);
             return pos;
         }
     }
@@ -272,30 +325,59 @@ void YaltaChessView::draw()
         // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
                 for (Case* c : model.getCases())
                 c->setPiece(nullptr);
-       for (Piece* p : model.getPieces())
-            {
-                        // centre de la case en pixels
-                Cube c = p->getPositionCube();
-                Vector2f center = gridToPixel(Hex::cubeVersGrille(c));
-                        // recherche de la case qui contient ce centre
-                        for (Case* c : model.getCases())
-                        {
-                                if (c->contientPoint(center))
-                                    {
-                                                c->setPiece(p);
-                                                break;
-                                            }
-                                }
-                    }
+    // Puis on relie chaque Piece* à sa Case* en O(1)
+    for (Piece* p : model.getPieces()) {
+        Case* ca = model.getCaseAtCube(p->getPositionCube());
+        if (ca) {
+            ca->setPiece(p);
+        }
+    }
+
+
+    // --- MISE À JOUR DES ptr de pièce dans chaque case ---
+    // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
 
 
 
-    // 1) dessin de toutes les cases en mode normal
+/*
+// 1) D'abord, on vide toutes les cases
+    for (int i = 0; i < model.getCases().size(); ++i) {
+        Case* caseActuelle = model.getCases()[i];
+        caseActuelle->setPiece(nullptr);
+    }
+
+// 2) Pour chaque pièce, on calcule sa position en pixels
+    for (int j = 0; j < model.getPieces().size(); ++j) {
+        Piece* pieceActuelle = model.getPieces()[j];
+
+        // a) position cube de la pièce
+        Cube positionCube = pieceActuelle->getPositionCube();
+        // b) conversion cube → grille (Vector2i)
+        Vector2i positionGrille = Hex::cubeVersGrille(positionCube);
+        // c) conversion grille → pixel (Vector2f)
+        Vector2f positionPixel = gridToPixelRaw(positionGrille);
+
+        // 3) On cherche la case correspondante
+        for (int k = 0; k < model.getCases().size(); ++k) {
+            Case* caseTest = model.getCases()[k];
+            if (caseTest->contientPoint(positionPixel)) {
+                caseTest->setPiece(pieceActuelle);
+                break;  // on sort dès qu’on a trouvé
+            }
+        }
+    }
+*/
+
+
+
+
+
+    // dessin de toutes les cases en mode normal
     for (Case* c : model.getCases()) {
         window.draw(*c);
     }
 
-// 2) dessin des cases surlignées (sélection + coups légaux) en vert semi-transparent
+// dessin des cases surlignées (sélection + coups légaux) en vert semi-transparent
     for (Case* c : highlightedCases) {
         ConvexShape highlight = c->getShape(); // copie
         if (selectedCase && c == selectedCase) {
@@ -314,7 +396,7 @@ void YaltaChessView::draw()
 
 
 
-// 3) dessin de la case sous le curseur en orange
+// dessin de la case sous le curseur en orange
     if (hoveredCase) {
         ConvexShape highlight = hoveredCase->getShape();   // copie
         highlight.setFillColor(Color(255, 220, 130, 240)); // orange
