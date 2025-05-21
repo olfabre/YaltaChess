@@ -39,54 +39,13 @@ bool Pion::mouvementValide(Cube nouvellePos) const
     return std::find(moves.begin(), moves.end(), nouvellePos) != moves.end();
 }
 
-
-
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
-    //return Hex::movesPion(positionCube, model, couleur);
-
-
-
-
-    vector<Cube> moves;
-    Cube pos   = getPositionCube();
-    int coul   = static_cast<int>(getCouleur());
-
-    // --- 0) On récupère le Side de la case d'origine pour faire nos filtres
-    Case* origCase = model.getCaseAtCube(pos);
-    Side origSide = origCase ? origCase->getSide() : Side::White;
-
-
-    std::cout << "[getLegalMoves] posCube="
-              << "(" << pos.x << "," << pos.y << "," << pos.z << ") "
-              << "couleur=" << couleur << "\n";
-
-
-
-    // --- 1) Avance simple (UNIQUEMENT DANS LE MÊME SECTEUR)
-    auto d = dirAvance[coul];
-    Cube dest = { pos.x + d.x, pos.y + d.y, pos.z + d.z };
-    if (auto c = model.getCaseAtCube(dest)) {
-        // on vérifie qu'elle n'est pas occupée ET qu'elle est bien dans le même Side
-        if (!c->estOccupee() && c->getSide() == origSide) {
-            moves.push_back(dest);
-        }
-    }
-
-    // --- 2) Captures diagonales (TOUJOURS DANS LE MÊME SECTEUR)
-    for (auto dc : dirCapture[coul]) {
-        Cube cap = { pos.x + dc.x, pos.y + dc.y, pos.z + dc.z };
-        if (auto c = model.getCaseAtCube(cap)) {
-            // côté identique à l'origine, case occupée par un adversaire
-            if (c->getSide() == origSide
-                && c->estOccupee()
-                && c->getPiece()->getCouleur() != getCouleur()) {
-                moves.push_back(cap);
-            }
-        }
-    }
-
-    return moves;
+    std::cout << "[getLegalMoves] posCube=(" << positionCube.x << "," 
+              << positionCube.y << "," << positionCube.z 
+              << ") couleur=" << static_cast<int>(couleur) << "\n";
+    return Hex::movesPion(positionCube, model, couleur);
 }
+
 string Pion::getTypeName() const {
     return "Pion";
 }

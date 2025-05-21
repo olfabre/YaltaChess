@@ -26,11 +26,12 @@ class Model
 private:
     // … vos membres existants …
     vector<PlayerInfo> players;
-    int currentPlayerIdx;  // index dans players du joueur dont c'est le tour
+    int currentPlayerIdx = 0;  // index dans players du joueur dont c'est le tour
     vector<Case *> cases;
     vector<Piece*> pieces; // mes instances de Pion/ Tour/ Fou / Cavalier / Dame / Roi.
     static constexpr float WIDTH = 800.f;
     static constexpr float HEIGHT = 800.f;
+    Cube lastMove;  // Stocke le dernier mouvement effectué
 
     //void ajouterCase(const vector<Vector2f>& points, bool estBlanc);
     /*void ajouterCase(const std::vector<sf::Vector2f>& points,
@@ -41,8 +42,6 @@ private:
 
     // accès O(1) à la case par cube
     std::unordered_map<Cube, Case*, CubeHash> caseMap;
-
-
 
     void initialiserEchiquier();
     void initialiserPieces();
@@ -62,7 +61,6 @@ public:
     // Retourne la Case* correspondant à une position grille (ou nullptr)
     //Case* getCaseAt(const sf::Vector2i& pos) const;
 
-
     int getCurrentPlayerIdx() const { return currentPlayerIdx; }
 
     const vector<Case *> &getCases() const { return cases; }
@@ -75,6 +73,14 @@ public:
     void movePieceCube(Piece* p, const Cube& dest);
     // Vrai si une pièce occupe la case
     bool isOccupied(sf::Vector2i pos) const;
+    
+    // Retourne le dernier mouvement effectué
+    Cube getLastMove() const { return lastMove; }
+    // Met à jour le dernier mouvement
+    void setLastMove(const Cube& move) { lastMove = move; }
+
+    void movePiece(Piece* piece, const Cube& destination);
+    void nextPlayer();
 };
 
 #endif
