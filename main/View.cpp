@@ -89,16 +89,31 @@ void YaltaChessView::initBorderLabels()
     const float WIDTH    = 1000.f;
     const float OFFSET   = 50.f;
     const float OUTSET   = 25.f;  // distance label → bordure
+/*
 
-    // Étiquettes par côté (horaire)
     const vector<vector<string>> labels = {
-            /* 0 (num.)   */ { "8","7","6","5","9","10","11","12" },
-            /* 1 (lettres)*/ { "l","k","j","i","e","f","g","h"       },
-            /* 2 (num.)   */ { "12","11","10","9","4","3","2","1"    },
-            /* 3 (lettres)*/ { "h","g","f","e","d","c","b","a"       },
-            /* 4 (num.)   */ { "1","2","3","4","5","6","7","8"       },
-            /* 5 (lettres)*/ { "a","b","c","d","i","j","k","l"       }
+           { "8","7","6","5","9","10","11","12" },
+           { "l","k","j","i","e","f","g","h"       },
+           { "12","11","10","9","4","3","2","1"    },
+           { "h","g","f","e","d","c","b","a"       },
+           { "1","2","3","4","5","6","7","8"       },
+           { "a","b","c","d","i","j","k","l"       }
     };
+*/
+
+
+    const vector<vector<string>> labels = {
+            { "l","k","j","i","e","f","g","h" }, //good
+            { "12","11","10","9","4","3","2","1"       },//good
+            { "h","g","f","e","d","c","b","a"    }, //good
+            { "1","2","3","4","5","6","7","8"       }, //good
+            { "a","b","c","d","i","j","k","l"       },
+            { "8","7","6","5","9","10","11","12"       } //good
+    };
+
+
+
+
 
     Vector2f mid(WIDTH/2.f + OFFSET, WIDTH/2.f + OFFSET);
     float size   = WIDTH/2.f;
@@ -152,12 +167,15 @@ void YaltaChessView::initBorderLabels()
             );
 
             // override angles pour côtés lettres
-            float angleDeg = baseAngle;
-            if      (k == 1) angleDeg = 240.f;
-            else if (k == 3) angleDeg =   0.f;
-            else if (k == 5) angleDeg = 120.f;
+            // on décide si la face k est numérique (1,3,5) ou alphabétique (0,2,4)
+            bool isNumberSide = (k == 1 || k == 3 || k == 5);
+// on ajoute –45° pour les chiffres, +45° pour les lettres
+            float extraAngle = isNumberSide ? +360.f : +90.f;
+// on oriente chaque label à baseAngle + décalage souhaité
+            txt.setRotation(sf::degrees(baseAngle + extraAngle));
 
-            txt.setRotation(degrees(angleDeg));
+
+            //txt.setRotation(degrees(angleDeg));
             txt.setPosition(pos);
             borderLabels.push_back(txt);
         }
@@ -281,7 +299,7 @@ Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
 
             //return corner + s1 * mid_r_y + midU * mid_r_x;
             Vector2f pos = corner + s1 * mid_r_y + midU * mid_r_x;
-// Rotation de -90° autour du centre
+            // Rotation de -90° autour du centre
             //const float angle = M_PI / 3; // -90° en radians
            //pos = rotateAroundCenter(pos, mid, angle);
             return pos;
@@ -422,10 +440,16 @@ void YaltaChessView::draw()
     }
 
 
+// =========== NOUVEAU ===========
+       // On a fini tout ce qui doit être dans la vue « échiquier ».
+                // On repasse maintenant au repère normal pour les labels,
+                        // les noms de joueurs, les menus, etc.
+                                //window.setView(window.getDefaultView());
+        // ===============================
 
     for (auto& txt : borderLabels)
         window.draw(txt);
-
+    //window.setView(window.getDefaultView());
 
 
 
@@ -460,10 +484,17 @@ void YaltaChessView::draw()
             case NOIR:  angleDeg =  -30.f; break;  // en haut-droite
 
         }
-        float a = angleDeg * 3.14159265f / 180.f;
+
+        //float boardRotDeg   = boardView.getRotation().asDegrees();     // -60°
+        float worldAngleDeg = angleDeg + boardView.getRotation().asDegrees();                  // ex : 90 + (-60) = 30
+        float a = worldAngleDeg * 3.14159265f / 180.f;
 
         // 2) Positionne le texte & le cercle
         Vector2f pos = mid + Vector2f(std::cos(a), std::sin(a)) * infoRadius;
+
+        float viewRotDeg  = boardView.getRotation().asDegrees();   // ex. -60
+        float labelRotDeg = angleDeg - viewRotDeg;
+
 
         // Cercle indicateur (vert si actif, rouge sinon)
         CircleShape dot(8.f);
@@ -489,8 +520,11 @@ void YaltaChessView::draw()
                    p.isHuman ? "Vous" : p.name,
                    20);
         label.setFillColor(Color::Yellow);
+
+        // **Orienter le texte** en sens anti-horaire vers le haut
+        label.setRotation(sf::degrees(-viewRotDeg  - 120.f));
         // aligne un peu à droite du point
-        label.setPosition(pos + Vector2f(-20.f, -10.f));
+        label.setPosition(pos + Vector2f(-30.f, -10.f));
         window.draw(label);
     }
 
@@ -522,6 +556,8 @@ void YaltaChessView::draw()
         Cube c = p->getPositionCube();
         Vector2f pos = gridToPixel(Hex::cubeVersGrille(c));
         spr.setPosition(pos);
+        float undo = -boardView.getRotation().asDegrees();   // si vue = -60°, undo = +60°
+        spr.setRotation(sf::degrees(-60.0f));
         if (p->getCouleur() == ROUGE)
             spr.setColor(Color(195,83,51));
 
@@ -550,6 +586,7 @@ void YaltaChessView::draw()
         maskSpr.setOrigin({ maskTex.getSize().x/2.f,
                             maskTex.getSize().y/2.f });
         maskSpr.setPosition(pos);
+        maskSpr.setRotation(sf::degrees(-60.0f));
         maskSpr.setColor(outlineColor);
 
 // 2) on dessine 8 copies décalées du mask pour former le liseré
