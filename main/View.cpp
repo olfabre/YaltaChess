@@ -6,6 +6,9 @@
 #include "ResourceManager.h"
 #include <array>
 #include <cmath> // pour std::cos et std::sin
+
+
+
 using namespace sf;
 using namespace std;
 
@@ -64,6 +67,18 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
 
     // Initialise tous les labels
     initBorderLabels();
+
+    // --- initialisation de la vue tournée du plateau ---
+    float BOARD_SIZE = 1000.f;
+    float OFFSET     = 50.f;
+    Vector2f mid(OFFSET + BOARD_SIZE/2.f, OFFSET + BOARD_SIZE/2.f);
+
+    boardView = window.getDefaultView();   // copie les dimensions de la fenêtre
+    boardView.setCenter(mid);              // centre géométrique du plateau
+    boardView.setRotation(sf::degrees(-60.f));           // +60° sens horaire ; mettez -60.f si besoin
+
+
+
     blinkClock.restart();
 
 }
@@ -267,8 +282,8 @@ Vector2f YaltaChessView::gridToPixel(const Vector2i& g) const {
             //return corner + s1 * mid_r_y + midU * mid_r_x;
             Vector2f pos = corner + s1 * mid_r_y + midU * mid_r_x;
 // Rotation de -90° autour du centre
-            const float angle = M_PI / 3; // -90° en radians
-           pos = rotateAroundCenter(pos, mid, angle);
+            //const float angle = M_PI / 3; // -90° en radians
+           //pos = rotateAroundCenter(pos, mid, angle);
             return pos;
         }
     }
@@ -297,6 +312,7 @@ void YaltaChessView::draw()
             Vector2f(-size*0.5f,  height),
             Vector2f(-size,       0      )
     };
+    window.setView(boardView);
     window.clear(Color::Black);
 
     // Dessin du plateau et des labels (inchangé)
@@ -404,6 +420,7 @@ void YaltaChessView::draw()
         highlight.setOutlineThickness(2.f);
         window.draw(highlight);
     }
+
 
 
     for (auto& txt : borderLabels)

@@ -22,6 +22,7 @@ private:
     RenderWindow &window;
     const Model &model;
     Clock blinkClock; // mesure le temps pour le clignotement
+    sf::View boardView;
 
     // police et labels bordure
     Font coordFont;
@@ -43,6 +44,7 @@ public:
     void clearHighlights() { highlightedCases.clear(); }
     void draw();
     void setHighlightedCases(const std::vector<Case*>& cases);
+    const sf::View& getBoardView() const { return boardView; }
 };
 
 #endif
