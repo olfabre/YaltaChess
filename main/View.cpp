@@ -53,7 +53,7 @@ namespace {
 
 
 YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
-        : window(win), model(mod)
+        : window(win), model(mod), eventText(tempFont)
 {
     // Charge la police (unique, tirée de ton dossier de ressources)
     // Charge la police (SFML 3)
@@ -64,6 +64,13 @@ YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
     auto fontPath = execPath / "Roboto-Regular.ttf";
     if (!coordFont.openFromFile(fontPath.string()))
         throw runtime_error("Impossible de charger Roboto-Regular.ttf");
+
+    // Configure le texte d'événement
+    eventText.setFont(coordFont);
+    eventText.setString("Bienvenue dans Yalta Chess !");
+    eventText.setCharacterSize(24);
+    eventText.setFillColor(Color::White);
+    eventText.setPosition(Vector2f(20.f, 20.f)); // Position en haut à gauche
 
     // Initialise tous les labels
     initBorderLabels();
@@ -332,6 +339,11 @@ void YaltaChessView::draw()
     };
     window.setView(boardView);
     window.clear(Color::Black);
+
+    // Dessin du texte d'événement (en mode coordonnées fenêtre)
+    window.setView(window.getDefaultView());
+    window.draw(eventText);
+    window.setView(boardView);
 
     // Dessin du plateau et des labels (inchangé)
     ConvexShape whiteBorder;
@@ -608,4 +620,8 @@ void YaltaChessView::draw()
 // View.cpp
 void YaltaChessView::setHighlightedCases(const std::vector<Case*>& cases) {
     highlightedCases = cases;
+}
+
+void YaltaChessView::setEventMessage(const string& message) {
+    eventText.setString(message);
 }

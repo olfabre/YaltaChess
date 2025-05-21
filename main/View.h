@@ -26,7 +26,9 @@ private:
 
     // police et labels bordure
     Font coordFont;
+    Font tempFont; // Police temporaire pour l'initialisation
     vector<Text> borderLabels;
+    Text eventText; // Texte pour afficher les événements du jeu
 
     void initBorderLabels();
     // helper pour convertir une position grille (x,y) en pixel centre de case
@@ -45,6 +47,7 @@ public:
     void draw();
     void setHighlightedCases(const std::vector<Case*>& cases);
     const sf::View& getBoardView() const { return boardView; }
+    void setEventMessage(const string& message); // Nouvelle méthode pour mettre à jour le message d'événement
 };
 
 #endif

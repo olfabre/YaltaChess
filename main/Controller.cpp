@@ -3,6 +3,7 @@
 #include "Controller.h"
 #include "View.h"
 #include "HexagonalCubique.h"
+#include "CubeToLabel.h"
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>  // pour Mouse::Button
 #include <algorithm>
@@ -77,6 +78,12 @@ void Controller::handleEvent(const sf::Event& event)
     }
     if (!clickedCase) return;
 
+    // Affiche les coordonnées cube et le label de la case cliquée
+    Cube cubePos = clickedCase->getCubePos();
+    std::cout << "Case cliquée - Coordonnées cube : ("
+              << cubePos.x << ", " << cubePos.y << ", " << cubePos.z << ")"
+              << " → Label : " << cubeToLabel(cubePos) << std::endl;
+
     // Récupère la couleur du joueur courant
     Couleur couleurCourante = model.getPlayers()[model.getCurrentPlayerIdx()].color;
 
@@ -100,7 +107,16 @@ void Controller::handleEvent(const sf::Event& event)
         if (pieceToMove) {
             // On déplace la pièce
             model.movePieceCube(pieceToMove, clickedCase->getCubePos());
-            
+
+            // On met à jour le message d'événement
+            string message = string("Le joueur ") +
+                             (pieceToMove->getCouleur() == BLANC ? "Blanc" :
+                              pieceToMove->getCouleur() == NOIR ? "Noir" : "Rouge") +
+                             " a déplacé son " + pieceToMove->getTypeName() +
+                             " de " + cubeToLabel(selectedCase->getCubePos()) +
+                             " vers " + cubeToLabel(clickedCase->getCubePos());
+            view.setEventMessage(message);
+
             // On réinitialise la sélection
             selectedCase = nullptr;
             view.setSelectedCase(nullptr);
