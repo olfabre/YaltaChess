@@ -71,7 +71,7 @@ static const std::pair<int,int> SETUP[12][12] = {
 
 Model::Model() {
     initialiserEchiquier();
-    //ÒrealignerPieces();
+    realignerPieces();
     initialiserPieces();
     initialiserJoueurs();
     lastMove = Cube{0, 0, 0};  // Initialisation du dernier mouvement
@@ -378,7 +378,8 @@ Piece* Model::getPieceAtCube(const Cube& c) const {
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-    if (!p) return;
+    //if (!p) return;
+    if (!p || !p->mouvementValide(dest)) return;   // garde-fou
     
     // Calculer le mouvement effectué
     Cube move = {

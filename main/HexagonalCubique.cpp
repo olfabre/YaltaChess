@@ -2,6 +2,18 @@
 #include "Model.h"
 #include <iostream>
 
+const std::array<Cube,3> ADV = {
+        Cube{ 0,+1,-1},   // White  (side « bas »)
+        Cube{-1, 0,+1},   // Red    (haut-gauche)
+        Cube{+1,-1, 0}    // Black  (haut-droit)
+};
+const std::array<std::array<Cube,2>,3> CAP = {{
+       /* White  */ { Cube{+1, 0,-1}, Cube{-1,+1, 0} },
+       /* Red    */ { Cube{ 0,+1,-1}, Cube{-1, 0,+1} },
+        /* Black  */ { Cube{+1,-1, 0}, Cube{ 0,-1,+1} }
+                                              }};
+
+
 namespace Hex {
 
     vector<Cube> movesCavalier(const Cube pos, const Model& model, Couleur couleur) {
@@ -26,23 +38,41 @@ namespace Hex {
     }
 
     vector<Cube> movesTour(const Cube pos, const Model& model, Couleur couleur) {
-        return movesCavalier(pos, model, couleur);
+        return movesTour(pos, model, couleur);
     }
 
     vector<Cube> movesFou(const Cube pos, const Model& model, Couleur couleur) {
-        return movesCavalier(pos, model, couleur);
+        return movesFou(pos, model, couleur);
     }
 
     vector<Cube> movesDame(const Cube pos, const Model& model, Couleur couleur) {
-        return movesCavalier(pos, model, couleur);
+        return movesDame(pos, model, couleur);
     }
 
     vector<Cube> movesRoi(const Cube pos, const Model& model, Couleur couleur) {
-        return movesCavalier(pos, model, couleur);
+        return movesRoi(pos, model, couleur);
     }
 
-    vector<Cube> movesPion(const Cube pos, const Model& model, Couleur couleur) {
-        return movesCavalier(pos, model, couleur);
+    vector<Cube> Hex::movesPion(const Cube pos, const Model& model, Couleur c)
+    {
+        vector<Cube> res;
+        int idx = (c==BLANC)?0 : (c==ROUGE)?1 : 2;
+
+        // avance simple
+        Cube fwd = pos + ADV[idx];
+        if (auto ca = model.getCaseAtCube(fwd); ca && !model.getPieceAtCube(fwd))
+            res.push_back(fwd);
+
+        // captures
+        for (Cube d : CAP[idx]) {
+            Cube dst = pos + d;
+            if (auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=c)
+                res.push_back(dst);
+        }
+
+        // TODO : double-pas initial, promotion, en-passant
+
+        return res;
     }
 
 }
