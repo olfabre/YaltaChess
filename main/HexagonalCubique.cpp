@@ -8,23 +8,37 @@
 using std::array;
 using std::vector;
 
-// ───────────────── utilitaire ────────────────────────────
-inline Cube operator+(Cube a, Cube b) { return {a.x+b.x, a.y+b.y, a.z+b.z}; }
 
+// ───────────────── utilitaires bas niveau ───────────────────────────
+inline Cube operator+(Cube a, Cube b){ return {a.x+b.x, a.y+b.y, a.z+b.z}; }
 
-
-
-// ──────────── directions correctes (testées) ─────────────
-// 0 = BLANC (bas)  1 = ROUGE (haut-gauche)  2 = NOIR (haut-droit)
-static const Cube D[6] = {
+static const Cube DIR[6] = {                    // les 6 directions cube
         {+1,-1,0},{+1,0,-1},{0,+1,-1},
         {-1,+1,0},{-1,0,+1},{0,-1,+1}
 };
-
-// Les deux cases diagonales adjacentes au vecteur d’avance
-static int dirIndex(Cube v){
-    for(int i=0;i<6;++i) if(D[i].x==v.x&&D[i].y==v.y&&D[i].z==v.z) return i;
+static int dirIndex(Cube v){                    // 0‥5 → pour les diagonales
+    for(int i=0;i<6;++i) if(DIR[i].x==v.x && DIR[i].y==v.y && DIR[i].z==v.z) return i;
     return -1;
+}
+
+// ───────────────── centre “réel” du plateau ─────────────────────────
+static double CX=0,CY=0,CZ=0;   // centre géométrique (double)
+static bool centreInit=false;
+
+static void initCentre(const Model& model)
+{
+    if (centreInit) return;
+    long long sx=0, sy=0, sz=0; size_t n=0;
+    for (const Case* c : model.getCases()){      // Model::getCases() existe déjà
+        Cube q = c->getCubePos();
+        sx+=q.x; sy+=q.y; sz+=q.z; ++n;
+    }
+    CX = double(sx)/n; CY = double(sy)/n; CZ = double(sz)/n;
+    centreInit = true;
+}
+inline double dist2Centre(Cube c){
+    double dx=c.x-CX, dy=c.y-CY, dz=c.z-CZ;
+    return dx*dx + dy*dy + dz*dz;                // distance euclidienne²
 }
 
 
@@ -67,47 +81,48 @@ namespace Hex {
         return movesRoi(pos, model, couleur);
     }
 
-    vector<Cube> movesPion(const Cube pos,const Model& model,Couleur)
+    vector<Cube> movesPion(const Cube pos, const Model& model, Couleur)
     {
-        Case* cur = model.getCaseAtCube(pos);      // position actuelle
+        Case* cur = model.getCaseAtCube(pos);
         if(!cur) return {};
-        const int side = cur->getSide();           // 0 = bas, 1 = gauche, 2 = droite
 
-        // 2.1  vecteurs “avant” pour chaque side  (deux branches)
-        Cube cand1, cand2;                  // deux candidats par side
-        switch(side){                       // 0 = bas, 1 = gauche, 2 = droite
-            case 0: cand1={-1,0, +1}; cand2={+1,-1,0};  break;
-            case 1: cand1={+1,-1,0};  cand2={ 0,+1,-1}; break;
-            case 2: cand1={ 0,+1,-1}; cand2={-1,0,+1};  break;
-            default: return {};
+        initCentre(model);
+
+        // 1) trouver l’unique direction qui augmente le plus la distance au centre
+        Cube bestDir{0,0,0};                // initial : invalide
+        double bestDist = -1.0;
+        for (Cube d : DIR){
+            Cube nxt = pos + d;
+            if (!model.getCaseAtCube(nxt)) continue; // hors plateau
+            double d2 = dist2Centre(nxt);
+            if (d2 > bestDist){ bestDist = d2; bestDir = d; }
         }
+        if (bestDist < 0) return {};        // impossible (devrait jamais arriver)
 
-        // On teste le premier ; s’il mène hors-plateau on prend le second
-        Cube fwd = model.getCaseAtCube(pos + cand1) ? cand1 : cand2;
-
-
-
-        // 2.3  diagonales = directions adjacentes dans D
-        int k = dirIndex(fwd);                   // 0..5
-        Cube cap1 = D[(k+5)%6], cap2 = D[(k+1)%6];
+        // 2) diagonales de prise = directions voisines
+        int k = dirIndex(bestDir);
+        Cube cap1 = DIR[(k+5)%6], cap2 = DIR[(k+1)%6];
 
         vector<Cube> res;
 
-        // a) avance simple
-        Cube step = pos + fwd;
-        std::cout << "step -> " << cubeToLabel(step)
-                  << "  piece? " << (model.getPieceAtCube(step) ? "OUI":"non") << '\n';
-
-        if(model.getCaseAtCube(step) && !model.getPieceAtCube(step))
+        // a) avance simple (si la case est vide)
+        Cube step = pos + bestDir;
+        if (model.getCaseAtCube(step) && !model.getPieceAtCube(step))
             res.push_back(step);
 
         // b) captures
-        for(Cube d : {cap1,cap2}){
+        for (Cube d : {cap1,cap2}){
             Cube dst = pos + d;
-            if(auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=cur->getPiece()->getCouleur())
+            if (auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=cur->getPiece()->getCouleur())
                 res.push_back(dst);
         }
-        return res;      // (double-pas, promotion : à coder plus tard)
+
+        // DEBUG ► supprime ou commente ces 2 lignes si tu ne veux plus de traces
+        std::cout << "[Pawn " << cubeToLabel(pos) << "] moves = ";
+        for(Cube c : res) std::cout << cubeToLabel(c) << ' '; std::cout << '\n';
+
+        return res;   // (double-pas, promotion … viendront plus tard)
     }
+
 
 }
