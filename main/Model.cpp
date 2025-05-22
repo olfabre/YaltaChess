@@ -117,25 +117,19 @@ void Model::initialiserPieces() {
                 default: cc = BLANC;
             }
 
-            unique_ptr<Piece> p;
+            string pieceType;
             switch(type) {
-                case 0: p = make_unique<Roi>(c, cc, this);       break;
-                case 1: p = make_unique<Pion>(c, cc, this);      break;
-                case 2: p = make_unique<Cavalier>(c, cc, this);  break;
-                case 3: p = make_unique<Fou>(c, cc, this);       break;
-                case 4: p = make_unique<Tour>(c, cc, this);      break;
-                case 5: p = make_unique<Dame>(c, cc, this);      break;
+                case 0: pieceType = "Roi"; break;
+                case 1: pieceType = "Pion"; break;
+                case 2: pieceType = "Cavalier"; break;
+                case 3: pieceType = "Fou"; break;
+                case 4: pieceType = "Tour"; break;
+                case 5: pieceType = "Dame"; break;
+                default: continue;
             }
 
+            auto p = PieceFactory::createPiece(pieceType, c, cc, this);
             if (!p) continue;
-
-            string couleur;
-            switch(coul){
-                case 0: couleur = "BLANC"; break;
-                case 1: couleur = "ROUGE"; break;
-                case 2: couleur = "NOIR";  break;
-                default: couleur = "BLANC";
-            }
 
             pieces.push_back(std::move(p));
             ca->setPiece(pieces.back().get());
@@ -344,26 +338,19 @@ Piece* Model::getPieceAtCube(const Cube& c) const {
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-    //if (!p) return;
-    if (!p || !p->mouvementValide(dest)) return;   // garde-fou
+    if (!p || !p->mouvementValide(dest)) return;
     
-    // Calculer le mouvement effectué
-    Cube move = {
-        dest.x - p->getPositionCube().x,
-        dest.y - p->getPositionCube().y,
-        dest.z - p->getPositionCube().z
-    };
-    
-    // Mettre à jour le dernier mouvement
-    setLastMove(move);
+    Cube oldPos = p->getPositionCube();
     
     // Gérer la capture si nécessaire
     if (auto captured = getPieceAtCube(dest)) {
         removePiece(captured);
+        notifyPieceCaptured(captured);
     }
     
     // Déplacer la pièce
     deplacerPiece(p, dest);
+    notifyPieceMoved(p, oldPos, dest);
     
     // Passer au joueur suivant
     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
@@ -560,10 +547,12 @@ void Model::verifierFinPartie() {
                 case ROUGE: gagnant = "Les blancs"; break;
             }
             messageFinPartie = "Échec et mat ! " + gagnant + " ont gagné.";
+            notifyGameStateChanged(true, messageFinPartie);
         }
     } else if (!aMouvementsLegaux(joueurActuel)) {
         partieTerminee = true;
         messageFinPartie = "Pat ! La partie est nulle.";
+        notifyGameStateChanged(true, messageFinPartie);
     }
 }
 

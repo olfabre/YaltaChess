@@ -7,9 +7,13 @@
 #include "Controller.h"
 #include "HexagonalCubique.h"
 #include <iostream>
+#include "GameLogger.h"
 
 using namespace sf;
 using namespace std;
+
+// Création du logger en tant que variable globale
+GameLogger logger;
 
 int main()
 {
@@ -38,15 +42,14 @@ int main()
     // Chargement des textures de pièces (PNG)
     ResourceManager::loadAll();   // chargé une seule fois
 
-
     // Initialisation du jeu
     Model model;
-
 
     YaltaChessView YaltaChessView(window, model);
     Controller controller(model, YaltaChessView);
 
-
+    // Ajout du logger au modèle
+    model.addObserver(&logger);
 
     // Boucle principale du jeu
     while (window.isOpen())
@@ -64,7 +67,6 @@ int main()
 
     // **IMPORTANT** : on vide le cache de textures
     ResourceManager::unloadAll();
-
 
     return 0;
 }
