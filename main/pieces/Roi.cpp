@@ -9,27 +9,22 @@
 using namespace sf;
 using namespace std;
 
-Roi::Roi(Cube pos, Couleur coul) : Piece(pos, coul) {}
+Roi::Roi(Cube pos, Couleur coul, Model* modelPtr) : Piece(pos, coul) {
+    this->modelPtr = modelPtr;
+}
 
 bool Roi::mouvementValide(Cube nouvellePos) const {
-    int dx = abs(nouvellePos.x - positionCube.x);
-    int dy = abs(nouvellePos.y - positionCube.y);
-    int dz = abs(nouvellePos.z - positionCube.z);
-    // … test en cube …
-    return true;
+    auto mouvements = Hex::mouvementsRoi(positionCube, *modelPtr, couleur);
+    return std::find(mouvements.begin(), mouvements.end(), nouvellePos) != mouvements.end();
 }
 
 void Roi::dessiner(RenderWindow& window) const {
     // Ici, dessiner le Roi (sprite ou forme)
 }
 
-
-
-
 vector<Cube> Roi::getLegalMoves(const Model& model) const {
-    return Hex::movesRoi(positionCube, model, couleur);
+    return Hex::mouvementsRoi(positionCube, model, couleur);
 }
-
 
 string Roi::getTypeName() const {
     return "Roi";

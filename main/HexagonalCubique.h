@@ -1,4 +1,5 @@
-#pragma once
+#ifndef HEXAGONALCUBIQUE_H
+#define HEXAGONALCUBIQUE_H
 
 #include <SFML/System/Vector2.hpp>
 #include <vector>
@@ -60,8 +61,8 @@ namespace Hex {
 
 
 namespace Hex {
-    // 6 poinst cardiaux d’un hexagone en coords cubiques  (E, NE, NW, W, SW, SE)
-    static constexpr array<Cube,6> DIR = {
+    // 6 poinst cardiaux d'un hexagone en coords cubiques  (E, NE, NW, W, SW, SE)
+    static constexpr array<Cube,6> DIRECTIONS = {
             Cube{+1,-1, 0},   // 0 : Est
             Cube{+1, 0,-1},   // 1 : Nord-Est
             Cube{ 0,+1,-1},   // 2 : Nord-Ouest
@@ -119,12 +120,12 @@ namespace Hex {
 
 
 
-    vector<Cube> movesCavalier(const Cube pos,const Model& model,Couleur couleur);
-    vector<Cube> movesTour   (const Cube pos,const Model& model,Couleur couleur);
-    vector<Cube> movesFou    (const Cube pos,const Model& model,Couleur couleur);
-    vector<Cube> movesDame   (const Cube pos,const Model& model,Couleur couleur);
-    vector<Cube> movesRoi    (const Cube pos,const Model& model,Couleur couleur);
-    vector<Cube> movesPion   (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsCavalier(const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsTour   (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsFou    (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsDame   (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsRoi    (const Cube pos,const Model& model,Couleur couleur);
+    vector<Cube> mouvementsPion   (const Cube pos,const Model& model,Couleur couleur);
 
 
 
@@ -134,3 +135,5 @@ namespace Hex {
 
 
 }
+
+#endif

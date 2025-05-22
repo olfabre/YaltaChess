@@ -11,8 +11,11 @@ class Model;  // forward declaration
 
 // Classe Tour héritant de Piece
 class Tour : public Piece {
+private:
+    Model* modelPtr;
+
 public:
-    Tour(Cube pos, Couleur coul);
+    Tour(Cube pos, Couleur coul, Model* modelPtr);
     bool mouvementValide(Cube nouvellePos) const override;
     void dessiner(sf::RenderWindow& window) const override;
 

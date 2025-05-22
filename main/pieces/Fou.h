@@ -11,8 +11,11 @@ class Model;  // forward declaration
 
 // Classe Fou héritant de Piece
 class Fou : public Piece {
+private:
+    Model* modelPtr;
+
 public:
-    Fou(Cube pos, Couleur coul);
+    Fou(Cube pos, Couleur coul, Model* modelPtr);
     bool mouvementValide(Cube nouvellePos) const override;
     void dessiner(sf::RenderWindow& window) const override;
 
