@@ -105,6 +105,17 @@ void Controller::handleEvent(const sf::Event& event)
         // Sinon on déplace la pièce vers la nouvelle case
         Piece* pieceToMove = selectedCase->getPiece();
         if (pieceToMove) {
+
+            if (!pieceToMove->mouvementValide(clickedCase->getCubePos())) {
+                view.setEventMessage("Deplacement illegal : coup refuse.");
+                selectedCase = nullptr;
+                view.setSelectedCase(nullptr);
+                view.setHighlightedCases({});
+                return;   // on annule tout
+            }
+
+
+
             // On déplace la pièce
             model.movePieceCube(pieceToMove, clickedCase->getCubePos());
 
@@ -112,7 +123,7 @@ void Controller::handleEvent(const sf::Event& event)
             string message = string("Le joueur ") +
                              (pieceToMove->getCouleur() == BLANC ? "Blanc" :
                               pieceToMove->getCouleur() == NOIR ? "Noir" : "Rouge") +
-                             " a déplacé son " + pieceToMove->getTypeName() +
+                             " bouge son " + pieceToMove->getTypeName() +
                              " de " + cubeToLabel(selectedCase->getCubePos()) +
                              " vers " + cubeToLabel(clickedCase->getCubePos());
             view.setEventMessage(message);
