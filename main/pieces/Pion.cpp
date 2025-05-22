@@ -4,6 +4,8 @@
 #include <vector>
 #include <array>
 #include <iostream>
+#include "CubeToLabel.h"   // pour convertir Cube → "A1", "J7", etc.
+
 
 using namespace sf;
 using namespace std;
@@ -27,10 +29,20 @@ bool Pion::mouvementValide(Cube nouvellePos) const
 }
 
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
+
+    auto moves = Hex::movesPion(positionCube, model, couleur);   // ← récupère les coups légaux
+
+    std::cout << "Legal moves = ";
+    for (const Cube& m : moves) std::cout << cubeToLabel(m) << ' ';
+    std::cout << std::endl;
+/*
     std::cout << "[getLegalMoves] posCube=(" << positionCube.x << ","
               << positionCube.y << "," << positionCube.z
               << ") couleur=" << static_cast<int>(couleur) << "\n";
-    return Hex::movesPion(positionCube, model, couleur);
+*/
+
+
+    return moves;   // ← on renvoie quand même la liste au reste du programme
 }
 
 string Pion::getTypeName() const {
