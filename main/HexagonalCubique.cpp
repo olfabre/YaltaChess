@@ -13,18 +13,17 @@ inline Cube operator+(Cube a, Cube b) { return {a.x+b.x, a.y+b.y, a.z+b.z}; }
 
 // ──────────── directions correctes (testées) ─────────────
 // 0 = BLANC (bas)  1 = ROUGE (haut-gauche)  2 = NOIR (haut-droit)
-static const array<Cube,3> ADV = {
-        /* BLANC */ Cube{-1,  0, +1},
-        /* ROUGE */ Cube{+1, -1,  0},
-        /* NOIR  */ Cube{ 0, +1, -1}
+static const Cube D[6] = {
+        {+1,-1,0},{+1,0,-1},{0,+1,-1},
+        {-1,+1,0},{-1,0,+1},{0,-1,+1}
 };
 
 // Les deux cases diagonales adjacentes au vecteur d’avance
-static const array<array<Cube,2>,3> CAP = {{
-                                                   /* BLANC */ { Cube{-1, +1, 0}, Cube{ 0, -1, +1} },
-                                                   /* ROUGE */ { Cube{+1,  0,-1}, Cube{ 0, -1, +1} },
-                                                   /* NOIR  */ { Cube{-1, +1, 0}, Cube{+1,  0,-1} }
-                                           }};
+static int dirIndex(Cube v){
+    for(int i=0;i<6;++i) if(D[i].x==v.x&&D[i].y==v.y&&D[i].z==v.z) return i;
+    return -1;
+}
+
 
 namespace Hex {
 
@@ -65,24 +64,45 @@ namespace Hex {
         return movesRoi(pos, model, couleur);
     }
 
-    vector<Cube> movesPion(const Cube pos,const Model& model,Couleur c)
+    vector<Cube> movesPion(const Cube pos,const Model& model,Couleur)
     {
+        Case* cur = model.getCaseAtCube(pos);      // position actuelle
+        if(!cur) return {};
+        const int side = cur->getSide();           // 0 = bas, 1 = gauche, 2 = droite
+
+        // 2.1  vecteurs “avant” pour chaque side  (deux branches)
+        Cube dA, dB;
+        switch(side){
+            case 0: dA={-1,0,+1}; dB={+1,-1,0};  break;   // bas
+            case 1: dA={+1,-1,0}; dB={ 0,+1,-1}; break;   // gauche
+            case 2: dA={ 0,+1,-1}; dB={-1,0,+1}; break;   // droite
+            default: return {};
+        }
+
+        // 2.2  choisir la branche selon la coordonnée clef
+        Cube fwd;
+        if      (side==0) fwd = (pos.z >  6 ? dB : dA);
+        else if (side==1) fwd = (pos.x >  4 ? dA : dB);
+        else              fwd = (pos.y < -6 ? dA : dB);
+
+        // 2.3  diagonales = directions adjacentes dans D
+        int k = dirIndex(fwd);                   // 0..5
+        Cube cap1 = D[(k+5)%6], cap2 = D[(k+1)%6];
+
         vector<Cube> res;
-        int idx = (c==BLANC)?0 : (c==ROUGE)?1 : 2;
 
         // a) avance simple
-        Cube fwd = pos + ADV[idx];
-        if (model.getCaseAtCube(fwd) && !model.getPieceAtCube(fwd))
-            res.push_back(fwd);
+        Cube step = pos + fwd;
+        if(model.getCaseAtCube(step) && !model.getPieceAtCube(step))
+            res.push_back(step);
 
         // b) captures
-        for (Cube d : CAP[idx]) {
+        for(Cube d : {cap1,cap2}){
             Cube dst = pos + d;
-            if (auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=c)
+            if(auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=cur->getPiece()->getCouleur())
                 res.push_back(dst);
         }
-        // (avance double, promo, en-passant : à ajouter)
-        return res;
+        return res;      // (double-pas, promotion : à coder plus tard)
     }
 
 }
