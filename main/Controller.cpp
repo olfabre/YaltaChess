@@ -142,7 +142,16 @@ void Controller::handleEvent(const sf::Event& event)
         if (clickedPiece && clickedPiece->getCouleur() == couleurCourante) {
             selectedCase = clickedCase;
             view.setSelectedCase(selectedCase);
-            view.setHighlightedCases({selectedCase});
+
+            // --- nouveau : calcule et surligne tous les déplacements légaux ---
+            vector<Cube> dests = clickedPiece->getLegalMoves(model);
+            vector<Case*> hl;
+            hl.push_back(selectedCase);               // case source en orange
+
+            for (Cube c : dests)
+                if (auto ca = model.getCaseAtCube(c)) hl.push_back(ca);
+            view.setHighlightedCases(hl);
+
         }
     }
 }
