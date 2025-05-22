@@ -6,6 +6,8 @@
 #include <array>
 #include <cmath>
 #include <algorithm>
+#include <iostream>  // pour std::cout
+#include "CubeToLabel.h"   // pour convertir Cube → "A1", "J7", etc.
 
 using namespace sf;
 using namespace std;
@@ -28,7 +30,13 @@ void Cavalier::dessiner(RenderWindow& window) const {
 
 
 vector<Cube> Cavalier::getLegalMoves(const Model& model) const {
-    return Hex::mouvementsCavalier(positionCube, model, couleur);
+    auto mouvements = Hex::mouvementsCavalier(positionCube, model, couleur);
+    
+    std::cout << "Mouvements légaux Cavalier = ";
+    for(const Cube& m : mouvements) std::cout << cubeToLabel(m) << ' ';
+    std::cout << '\n';
+    
+    return mouvements;
 }
 
 

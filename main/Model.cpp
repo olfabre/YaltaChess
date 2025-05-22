@@ -92,32 +92,22 @@ Model::Model() {
  */
 
 void Model::initialiserPieces() {
-
     int compteur = 0;
 
-    for (int y = 0; y < 12; ++y) { // ligne
-        for (int x = 0; x < 12; ++x) { // colonne
-
-            // desturcturation
+    for (int y = 0; y < 12; ++y) {
+        for (int x = 0; x < 12; ++x) {
             auto [coul, type] = SETUP[y][x];
-
-            //si pas couleur, on passe à la suivante
             if (coul < 0 || type < 0) continue;
 
             ++compteur;
-            // 1) Calcule la position cube et récupère la Case
             Cube c = Hex::grilleVersCube({x,y});
-            //cout << "N°" << compteur << "ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
             Case* ca = getCaseAtCube(c);
-
 
             if (!ca) {
                 std::cout << "ERREUR: Pas de case trouvée pour la position (" << x << "," << y << ")" << std::endl;
                 std::cout << "Position cube calculée: " << c.x << "," << c.y << "," << c.z << std::endl;
                 continue;
             }
-
-            // 2) On utilise la couleur lue dans SETUP (pas besoin de side)
 
             Couleur cc;
             switch (coul) {
@@ -127,22 +117,18 @@ void Model::initialiserPieces() {
                 default: cc = BLANC;
             }
 
-
-
-            Piece* p = nullptr;
-            // on crée la piece qui reçoit ses coordonnées et sa couleur
+            unique_ptr<Piece> p;
             switch(type) {
-                case 0: p = new Roi(c, cc, this);       break;
-                case 1: p = new Pion(c, cc, this);      break;
-                case 2: p = new Cavalier(c, cc, this);  break;
-                case 3: p = new Fou(c, cc, this);       break;
-                case 4: p = new Tour(c, cc, this);      break;
-                case 5: p = new Dame(c, cc, this);      break;
+                case 0: p = make_unique<Roi>(c, cc, this);       break;
+                case 1: p = make_unique<Pion>(c, cc, this);      break;
+                case 2: p = make_unique<Cavalier>(c, cc, this);  break;
+                case 3: p = make_unique<Fou>(c, cc, this);       break;
+                case 4: p = make_unique<Tour>(c, cc, this);      break;
+                case 5: p = make_unique<Dame>(c, cc, this);      break;
             }
 
             if (!p) continue;
 
-            // debug
             string couleur;
             switch(coul){
                 case 0: couleur = "BLANC"; break;
@@ -150,41 +136,21 @@ void Model::initialiserPieces() {
                 case 2: couleur = "NOIR";  break;
                 default: couleur = "BLANC";
             }
-            //cout << "N° " << compteur << ", " << couleur << " " << p->getTypeName() << " " << cc << ", ligne/colonne " << x << "/" << y << " ->(" << c.x << ", " << c.y << ", " <<  c.z << ")" << endl;
-            // fin debug
 
+            pieces.push_back(std::move(p));
+            ca->setPiece(pieces.back().get());
+            pieces.back()->setPositionCube(ca->getCubePos());
 
-
-            // je place le pointeur de la piece dans la liste du jeu
-            pieces.push_back(p);
-
-            // on associe la piece avec la case
-            ca->setPiece(p);
-            p->setPositionCube(ca->getCubePos());
-
-
-
-            // debug
-            cout << "Coord. Piece:" << p->getTypeName() << "(" << p->getPositionCube().x << "," << p->getPositionCube().y << "," << p->getPositionCube().z << ")" << endl;
-            cout << "Coord. Case:" << ca->getPiece()->getTypeName() <<  "(" << ca->getCubePos().x << "," << ca->getCubePos().y << "," << ca->getCubePos().z << ")" << endl << endl;
-
-
-
-        } // colonne
-    } // ligne
-
-
-
-
-   //realignerPieces();
-
-
-
-
-//initialiserEchiquier();
-    //initialiserJoueurs();
-
-
+            cout << "Coord. Piece:" << pieces.back()->getTypeName() << "(" 
+                 << pieces.back()->getPositionCube().x << ","
+                 << pieces.back()->getPositionCube().y << ","
+                 << pieces.back()->getPositionCube().z << ")" << endl;
+            cout << "Coord. Case:" << ca->getPiece()->getTypeName() <<  "(" 
+                 << ca->getCubePos().x << ","
+                 << ca->getCubePos().y << ","
+                 << ca->getCubePos().z << ")" << endl << endl;
+        }
+    }
 }
 
 
@@ -216,16 +182,16 @@ void Model::initialiserJoueurs()
 
 // a la creation on initalise tout
 Model::~Model() {
-    for (auto &c : cases) delete c;
-    for(auto p: pieces) delete p;
-
+    // Plus besoin de delete car unique_ptr s'en charge
+    cases.clear();
+    pieces.clear();
 }
 
 void Model::ajouterCase(const vector<Vector2f>& points, bool estBlanc, const Cube& cubePos, Side side) {
-    Case* c = new Case(points, estBlanc, cubePos);
+    auto c = make_unique<Case>(points, estBlanc, cubePos);
     c->setSide(side);
-    cases.push_back(c);
-    caseMap[cubePos] = c;
+    caseMap[cubePos] = c.get();
+    cases.push_back(std::move(c));
 }
 
 void Model::initialiserEchiquier()
@@ -303,14 +269,14 @@ void Model::initialiserEchiquier()
 // 3) Lier les voisins intra-half-board (N/E/S/W)
 // ——————————————————————————————————————————
     auto findCase = [&](sf::Vector2i p) -> Case* {
-        for (Case* c : cases) {
+        for (const auto& c : cases) {
             if (c->getGridPos() == p)
-                return c;
+                return c.get();
         }
         return nullptr;
     };
 
-    for (Case* c : cases) {
+    for (const auto& c : cases) {
         Vector2i g = c->getGridPos();
         // on ne lie que si le voisin existe ET appartient au même side
         Case* n = findCase({ g.x,     g.y - 1 });
@@ -324,20 +290,20 @@ void Model::initialiserEchiquier()
     }
 
     // ——————————————————————————————————————————
-// Lier les frontières entre half-boards (cross-group)
-// ——————————————————————————————————————————
-// Regrouper les cases par Side
+    // Lier les frontières entre half-boards (cross-group)
+    // ——————————————————————————————————————————
+    // Regrouper les cases par Side
     array<vector<Case*>,3> bySide;
-    for (Case* c : cases)
-        bySide[c->getSide()].push_back(c);
+    for (const auto& c : cases) {
+        bySide[c->getSide()].push_back(c.get());
+    }
 
-// Pour chaque paire de côtés adjacents (White→Red, Red→Black, Black→White)
+    // Pour chaque paire de côtés adjacents (White→Red, Red→Black, Black→White)
     for (int s = 0; s < 3; ++s) {
         auto& cur = bySide[s];
         auto& nxt = bySide[(s + 1) % 3];
 
-        // Trier chaque vecteur pour isoler les 8 cases de l'arête :
-        // On ordonne d'abord par "distance au joueur" (row % 4), puis par "half-col" (col % 4).
+        // Trier chaque vecteur pour isoler les 8 cases de l'arête
         auto comp = [](Case* a, Case* b){
             auto ga = a->getGridPos(), gb = b->getGridPos();
             int rowA = ga.y % 4, rowB = gb.y % 4;
@@ -368,12 +334,12 @@ void Model::initialiserEchiquier()
 
 // Recherche la pièce dont la positionCube == c
 Piece* Model::getPieceAtCube(const Cube& c) const {
-        for (auto p : pieces) {
-                if (p->getPositionCube() == c)
-                        return p;
-            }
-        return nullptr;
+    for (const auto& p : pieces) {
+        if (p->getPositionCube() == c)
+            return p.get();
     }
+    return nullptr;
+}
 
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
@@ -401,6 +367,9 @@ void Model::movePieceCube(Piece* p, const Cube& dest) {
     
     // Passer au joueur suivant
     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+
+    // Après le mouvement, vérifier si la partie est terminée
+    verifierFinPartie();
 }
 
 bool Model::isOccupied(Vector2i pos) const {
@@ -408,11 +377,11 @@ bool Model::isOccupied(Vector2i pos) const {
     }
 
 void Model::removePiece(Piece* p) {
-    pieces.erase(
-            std::remove(pieces.begin(), pieces.end(), p),
-            pieces.end()
-    );
-    delete p;
+    auto it = std::find_if(pieces.begin(), pieces.end(),
+        [p](const unique_ptr<Piece>& piece) { return piece.get() == p; });
+    if (it != pieces.end()) {
+        pieces.erase(it);
+    }
 }
 
 
@@ -482,7 +451,7 @@ void Model::realignerPieces()
         return mid; // fallback
     };
 
-    for (Piece* p : pieces) {
+    for (const auto& p : pieces) {
         if (!p) continue;
 
         // 1. Calcul de la position pixel actuelle de la pièce
@@ -490,9 +459,9 @@ void Model::realignerPieces()
 
         // 2. Recherche de la case contenant ce point
         Case* caseTrouvee = nullptr;
-        for (Case* c : cases) {
+        for (const auto& c : cases) {
             if (c && c->contientPoint(centre)) {
-                caseTrouvee = c;
+                caseTrouvee = c.get();
                 break;
             }
         }
@@ -543,4 +512,117 @@ void Model::movePiece(Piece* piece, const Cube& destination) {
 void Model::nextPlayer() {
     // On passe au joueur suivant en boucle
     currentPlayerIdx = (currentPlayerIdx + 1) % players.size();
+}
+
+bool Model::estEnEchec(Couleur couleur) const {
+    // Trouver le roi de la couleur donnée
+    Piece* roi = nullptr;
+    for (const auto& piece : pieces) {
+        if (piece->getTypeName() == "Roi" && piece->getCouleur() == couleur) {
+            roi = piece.get();
+            break;
+        }
+    }
+    if (!roi) return false;  // Pas de roi trouvé (ne devrait pas arriver)
+
+    // Vérifier si une pièce adverse peut atteindre le roi
+    for (const auto& piece : pieces) {
+        if (piece->getCouleur() != couleur) {  // Pièce adverse
+            if (piece->mouvementValide(roi->getPositionCube())) {
+                return true;  // Le roi est en échec
+            }
+        }
+    }
+    return false;
+}
+
+bool Model::aMouvementsLegaux(Couleur couleur) const {
+    // Vérifier tous les mouvements possibles pour toutes les pièces de la couleur
+    for (const auto& piece : pieces) {
+        if (piece->getCouleur() == couleur) {
+            auto mouvements = piece->getLegalMoves(*this);
+            if (!mouvements.empty()) {
+                return true;  // Au moins un mouvement légal trouvé
+            }
+        }
+    }
+    return false;  // Aucun mouvement légal trouvé
+}
+
+void Model::verifierFinPartie() {
+    if (estEnEchec(joueurActuel)) {
+        if (!aMouvementsLegaux(joueurActuel)) {
+            partieTerminee = true;
+            string gagnant;
+            switch(joueurActuel) {
+                case BLANC: gagnant = "Les noirs"; break;
+                case NOIR: gagnant = "Les blancs"; break;
+                case ROUGE: gagnant = "Les blancs"; break;
+            }
+            messageFinPartie = "Échec et mat ! " + gagnant + " ont gagné.";
+        }
+    } else if (!aMouvementsLegaux(joueurActuel)) {
+        partieTerminee = true;
+        messageFinPartie = "Pat ! La partie est nulle.";
+    }
+}
+
+void Model::resetPartie() {
+    pieces.clear();
+    cases.clear();
+    partieTerminee = false;
+    messageFinPartie = "";
+    joueurActuel = Couleur::BLANC;
+    initialiserPieces();
+    initialiserCases();
+}
+
+void Model::initialiserCases() {
+    // Nettoyer les cases existantes
+    cases.clear();
+
+    // Créer les cases pour chaque position valide
+    for (int x = -3; x <= 9; x++) {
+        for (int y = -17; y <= 0; y++) {
+            for (int z = 0; z <= 11; z++) {
+                // Vérifier si la position est valide (x + y + z = 0)
+                if (x + y + z == 0) {
+                    // Créer une nouvelle case avec les coordonnées cube
+                    // On crée d'abord les points pour la case
+                    vector<Vector2f> points = {
+                        Vector2f(0, 0),  // Point central
+                        Vector2f(50, 0),  // Droite
+                        Vector2f(25, 43.3f),  // Bas droite
+                        Vector2f(-25, 43.3f),  // Bas gauche
+                        Vector2f(-50, 0),  // Gauche
+                        Vector2f(-25, -43.3f),  // Haut gauche
+                        Vector2f(25, -43.3f)   // Haut droite
+                    };
+                    bool estBlanc = (x + y + z) % 2 == 0;
+                    auto nouvelleCase = std::make_unique<Case>(points, estBlanc, Cube{x, y, z});
+                    cases.push_back(std::move(nouvelleCase));
+                }
+            }
+        }
+    }
+
+    // Initialiser les connexions entre les cases
+    for (const auto& c : cases) {
+        Cube pos = c->getCubePos();
+        // Vérifier les 6 directions possibles
+        for (const auto& dir : Hex::DIRECTIONS) {
+            Cube voisinPos;
+            voisinPos.x = pos.x + dir.x;
+            voisinPos.y = pos.y + dir.y;
+            voisinPos.z = pos.z + dir.z;
+            
+            if (auto voisin = getCaseAtCube(voisinPos)) {
+                // Utiliser les méthodes existantes pour définir les voisins
+                if (dir == Hex::DIRECTIONS[0]) c->setNorth(voisin);
+                else if (dir == Hex::DIRECTIONS[1]) c->setEast(voisin);
+                else if (dir == Hex::DIRECTIONS[2]) c->setSouth(voisin);
+                else if (dir == Hex::DIRECTIONS[3]) c->setWest(voisin);
+            }
+        }
+    }
 }

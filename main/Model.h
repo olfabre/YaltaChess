@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <vector>
+#include <memory>
 
 #include "HexagonalCubique.h"    // pour Cube, CubeHash
 #include "cases/Case.h"
@@ -27,11 +28,14 @@ private:
     // … vos membres existants …
     vector<PlayerInfo> players;
     int currentPlayerIdx = 0;  // index dans players du joueur dont c'est le tour
-    vector<Case *> cases;
-    vector<Piece*> pieces; // mes instances de Pion/ Tour/ Fou / Cavalier / Dame / Roi.
+    vector<unique_ptr<Case>> cases;
+    vector<unique_ptr<Piece>> pieces; // mes instances de Pion/ Tour/ Fou / Cavalier / Dame / Roi.
     static constexpr float WIDTH = 800.f;
     static constexpr float HEIGHT = 800.f;
     Cube lastMove;  // Stocke le dernier mouvement effectué
+    Couleur joueurActuel;              // joueur dont c'est le tour
+    bool partieTerminee;               // true si la partie est terminée
+    string messageFinPartie;           // message à afficher à la fin de la partie
 
     //void ajouterCase(const vector<Vector2f>& points, bool estBlanc);
     /*void ajouterCase(const std::vector<sf::Vector2f>& points,
@@ -50,6 +54,11 @@ private:
     // Supprime p de `pieces` et libère la mémoire
     void removePiece(Piece* p);
 
+    // Méthodes privées pour la gestion de l'échec et mat
+    bool estEnEchec(Couleur couleur) const;
+    bool aMouvementsLegaux(Couleur couleur) const;
+    void verifierFinPartie();
+
 public:
     Model();
     ~Model();
@@ -63,7 +72,7 @@ public:
 
     int getCurrentPlayerIdx() const { return currentPlayerIdx; }
 
-    const vector<Case *> &getCases() const { return cases; }
+    const vector<unique_ptr<Case>>& getCases() const { return cases; }
     const auto& getPieces() const { return pieces; }
     // Renvoie la pièce à la position grille donnée (ou nullptr)
 
@@ -81,6 +90,20 @@ public:
 
     void movePiece(Piece* piece, const Cube& destination);
     void nextPlayer();
+
+    void initialiserCases();
+    void movePieceGrid(Vector2i dest);
+    void dessiner(RenderWindow& window);
+    void setJoueurActuel(Couleur c) { joueurActuel = c; }
+    Couleur getJoueurActuel() const { return joueurActuel; }
+    bool isPartieTerminee() const { return partieTerminee; }
+    string getMessageFinPartie() const { return messageFinPartie; }
+    Piece* getPieceAt(Cube pos) const;
+    Case* getCaseAt(Cube pos) const;
+    Case* getCaseAt(Vector2i pos) const;
+    vector<Cube> getLegalMoves(Cube pos) const;
+    bool estMouvementLegal(Cube depart, Cube arrivee) const;
+    void resetPartie();
 };
 
 #endif
