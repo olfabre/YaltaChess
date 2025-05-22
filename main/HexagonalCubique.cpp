@@ -2,6 +2,9 @@
 #include "Model.h"
 #include <array>
 #include <vector>
+#include <iostream>
+#include "CubeToLabel.h"
+
 using std::array;
 using std::vector;
 
@@ -71,19 +74,18 @@ namespace Hex {
         const int side = cur->getSide();           // 0 = bas, 1 = gauche, 2 = droite
 
         // 2.1  vecteurs “avant” pour chaque side  (deux branches)
-        Cube dA, dB;
-        switch(side){
-            case 0: dA={-1,0,+1}; dB={+1,-1,0};  break;   // bas
-            case 1: dA={+1,-1,0}; dB={ 0,+1,-1}; break;   // gauche
-            case 2: dA={ 0,+1,-1}; dB={-1,0,+1}; break;   // droite
+        Cube cand1, cand2;                  // deux candidats par side
+        switch(side){                       // 0 = bas, 1 = gauche, 2 = droite
+            case 0: cand1={-1,0, +1}; cand2={+1,-1,0};  break;
+            case 1: cand1={+1,-1,0};  cand2={ 0,+1,-1}; break;
+            case 2: cand1={ 0,+1,-1}; cand2={-1,0,+1};  break;
             default: return {};
         }
 
-        // 2.2  choisir la branche selon la coordonnée clef
-        Cube fwd;
-        if      (side==0) fwd = (pos.z >  6 ? dB : dA);
-        else if (side==1) fwd = (pos.x >  4 ? dA : dB);
-        else              fwd = (pos.y < -6 ? dA : dB);
+        // On teste le premier ; s’il mène hors-plateau on prend le second
+        Cube fwd = model.getCaseAtCube(pos + cand1) ? cand1 : cand2;
+
+
 
         // 2.3  diagonales = directions adjacentes dans D
         int k = dirIndex(fwd);                   // 0..5
@@ -93,6 +95,9 @@ namespace Hex {
 
         // a) avance simple
         Cube step = pos + fwd;
+        std::cout << "step -> " << cubeToLabel(step)
+                  << "  piece? " << (model.getPieceAtCube(step) ? "OUI":"non") << '\n';
+
         if(model.getCaseAtCube(step) && !model.getPieceAtCube(step))
             res.push_back(step);
 
