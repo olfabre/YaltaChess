@@ -9,26 +9,22 @@
 using namespace sf;
 using namespace std;
 
-Fou::Fou(Cube pos, Couleur coul) : Piece(pos, coul) {}
+Fou::Fou(Cube pos, Couleur coul, Model* modelPtr) : Piece(pos, coul) {
+    this->modelPtr = modelPtr;
+}
 
 bool Fou::mouvementValide(Cube nouvellePos) const {
-    int dx = abs(nouvellePos.x - positionCube.x);
-    int dy = abs(nouvellePos.y - positionCube.y);
-    int dz = abs(nouvellePos.z - positionCube.z);
-    // … test en cube …
-    return true;
+    auto mouvements = Hex::mouvementsFou(positionCube, *modelPtr, couleur);
+    return std::find(mouvements.begin(), mouvements.end(), nouvellePos) != mouvements.end();
 }
 
 void Fou::dessiner(RenderWindow& window) const {
     // Dessiner le Fou
 }
 
-
-
 vector<Cube> Fou::getLegalMoves(const Model& model) const {
-    return Hex::movesFou(positionCube, model, couleur);
+    return Hex::mouvementsFou(positionCube, model, couleur);
 }
-
 
 string Fou::getTypeName() const {
     return "Fou";

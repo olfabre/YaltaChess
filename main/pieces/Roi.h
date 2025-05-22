@@ -12,8 +12,11 @@ class Model;  // forward declaration
 
 // Classe Roi héritant de Piece
 class Roi : public Piece {
+private:
+    Model* modelPtr;
+
 public:
-    Roi(Cube pos, Couleur coul);
+    Roi(Cube pos, Couleur coul, Model* modelPtr);
     bool mouvementValide(Cube nouvellePos) const override;
     void dessiner(sf::RenderWindow& window) const override;
 

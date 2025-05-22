@@ -22,18 +22,16 @@ void Pion::dessiner(RenderWindow& window) const {
     // Dessiner le Pion
 }
 
-bool Pion::mouvementValide(Cube nouvellePos) const
-{
-    auto moves = Hex::movesPion(positionCube, *modelPtr, couleur);
-    return std::find(moves.begin(), moves.end(), nouvellePos) != moves.end();
+bool Pion::mouvementValide(Cube nouvellePos) const {
+    auto mouvements = Hex::mouvementsPion(positionCube, *modelPtr, couleur);
+    return std::find(mouvements.begin(), mouvements.end(), nouvellePos) != mouvements.end();
 }
 
 vector<Cube> Pion::getLegalMoves(const Model& model) const {
+    auto mouvements = Hex::mouvementsPion(positionCube, model, couleur);   // ← récupère les coups légaux
 
-    auto moves = Hex::movesPion(positionCube, model, couleur);   // ← récupère les coups légaux
-
-    std::cout << "Legal moves = ";
-    for(const Cube& m : moves) std::cout << cubeToLabel(m) << ' ';
+    std::cout << "Mouvements légaux = ";
+    for(const Cube& m : mouvements) std::cout << cubeToLabel(m) << ' ';
     std::cout << '\n';
 /*
     std::cout << "[getLegalMoves] posCube=(" << positionCube.x << ","
@@ -42,7 +40,7 @@ vector<Cube> Pion::getLegalMoves(const Model& model) const {
 */
 
 
-    return moves;   // ← on renvoie quand même la liste au reste du programme
+    return mouvements;   // ← on renvoie quand même la liste au reste du programme
 }
 
 string Pion::getTypeName() const {
