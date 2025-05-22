@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 #include <cmath>
+#include <iostream>  // pour std::cout
+#include "CubeToLabel.h"   // pour convertir Cube → "A1", "J7", etc.
 
 using namespace sf;
 using namespace std;
@@ -25,7 +27,13 @@ void Dame::dessiner(RenderWindow& window) const {
 }
 
 vector<Cube> Dame::getLegalMoves(const Model& model) const {
-    return Hex::mouvementsDame(positionCube, model, couleur);
+    auto mouvements = Hex::mouvementsDame(positionCube, model, couleur);
+    
+    std::cout << "Mouvements légaux Dame = ";
+    for(const Cube& m : mouvements) std::cout << cubeToLabel(m) << ' ';
+    std::cout << '\n';
+    
+    return mouvements;
 }
 
 

@@ -5,6 +5,8 @@
 #include <vector>
 #include <array>
 #include <cmath>
+#include <iostream>  // pour std::cout
+#include "CubeToLabel.h"   // pour convertir Cube → "A1", "J7", etc.
 
 using namespace sf;
 using namespace std;
@@ -23,7 +25,13 @@ void Roi::dessiner(RenderWindow& window) const {
 }
 
 vector<Cube> Roi::getLegalMoves(const Model& model) const {
-    return Hex::mouvementsRoi(positionCube, model, couleur);
+    auto mouvements = Hex::mouvementsRoi(positionCube, model, couleur);
+    
+    std::cout << "Mouvements légaux Roi = ";
+    for(const Cube& m : mouvements) std::cout << cubeToLabel(m) << ' ';
+    std::cout << '\n';
+    
+    return mouvements;
 }
 
 string Roi::getTypeName() const {
