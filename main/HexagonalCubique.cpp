@@ -1,31 +1,30 @@
 #include "HexagonalCubique.h"
 #include "Model.h"
-#include <iostream>
 #include <array>
 #include <vector>
 using std::array;
 using std::vector;
 
-
-//struct Cube { int x, y, z; };
-inline Cube operator+(Cube a, Cube b) {
-    return {a.x + b.x, a.y + b.y, a.z + b.z};
-}
+// ───────────────── utilitaire ────────────────────────────
+inline Cube operator+(Cube a, Cube b) { return {a.x+b.x, a.y+b.y, a.z+b.z}; }
 
 
 
-// 1)  Vecteurs du pion (Yalta 3J)
+
+// ──────────── directions correctes (testées) ─────────────
+// 0 = BLANC (bas)  1 = ROUGE (haut-gauche)  2 = NOIR (haut-droit)
 static const array<Cube,3> ADV = {
-        /* Blanc */ Cube{ 0, +1, -1},
-        /* Rouge */ Cube{-1,  0, +1},
-        /* Noir  */ Cube{+1, -1,  0}
+        /* BLANC */ Cube{-1,  0, +1},
+        /* ROUGE */ Cube{+1, -1,  0},
+        /* NOIR  */ Cube{ 0, +1, -1}
 };
-static const array<array<Cube,2>,3> CAP = {{
-        /* Blanc */ { Cube{+1, 0,-1}, Cube{-1,+1, 0} },
-        /* Rouge */ { Cube{ 0,+1,-1}, Cube{-1, 0,+1} },
-      /* Noir  */ { Cube{+1,-1, 0}, Cube{ 0,-1,+1} }
-                                           }};
 
+// Les deux cases diagonales adjacentes au vecteur d’avance
+static const array<array<Cube,2>,3> CAP = {{
+                                                   /* BLANC */ { Cube{-1, +1, 0}, Cube{ 0, -1, +1} },
+                                                   /* ROUGE */ { Cube{+1,  0,-1}, Cube{ 0, -1, +1} },
+                                                   /* NOIR  */ { Cube{-1, +1, 0}, Cube{+1,  0,-1} }
+                                           }};
 
 namespace Hex {
 
@@ -66,23 +65,24 @@ namespace Hex {
         return movesRoi(pos, model, couleur);
     }
 
-    vector<Cube> movesPion(const Cube pos, const Model& model, Couleur c)
+    vector<Cube> movesPion(const Cube pos,const Model& model,Couleur c)
     {
         vector<Cube> res;
-        int idx = (c == BLANC) ? 0 : (c == ROUGE) ? 1 : 2;
+        int idx = (c==BLANC)?0 : (c==ROUGE)?1 : 2;
 
         // a) avance simple
         Cube fwd = pos + ADV[idx];
         if (model.getCaseAtCube(fwd) && !model.getPieceAtCube(fwd))
             res.push_back(fwd);
 
-        // b) captures diagonales
+        // b) captures
         for (Cube d : CAP[idx]) {
             Cube dst = pos + d;
-            if (auto p = model.getPieceAtCube(dst); p && p->getCouleur() != c)
+            if (auto p = model.getPieceAtCube(dst); p && p->getCouleur()!=c)
                 res.push_back(dst);
         }
-        return res;         // (avance double, promo, en-passant : à venir)
+        // (avance double, promo, en-passant : à ajouter)
+        return res;
     }
 
 }

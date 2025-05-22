@@ -33,8 +33,8 @@ vector<Cube> Pion::getLegalMoves(const Model& model) const {
     auto moves = Hex::movesPion(positionCube, model, couleur);   // ← récupère les coups légaux
 
     std::cout << "Legal moves = ";
-    for (const Cube& m : moves) std::cout << cubeToLabel(m) << ' ';
-    std::cout << std::endl;
+    for (Cube m : moves) std::cout << cubeToLabel(m) << ' ';
+    std::cout << '\n';
 /*
     std::cout << "[getLegalMoves] posCube=(" << positionCube.x << ","
               << positionCube.y << "," << positionCube.z

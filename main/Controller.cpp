@@ -145,14 +145,13 @@ void Controller::handleEvent(const sf::Event& event)
 
             // --- nouveau : calcule et surligne tous les déplacements légaux ---
             vector<Cube> dests = clickedPiece->getLegalMoves(model);
-            vector<Case*> toHL;
-            toHL.push_back(selectedCase);                 // ← 1. on ré-ajoute la case d’origine
+            vector<Case*> hl;
+            hl.push_back(selectedCase);               // case source en orange
 
-            for (const Cube& c : dests)                   // ← 2. on empile les destinations
-                if (auto ca = model.getCaseAtCube(c))
-                    toHL.push_back(ca);
+            for (Cube c : dests)
+                if (auto ca = model.getCaseAtCube(c)) hl.push_back(ca);
+            view.setHighlightedCases(hl);
 
-            view.setHighlightedCases(toHL);               // ← 3. un seul appel avec tout
         }
     }
 }
