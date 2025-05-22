@@ -29,7 +29,7 @@ static void initialiserCentre(const Model& model)
 {
     if (centreInitialise) return;
     long long somme_x=0, somme_y=0, somme_z=0; size_t nombre=0;
-    for (const Case* c : model.getCases()){      // Model::getCases() existe déjà
+    for (const auto& c : model.getCases()){      // Model::getCases() existe déjà
         Cube q = c->getCubePos();
         somme_x+=q.x; somme_y+=q.y; somme_z+=q.z; ++nombre;
     }
@@ -183,71 +183,14 @@ namespace Hex {
         return resultat;
     }
 
-    vector<Cube> mouvementsPion(const Cube position, const Model& model, Couleur)
-    {
-        Case* caseActuelle = model.getCaseAtCube(position);
-        if (!caseActuelle) return {};
-
-        /*──────────────────────────────────────────────────────
-          1)  Deux directions « avant » possibles selon le côté
-              (identiques à l'édition précédente)
-        ──────────────────────────────────────────────────────*/
-        const int cote = caseActuelle->getSide();          // 0 = bas/blanc, 1 = gauche/rouge, 2 = droite/noir
-        Cube candidat1{}, candidat2{};
-        switch (cote) {
-            case 0: candidat1 = {-1, 0, +1};  candidat2 = {+1, -1, 0}; break;
-            case 1: candidat1 = {+1, -1, 0};  candidat2 = { 0, +1,-1}; break;
-            case 2: candidat1 = { 0, +1,-1};  candidat2 = {-1, 0,+1};  break;
-            default: return {};
+    vector<Cube> mouvementsPion(const Cube position, const Model& model, Couleur couleur) {
+        vector<Cube> mouvements;
+        for (const auto& c : model.getCases()) {      // Utilisation de const auto& pour les unique_ptr
+            if (c->estOccupee() && c->getPiece()->getCouleur() == couleur) {
+                // ... existing code ...
+            }
         }
-
-        /*──────────────────────────────────────────────────────
-          2)  Choisir la « bonne » branche
-              • on prend d'abord la direction dont la case existe
-              • si les deux existent, on préfère celle qui est VIDE
-        ──────────────────────────────────────────────────────*/
-        struct InfoDirection { Cube direction; bool existe; bool vide; };
-        auto info = [&](Cube d)->InfoDirection{
-            Cube p = position + d;
-            bool ex = model.getCaseAtCube(p);
-            bool em = ex && !model.getPieceAtCube(p);
-            return {d, ex, em};
-        };
-        InfoDirection info1 = info(candidat1), info2 = info(candidat2);
-
-        Cube avant{};
-        if      ( info1.existe && !info2.existe)           avant = candidat1;
-        else if ( info2.existe && !info1.existe)           avant = candidat2;
-        else if ( info1.vide  && !info2.vide)            avant = candidat1;
-        else if ( info2.vide  && !info1.vide)            avant = candidat2;
-        else if ( info1.vide && info2.vide)              avant = candidat1; // au choix
-        else /* les deux existent mais sont bloquées */ return {};
-
-        /*──────────────────────────────────────────────────────
-          3)  Diagonales de capture : les deux directions voisines
-        ──────────────────────────────────────────────────────*/
-        static const Cube DIRECTIONS[6] = {
-                {+1,-1,0},{+1,0,-1},{0,+1,-1},
-                {-1,+1,0},{-1,0,+1},{0,-1,+1}
-        };
-        auto index=[&](Cube v){for(int k=0;k<6;++k) if(DIRECTIONS[k].x==v.x&&DIRECTIONS[k].y==v.y&&DIRECTIONS[k].z==v.z) return k; return 0;};
-        int k = index(avant);
-        Cube capture1 = DIRECTIONS[(k+5)%6], capture2 = DIRECTIONS[(k+1)%6];
-
-        vector<Cube> resultat;
-
-        /* a) Avance simple */
-        Cube pas = position + avant;
-        if (!model.getPieceAtCube(pas)) resultat.push_back(pas);
-
-        /* b) Captures diagonales */
-        for (Cube d : {capture1, capture2}) {
-            Cube destination = position + d;
-            if (auto p = model.getPieceAtCube(destination); p && p->getCouleur()!=caseActuelle->getPiece()->getCouleur())
-                resultat.push_back(destination);
-        }
-
-        return resultat;   // (double-pas, promotion : à venir)
+        return mouvements;
     }
 
 }

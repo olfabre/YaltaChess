@@ -49,10 +49,10 @@ void Controller::handleEvent(const sf::Event& event)
 
         // Cherche la case sous le curseur
         hoveredCase = nullptr;
-        for (Case* c : model.getCases()) {
+        for (const auto& c : model.getCases()) {
             if (c->contientPoint(world) && c->estOccupee()) {
                 if (c->getPiece()->getCouleur() == players[model.getCurrentPlayerIdx()].color) {
-                    hoveredCase = c;
+                    hoveredCase = c.get();
                 }
                 break;
             }
@@ -70,9 +70,9 @@ void Controller::handleEvent(const sf::Event& event)
 
     // Cherche la case cliquée
     Case* clickedCase = nullptr;
-    for (Case* c : model.getCases()) {
+    for (const auto& c : model.getCases()) {
         if (c->contientPoint(world)) {
-            clickedCase = c;
+            clickedCase = c.get();
             break;
         }
     }
@@ -105,7 +105,6 @@ void Controller::handleEvent(const sf::Event& event)
         // Sinon on déplace la pièce vers la nouvelle case
         Piece* pieceToMove = selectedCase->getPiece();
         if (pieceToMove) {
-
             if (!pieceToMove->mouvementValide(clickedCase->getCubePos())) {
                 view.setEventMessage("Deplacement illegal : coup refuse.");
                 selectedCase = nullptr;
@@ -113,8 +112,6 @@ void Controller::handleEvent(const sf::Event& event)
                 view.setHighlightedCases({});
                 return;   // on annule tout
             }
-
-
 
             // On déplace la pièce
             model.movePieceCube(pieceToMove, clickedCase->getCubePos());
@@ -151,8 +148,11 @@ void Controller::handleEvent(const sf::Event& event)
             for (Cube c : dests)
                 if (auto ca = model.getCaseAtCube(c)) hl.push_back(ca);
             view.setHighlightedCases(hl);
-
         }
+    }
+
+    if (model.isPartieTerminee()) {
+        view.setEventMessage(model.getMessageFinPartie());
     }
 }
 

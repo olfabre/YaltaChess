@@ -368,60 +368,21 @@ void YaltaChessView::draw()
 
 
     // --- MISE À JOUR DES ptr de pièce dans chaque case ---
-        // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
-        for (Case* c : model.getCases()){
-            c->setPiece(nullptr);
-        }
+    // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
+    for (const auto& c : model.getCases()) {
+        c->setPiece(nullptr);
+    }
 
     // Puis on relie chaque Piece* à sa Case* en O(1)
-    for (Piece* p : model.getPieces()) {
+    for (const auto& p : model.getPieces()) {
         Case* ca = model.getCaseAtCube(p->getPositionCube());
         if (ca) {
-            ca->setPiece(p);
+            ca->setPiece(p.get());
         }
     }
-
-
-    // --- MISE À JOUR DES ptr de pièce dans chaque case ---
-    // (nécessaire pour que c->estOccupee() et c->getPiece() fonctionnent)
-
-
-
-/*
-// 1) D'abord, on vide toutes les cases
-    for (int i = 0; i < model.getCases().size(); ++i) {
-        Case* caseActuelle = model.getCases()[i];
-        caseActuelle->setPiece(nullptr);
-    }
-
-// 2) Pour chaque pièce, on calcule sa position en pixels
-    for (int j = 0; j < model.getPieces().size(); ++j) {
-        Piece* pieceActuelle = model.getPieces()[j];
-
-        // a) position cube de la pièce
-        Cube positionCube = pieceActuelle->getPositionCube();
-        // b) conversion cube → grille (Vector2i)
-        Vector2i positionGrille = Hex::cubeVersGrille(positionCube);
-        // c) conversion grille → pixel (Vector2f)
-        Vector2f positionPixel = gridToPixelRaw(positionGrille);
-
-        // 3) On cherche la case correspondante
-        for (int k = 0; k < model.getCases().size(); ++k) {
-            Case* caseTest = model.getCases()[k];
-            if (caseTest->contientPoint(positionPixel)) {
-                caseTest->setPiece(pieceActuelle);
-                break;  // on sort dès qu'on a trouvé
-            }
-        }
-    }
-*/
-
-
-
-
 
     // dessin de toutes les cases en mode normal
-    for (Case* c : model.getCases()) {
+    for (const auto& c : model.getCases()) {
         window.draw(*c);
     }
 
@@ -549,7 +510,7 @@ void YaltaChessView::draw()
 
 
 
-    for (auto p : model.getPieces()) {
+    for (const auto& p : model.getPieces()) {
         // Prépare le sprite de la pièce
         string key = p->getTypeName() + "_" +
                      (p->getCouleur() == BLANC ? "White" :

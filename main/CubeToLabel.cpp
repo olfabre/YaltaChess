@@ -54,7 +54,7 @@ std::string cubeToLabel(const Cube& c) {
 // Fonction pour tester la conversion sur toutes les cases
 void testCubeToLabel(const Model& model) {
     std::cout << "Test de conversion des coordonnées cube en labels :\n";
-    for (Case* c : model.getCases()) {
+    for (const auto& c : model.getCases()) {
         Cube cubePos = c->getCubePos();
         std::cout << "(" << cubePos.x << "," << cubePos.y << "," << cubePos.z << ")"
                   << " → " << cubeToLabel(cubePos) << "\n";
