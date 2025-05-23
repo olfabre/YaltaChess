@@ -25,8 +25,8 @@ class Piece;
 // Modèle de données pour un joueur
 struct PlayerInfo {
     string name;    // "Humain" ou prénom aléatoire
-    Couleur    color;    // BLANC, ROUGE ou NOIR
-    bool       isHuman;  // true pour vous, false pour IA
+    Couleur color;    // BLANC, ROUGE ou NOIR
+    bool isHuman;  // true pour vous, false pour IA
 };
 
 // Interface Observer

@@ -338,9 +338,10 @@ Piece* Model::getPieceAtCube(const Cube& c) const {
 
 // Déplace p vers dest (Cube), gère la capture et change de joueur
 void Model::movePieceCube(Piece* p, const Cube& dest) {
-    if (!p || !p->mouvementValide(dest)) return;
-    
-    Cube oldPos = p->getPositionCube();
+    //if (!p || !p->mouvementValide(dest)) return;
+    if (!p) return;
+
+        Cube oldPos = p->getPositionCube();
     
     // Gérer la capture si nécessaire
     if (auto captured = getPieceAtCube(dest)) {
@@ -385,10 +386,7 @@ Case* Model::getCaseAtCube(const Cube& c) const {
 
 
 
-// ------------------------------------------------------------------
-//  Corrige la coordonnée logique d'une pièce en se basant
-//  sur la case qui contient réellement son centre pixel.
-// ------------------------------------------------------------------
+
 void Model::realignerPieces()
 {
     // helper interne pour (x,y) → position-pixel

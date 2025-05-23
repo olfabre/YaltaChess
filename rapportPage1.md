@@ -9,6 +9,9 @@ J'y intégre tous les résultats de mes recherches au fur-et-à-mesure de mes re
  CMake SFML Project Template https://github.com/SFML/cmake-sfml-project
 
 
+## Dépôt
+
+Mon dépôt de mon travail: https://github.com/olfabre/YaltaChess
 
 
 
@@ -22,10 +25,14 @@ Le codage se fera en C++ en architecture Model Vue Controler. Le jeu aura une in
 
 Pour les deux premières séances de TP, j'ai préféré me concentrer sur la recherche d'informations, bien comprendre les technologies que je devrai utiliser et comment les utiliser dans une architecture MVC.
 
-Pour l'instant je ne me concentre pas sur les aspects spéficiques du code: design patterns, algorithmes avancées mais davantage dans la mise en route du projet, l'architecture MVC et les relations entre les entités.
+Pour l'instant je ne me concentre pas sur les aspects spéficiques du code: design patterns, algorithmes avancées mais davantage dans la mise en route du projet, l'architecture MVC et les relations entre les entités. Cela devait passer aussi par la conception d'un premier diagramme de classes simple.
 
 Mon principal but est débuter correctement le projet avec une bases solides et une organisation adaptée pour coder proprement en MVC.
 
+
+### Diagramme de classes simple
+
+![yalta_conception_uml](yalta_conception_uml.png)
 
 
 ## Étape 2: installation de SFML 
@@ -267,6 +274,12 @@ Compilation de tout le projet
 Lancement du test
 
 
+
+
+
+
+
+EE
 
 
 
@@ -1931,79 +1944,850 @@ Z⁻ → **Sud** : vecteur cubique **( 0, +1, −1 )**
 
 
 
-Quand je clique sur une case, mon Controller va:
-
-- calculer e gridPos (colonne, ligne) de mon clic
-- récupère la `Pièce*` à cette positon
-- appelle ma méthode `getLegalMoves()`sur cette pièce (type de pièce avec sa classe).
 
 
+#### Implémentation des coordonnées cubiques 
 
-Rappel pour compiler
+L'implémentation des coordonnées cubiques (x,y,z) pour représenter chaque case du plateau va permettre en principe de surmonter:
 
-```bash
+La représentation des directions de déplacement devient complexe
 
-cmake --build build_main  
+Le calcul des distances entre cases n'est pas trivial
 
-./build_main/bin/SFML_MVC_YaltaChess 
+La détermination des cases voisines est moins intuitive
+
+Les algorithmes de déplacement des pièces deviennent plus compliqués
+
+
+
+Dans mon contexte de mon jeu:
+
+- Chaque case est représentée par trois coordonnées (x,y,z) qui respectent la contrainte x+y+z=0
+- Les six directions principales (Est, Nord-Est, Nord-Ouest, Ouest, Sud-Ouest, Sud-Est) sont représentées par des vecteurs simples
+- Les calculs de distance et de voisinage deviennent plus intuitifs et cohérents
+
+La structure `Cube` définie dans `HexagonalCubique.h` encapsule ces trois coordonnées :
+
+```cpp
+struct Cube { int x, y, z; };
+```
+
+**Conversion entre systèmes de coordonnées**
+
+L'une des fonctionnalités clés est la conversion bidirectionnelle entre les coordonnées de grille 2D (utilisées pour l'affichage) et les coordonnées cubiques (utilisées pour la logique du jeu). Ces conversions sont implémentées dans le namespace `Hex` :
+
+```cpp
+// Conversion d'une case en coordonnées "offset odd-r" (grille 2D) vers les coordonnées cubiques
+inline Cube grilleVersCube(const Vector2i &g) {
+    int q = g.x - (g.y - (g.y & 1)) / 2;
+    int r = g.y;
+    int x = q;
+    int z = r;
+    int y = -x - z;
+    return {x, y, z};
+}
+
+// Conversion inverse : d'une position cubique vers la grille 2D "offset odd-r"
+inline Vector2i cubeVersGrille(const Cube &c) {
+    int q = c.x;
+    int r = c.z;
+    int col = q + (r - (r & 1)) / 2;
+    return {col, r};
+}
+```
+
+Ces fonctions permettent de maintenir deux représentations cohérentes du plateau :
+
+- Une représentation visuelle en 2D pour l'interface utilisateur
+- Une représentation logique en 3D (coordonnées cubiques) pour les calculs
+
+**Directions et vosinage**
+
+Le système de coordonnées cubiques simplifie considérablement la définition des directions de déplacement. Les six directions principales sont définies comme des constantes :
+
+```cpp
+static constexpr array<Cube,6> DIRECTIONS = {
+    Cube{+1,-1, 0},   // 0 : Est
+    Cube{+1, 0,-1},   // 1 : Nord-Est
+    Cube{ 0,+1,-1},   // 2 : Nord-Ouest
+    Cube{-1,+1, 0},   // 3 : Ouest
+    Cube{-1, 0,+1},   // 4 : Sud-Ouest
+    Cube{ 0,-1,+1}    // 5 : Sud-Est
+};
+```
+
+Cette représentation permet de calculer facilement les cases voisines en ajoutant simplement le vecteur de direction à la position actuelle :
+
+```cpp
+Cube voisin = position + DIRECTIONS[i];
+```
+
+**Calcul des mouvements des pièces**
+
+L'utilisation des coordonnées cubiques simplifie considérablement l'implémentation des règles de déplacement des pièces. Par exemple, pour la Tour :
+
+```cpp
+vector<Cube> mouvementsTour(const Cube position, const Model& model, Couleur couleur) {
+    vector<Cube> resultat;
+    
+    // La Tour se déplace en ligne droite dans les 6 directions hexagonales
+    for (const Cube& direction : DIRECTIONS) {
+        Cube positionActuelle = position;
+        while (true) {
+            positionActuelle = positionActuelle + direction;
+            
+            // Vérifier si on est toujours sur l'échiquier
+            if (!model.getCaseAtCube(positionActuelle)) break;
+            
+            // Vérifier si la case est occupée
+            if (auto piece = model.getPieceAtCube(positionActuelle)) {
+                // Si la pièce est de couleur différente, on peut la capturer
+                if (piece->getCouleur() != couleur) {
+                    resultat.push_back(positionActuelle);
+                }
+                break; // On ne peut pas aller plus loin dans cette direction
+            }
+            
+            // La case est vide, on peut y aller
+            resultat.push_back(positionActuelle);
+        }
+    }
+    
+    return resultat;
+}
+```
+
+Cette approche permet d'implémenter de manière élégante et cohérente les mouvements de toutes les pièces, y compris celles dont les déplacements sont plus complexes comme le Cavalier ou le Fou.
+
+**Conversion Cube vers Label**
+
+Ka notation algébrique "a1" par exemple est utilisée pour identifier les cases et enregistrer les coups. Pour maintenir cette convention familière aux joueurs d'échecs, il était nécessaire de développer un système de conversion entre les coordonnées cubiques et une notation algébrique adaptée au plateau hexagonal à trois joueurs pour au moins, afficher les coups joués sur la fenêtre principale.
+
+La conversion entre coordonnées cubiques et notation algébrique est implémentée dans les fichiers `CubeToLabel.h` et `CubeToLabel.cpp`. Deux approches ont été explorées:
+
+**Conversion algorithmique** : Une tentative initiale de conversion basée sur des calculs (visible dans la fonction `toAlgebrique` de `HexagonalCubique.h`)
+
+**Table de correspondance directe** : L'approche finalement retenue, qui utilise une map statique pour associer directement chaque coordonnée cubique à son label :
+
+```cpp
+std::string cubeToLabel(const Cube& c) {
+    // Table de correspondance directe entre coordonnées cube et labels
+    static const std::map<Cube, std::string, CubeCompare> cubeToLabelMap = {
+        {{4, -4, 0}, "A1"}, {{4, -5, 1}, "A2"}, {{3, -5, 2}, "A3"}, {{3, -6, 3}, "A4"},
+        // ... autres correspondances ...
+        {{9, -13, 4}, "L9"}, {{8, -12, 4}, "L10"}, {{7, -11, 4}, "L11"}, {{6, -10, 4}, "L12"}
+    };
+
+    auto it = cubeToLabelMap.find(c);
+    if (it != cubeToLabelMap.end()) {
+        return it->second;
+    }
+    
+    // Si les coordonnées ne sont pas trouvées, retourner une chaîne vide
+    return "";
+}
+
+```
+
+Une fonction de test `testCubeToLabel` a également été implémentée pour vérifier la cohérence de la conversion sur l'ensemble des cases du plateau.
+
+**Conclusion:**  je pensais vraiment que toutes les obstacles allaient être plus facile à passer avec l'implémentation des coordonnés cube et des labels. Malheureusement pour moi, un beugue s'est glissé dans mon code et impossible d'utiliser les avantages de ces coordonnées et de finaliser la totalité des fonctionnalités du jeu à ce stade.
+
+
+
+Malgrès les inconhérences au niveau de la gestion des cases et pièces avec les coordonnées cube, j'ai implémenté des règles et contraintes pour les pièces du jeu.
+
+**Architeture des règles et contraintes**
+
+Au cœur de l'implémentation des règles se trouve la classe abstraite `Piece`, qui définit l'interface commune à toutes les pièces de mon jeu;
+
+```cpp
+class Piece {
+protected:
+    Cube positionCube; // Position cubique sur l'échiquier
+    Couleur couleur;   // Couleur de la pièce (joueur)
+
+public:
+    Piece(Cube pos, Couleur coul);
+    virtual ~Piece() = default;
+
+    // Vérifie la validité du déplacement spécifique à chaque pièce
+    virtual bool mouvementValide(Cube nouvellePos) const = 0;
+
+    // retourne toutes les destinations valides selon le model
+    virtual vector<Cube> getLegalMoves(const Model&) const = 0;
+
+    // Dessine graphiquement la pièce (SFML)
+    virtual void dessiner(RenderWindow& window) const = 0;
+
+    void setPosition(Cube nouvellePos);
+    Couleur getCouleur() const;
+
+    virtual string getTypeName() const = 0;
+
+    // Accesseurs
+    const Cube& getPositionCube() const { return positionCube; }
+    void setPositionCube(const Cube& c) { positionCube = c; }
+
+    // Compatibilité IHM
+    Vector2i getPosition() const { return Hex::cubeVersGrille(positionCube); }
+};
+
+```
+
+Cette classe abstraite définit deux méthodes clés pour la gestion des règles:
+
+- `mouvementValide(Cube nouvellePos)` : vérifie si un déplacement vers une position donnée est valide pour la pièce
+- `getLegalMoves(const Model&)` : retourne toutes les destinations valides pour la pièce selon l'état actuel du jeu
+
+Chaque type de pièce (Roi, Dame, Tour, Fou, Cavalier, Pion) hérite de la classe `Piece` et implémente ses propres règles de déplacement. Prenons l'exemple du Roi
+
+```cpp
+class Roi : public Piece {
+private:
+    Model* modelPtr;
+
+public:
+    Roi(Cube pos, Couleur coul, Model* modelPtr);
+    bool mouvementValide(Cube nouvellePos) const override;
+    void dessiner(sf::RenderWindow& window) const override;
+    vector<Cube> getLegalMoves(const Model& model) const override;
+    string getTypeName() const override;
+};
+```
+
+L'implémentation de `mouvementValide` et `getLegalMoves` pour le Roi utilise les fonctions utilitaires définies dans le namespace `Hex` :
+
+```cpp
+bool Roi::mouvementValide(Cube nouvellePos) const {
+    auto mouvements = Hex::mouvementsRoi(positionCube, *modelPtr, couleur);
+    return std::find(mouvements.begin(), mouvements.end(), nouvellePos) != mouvements.end();
+}
+
+vector<Cube> Roi::getLegalMoves(const Model& model) const {
+    auto mouvements = Hex::mouvementsRoi(positionCube, model, couleur);
+    
+    std::cout << "Mouvements légaux Roi = ";
+    for(const Cube& m : mouvements) std::cout << cubeToLabel(m) << ' ';
+    std::cout << '\n';
+    
+    return mouvements;
+}
+```
+
+et les règles de déplacement spécifiques à chaque type de pièce sont implémentées dans le namespace `Hex` du fichier `HexagonalCubique.cpp`. Toujours pour le Roi
+
+```cpp
+vector<Cube> mouvementsRoi(const Cube position, const Model& model, Couleur couleur) {
+    vector<Cube> resultat;
+    
+    // Le Roi se déplace d'une case dans toutes les directions
+    for (const Cube& direction : DIRECTIONS) {
+        Cube destination = position + direction;
+        
+        // Vérifier si on est toujours sur l'échiquier
+        if (!model.getCaseAtCube(destination)) continue;
+        
+        // Vérifier si la case est occupée
+        if (auto piece = model.getPieceAtCube(destination)) {
+            // Si la pièce est de couleur différente, on peut la capturer
+            if (piece->getCouleur() != couleur) {
+                resultat.push_back(destination);
+            }
+            continue;
+        }
+        
+        // La case est vide, on peut y aller
+        resultat.push_back(destination);
+    }
+    
+    return resultat;
+}
+```
+
+**Gestion des èvenements utilisateur du controleur à la vue**
+
+Le contrôleur est responsable de la gestion des événements utilisateur et de la traduction de ces événements en actions sur le modèle:
+
+**Survol de la souris**: le contrôleur détecte la case survolée et met à jour la vue en conséquence ( il faut ne pas perdre en tête que SFML 3 raffaichit le contenu périodiquement avec ce que l'on appelle la frame)
+
+**Clic sur une pièce** : le contrôleur sélectionne la pièce et demande au modèle les mouvements légaux
+
+**Clic sur une destination** : le contrôleur vérifie la validité du mouvement et demande au modèle d'effectuer le déplacement
+
+```cpp
+void Controller::handleEvent(const sf::Event& event) {
+    // Gestion du survol de la souris
+    if (event.is<sf::Event::MouseMoved>()) {
+        // ...
+    }
+
+    // Gestion des clics
+    auto const* mouseBtn = event.getIf<sf::Event::MouseButtonPressed>();
+    if (!mouseBtn || mouseBtn->button != sf::Mouse::Button::Left) return;
+
+    // ...
+
+    // Si on a déjà une pièce sélectionnée
+    if (selectedCase) {
+        // Si on clique sur la même case, on désélectionne
+        if (clickedCase == selectedCase) {
+            selectedCase = nullptr;
+            view.setSelectedCase(nullptr);
+            view.setHighlightedCases({});
+            return;
+        }
+
+        // Vérifie si la case de destination est occupée par une pièce du joueur courant
+        if (clickedCase->estOccupee() && clickedCase->getPiece()->getCouleur() == couleurCourante) {
+            return; // On ne peut pas déplacer une pièce sur une case occupée par une pièce de même couleur
+        }
+
+        // Sinon on déplace la pièce vers la nouvelle case
+        Piece* pieceToMove = selectedCase->getPiece();
+        if (pieceToMove) {
+            if (!pieceToMove->mouvementValide(clickedCase->getCubePos())) {
+                view.setEventMessage("Deplacement illegal : coup refuse.");
+                selectedCase = nullptr;
+                view.setSelectedCase(nullptr);
+                view.setHighlightedCases({});
+                return;   // on annule tout
+            }
+
+            // On déplace la pièce
+            model.movePieceCube(pieceToMove, clickedCase->getCubePos());
+
+            // On met à jour le message d'événement
+            string message = string("Le joueur ") +
+                             (pieceToMove->getCouleur() == BLANC ? "Blanc" :
+                              pieceToMove->getCouleur() == NOIR ? "Noir" : "Rouge") +
+                             " bouge son " + pieceToMove->getTypeName() +
+                             " de " + cubeToLabel(selectedCase->getCubePos()) +
+                             " vers " + cubeToLabel(clickedCase->getCubePos());
+            view.setEventMessage(message);
+
+            // On réinitialise la sélection
+            selectedCase = nullptr;
+            view.setSelectedCase(nullptr);
+            view.setHighlightedCases({});
+        }
+        return;
+    }
+
+    // Si on n'a pas de pièce sélectionnée, on vérifie si on clique sur une pièce du joueur courant
+    if (clickedCase->estOccupee()) {
+        Piece* clickedPiece = clickedCase->getPiece();
+        if (clickedPiece && clickedPiece->getCouleur() == couleurCourante) {
+            selectedCase = clickedCase;
+            view.setSelectedCase(selectedCase);
+
+            // --- nouveau : calcule et surligne tous les déplacements légaux ---
+            vector<Cube> dests = clickedPiece->getLegalMoves(model);
+            vector<Case*> hl;
+            hl.push_back(selectedCase);               // case source en orange
+
+            for (Cube c : dests)
+                if (auto ca = model.getCaseAtCube(c)) hl.push_back(ca);
+            view.setHighlightedCases(hl);
+        }
+    }
+
+    if (model.isPartieTerminee()) {
+        view.setEventMessage(model.getMessageFinPartie());
+    }
+}
+```
+
+La vue `YaltaChessView` est responsable de l'affichage graphique du jeu. Elle reçoit des instructions du contrôleur pour mettre à jour l'affichage en fonction des actions de l'utilisateur.
+
+**Surbrillance des cases**: la vue met en évidence la case sélectionnée et les destinations possibles
+
+**Affichage des messages**: la vue affiche des messages d'événements (déplacement, capture, échec, etc.)
+
+**Rendu graphique**: la vue dessine les pièces et les cases selon leur état actuel
+
+```cpp
+void YaltaChessView::setHighlightedCases(const std::vector<Case*>& cases) {
+    highlightedCases = cases;
+}
+
+void YaltaChessView::setEventMessage(const string& message) {
+    eventText.setString(message);
+}
+```
+
+**Validation des mouvements et gestion des captures**
+
+La validation des mouvements se fait en deux étapes;
+
+**Vérification par la pièce**: la méthode `mouvementValide` de la pièce vérifie si le mouvement respecte les règles spécifiques à ce type de pièce
+
+**Vérification par le contrôleur**: le controleur vérifie des contraintes supplémentaires (tour du joueur, case occupée par une pièce amie, etc.)
+
+La capture d'une pièce adverse est gérée par le modèle dans la méthode `movePieceCube` 
+
+```cpp
+void Model::movePieceCube(Piece* p, const Cube& dest) {
+    // Sauvegarde de la position d'origine
+    Cube from = p->getPositionCube();
+    
+    // Vérifie si une pièce adverse occupe la destination
+    if (Piece* captured = getPieceAtCube(dest)) {
+        // Notifie les observateurs de la capture
+        notifyPieceCaptured(captured);
+        
+        // Supprime la pièce capturée
+        removePiece(captured);
+    }
+    
+    // Déplace la pièce
+    p->setPositionCube(dest);
+    
+    // Notifie les observateurs du déplacement
+    notifyPieceMoved(p, from, dest);
+    
+    // Passe au joueur suivant
+    nextPlayer();
+    
+    // Vérifie si la partie est terminée
+    verifierFinPartie();
+}
+
+```
+
+**Gestion de l'échec et mat**
+
+Le modèle vérifie après chaque coup si un joueur est en échec ou en échec et mat
+
+```cpp
+void Model::verifierFinPartie() {
+    // Vérifie si le joueur actuel est en échec
+    bool echec = estEnEchec(joueurActuel);
+    
+    // Vérifie si le joueur actuel a des mouvements légaux
+    bool aMouvements = aMouvementsLegaux(joueurActuel);
+    
+    if (echec && !aMouvements) {
+        // Échec et mat
+        partieTerminee = true;
+        messageFinPartie = "Échec et mat ! Le joueur " + 
+                          (joueurActuel == BLANC ? "Blanc" : 
+                           joueurActuel == NOIR ? "Noir" : "Rouge") + 
+                          " a perdu.";
+        
+        // Notifie les observateurs
+        notifyGameStateChanged(true, messageFinPartie);
+    }
+    else if (!aMouvements) {
+        // Pat
+        partieTerminee = true;
+        messageFinPartie = "Pat ! Le joueur " + 
+                          (joueurActuel == BLANC ? "Blanc" : 
+                           joueurActuel == NOIR ? "Noir" : "Rouge") + 
+                          " ne peut plus bouger.";
+        
+        // Notifie les observateurs
+        notifyGameStateChanged(true, messageFinPartie);
+    }
+}
+
+```
+
+
+
+Ensuite j'ai implémenté des Design Paterns. J'ai eu l'aide d'une de Chatgpt pour l'implémentation pour le Design Pattern Observer
+
+**le Design Pattern Factory**
+
+Le pattern Factory est implémenté via la classe `PieceFactory` dans le fichier `Model.h`. Ce pattern permet de centraliser la création des différentes pièces du jeu d'échecs, en encapsulant la logique d'instanciation et en fournissant une interface unifiée pour créer des objets de différentes classes dérivées de `Piece`.
+
+```cpp
+// Factory pour les pièces
+class PieceFactory {
+public:
+    static unique_ptr<Piece> createPiece(const string& type, const Cube& pos, Couleur coul, Model* model) {
+        if (type == "Roi") return make_unique<Roi>(pos, coul, model);
+        if (type == "Pion") return make_unique<Pion>(pos, coul, model);
+        if (type == "Cavalier") return make_unique<Cavalier>(pos, coul, model);
+        if (type == "Fou") return make_unique<Fou>(pos, coul, model);
+        if (type == "Tour") return make_unique<Tour>(pos, coul, model);
+        if (type == "Dame") return make_unique<Dame>(pos, coul, model);
+        
+        // Si le type n'est pas reconnu, on affiche une erreur
+        cerr << "Erreur : Type de pièce inconnu : " << type << endl;
+        return nullptr;
+    }
+
+    // Méthode pour obtenir la liste des types de pièces disponibles
+    static vector<string> getAvailablePieceTypes() {
+        return {"Roi", "Pion", "Cavalier", "Fou", "Tour", "Dame"};
+    }
+
+    // Méthode pour vérifier si un type de pièce est valide
+    static bool isValidPieceType(const string& type) {
+        auto types = getAvailablePieceTypes();
+        return find(types.begin(), types.end(), type) != types.end();
+    }
+};
+
+```
+
+Son fonctionnement:
+
+**Méthode de création centralisée**: la méthode statique `createPiece` prend en paramètre le type de pièce (sous forme de chaîne de caractères), sa position, sa couleur et une référence au modèle.
+
+**Instanciation dynamique**: en fonction du type spécifié, la factory crée l'instance appropriée de la classe dérivée de `Piece` (Roi, Dame, Tour, etc.) en utilisant `make_unique` pour une gestion automatique de la mémoire.
+
+**Validation des types**: la méthode `isValidPieceType` permet de vérifier si un type de pièce est valide avant de tenter de le créer.
+
+**Enumération des types disponibles**: la méthode `getAvailablePieceTypes` fournit la liste de tous les types de pièces que la factory peut créer.
+
+La factory est principalement utilisée lors de l'initialisation du plateau de jeu dans la méthode `initialiserPieces()` du `Model` 
+
+```cpp
+// Extrait de Model.cpp (initialiserPieces)
+void Model::initialiserPieces() {
+    // ...
+    for (int y = 0; y < 12; ++y) {
+        for (int x = 0; x < 12; ++x) {
+            auto [coul, type] = SETUP[y][x];
+            if (coul < 0 || type < 0) continue;
+            
+            // Conversion des indices en types de pièces
+            string pieceType;
+            switch (type) {
+                case 0: pieceType = "Roi"; break;
+                case 1: pieceType = "Pion"; break;
+                case 2: pieceType = "Cavalier"; break;
+                case 3: pieceType = "Fou"; break;
+                case 4: pieceType = "Tour"; break;
+                case 5: pieceType = "Dame"; break;
+                default: continue;
+            }
+            
+            // Conversion des indices en couleurs
+            Couleur couleur;
+            switch (coul) {
+                case 0: couleur = BLANC; break;
+                case 1: couleur = ROUGE; break;
+                case 2: couleur = NOIR; break;
+                default: continue;
+            }
+            
+            // Création de la pièce via la factory
+            Cube cubePos = Hex::grilleVersCube({x, y});
+            auto piece = PieceFactory::createPiece(pieceType, cubePos, couleur, this);
+            if (piece) {
+                pieces.push_back(std::move(piece));
+            }
+        }
+    }
+    // ...
+}
+
 ```
 
 
 
 
 
-## **Pièce et Case — les méthodes doivent rester synchrones**
+**Le Design Pattern Observer**
 
-Dans `Case.cpp` et `Piece.cpp`, rien de spécial à changer si tu fais bien le lien pièce/case avec `ca->setPiece(p)` à chaque création de pièce.
+Le pattern Observer est implémenté via les interfaces `GameObserver` et `GameObservable` dans le fichier `Model.h`, avec une implémentation concrète d'observateur dans la classe `GameLogger` (fichier `GameLogger.h`). Ce pattern permet de notifier automatiquement plusieurs objets (observateurs) des changements d'état dans un objet observé (le modèle du jeu), sans créer de couplage fort entre ces objets.
 
-------
+```cpp
+// Interface Observer
+class GameObserver {
+public:
+    virtual ~GameObserver() = default;
+    virtual void onPieceMoved(Piece* piece, const Cube& from, const Cube& to) = 0;
+    virtual void onPieceCaptured(Piece* captured) = 0;
+    virtual void onGameStateChanged(bool isGameOver, const string& message) = 0;
+};
 
-## 4. **Pièges à éviter**
+// Interface Observable
+class GameObservable {
+public:
+    virtual ~GameObservable() = default;
+    virtual void addObserver(GameObserver* observer) = 0;
+    virtual void removeObserver(GameObserver* observer) = 0;
+protected:
+    virtual void notifyPieceMoved(Piece* piece, const Cube& from, const Cube& to) = 0;
+    virtual void notifyPieceCaptured(Piece* captured) = 0;
+    virtual void notifyGameStateChanged(bool isGameOver, const string& message) = 0;
+};
 
-- **Ne jamais créer deux pièces sur la même Case** (vérifie avec un print si besoin).
-- **Ne jamais utiliser le Side pour déterminer la couleur d'une pièce à la création !** Utilise uniquement la couleur du SETUP (très fréquent comme bug !).
-- **Toujours mettre à jour le pointeur de pièce dans la Case avec `ca->setPiece(p)`**.
+```
 
-------
+La classe `Model` implémente l'interface `GameObservable` et gère une liste d'observateurs
 
-## 5. **Résumé des fichiers concernés**
+```cpp
+class Model : public GameObservable
+{
+private:
+    vector<GameObserver*> observers;
+    // ...
 
-- **Model.cpp** (partie création de pièces, comme ci-dessus)
-- **Controller.cpp** (affichage des infos à la sélection)
-- **Case.cpp** (rien à changer si getPiece/setPiece sont simples)
-- **Piece.cpp** (rien à changer sauf si `getTypeName` est mal implémenté pour tes pièces)
+public:
+    // ...
+    
+    // Implémentation des méthodes de GameObservable
+    void addObserver(GameObserver* observer) override {
+        observers.push_back(observer);
+    }
+    
+    void removeObserver(GameObserver* observer) override {
+        auto it = find(observers.begin(), observers.end(), observer);
+        if (it != observers.end()) {
+            observers.erase(it);
+        }
+    }
+
+protected:
+    void notifyPieceMoved(Piece* piece, const Cube& from, const Cube& to) override {
+        for (auto observer : observers) {
+            observer->onPieceMoved(piece, from, to);
+        }
+    }
+    
+    void notifyPieceCaptured(Piece* captured) override {
+        for (auto observer : observers) {
+            observer->onPieceCaptured(captured);
+        }
+    }
+    
+    void notifyGameStateChanged(bool isGameOver, const string& message) override {
+        for (auto observer : observers) {
+            observer->onGameStateChanged(isGameOver, message);
+        }
+    }
+};
+```
+
+La classe `GameLogger` implémente l'interface `GameObserver` pour journaliser les événements du jeu
+
+```cpp
+class GameLogger : public GameObserver {
+private:
+    ofstream logFile;
+    // ...
+
+public:
+    GameLogger() {
+        // Initialisation du fichier de log
+        // ...
+    }
+
+    void onPieceMoved(Piece* piece, const Cube& from, const Cube& to) override {
+        if (!logFile.is_open()) {
+            cerr << "Erreur : Fichier de log non ouvert dans onPieceMoved" << endl;
+            return;
+        }
+        
+        string couleur;
+        switch(piece->getCouleur()) {
+            case BLANC: couleur = "Blanc"; break;
+            case NOIR: couleur = "Noir"; break;
+            case ROUGE: couleur = "Rouge"; break;
+        }
+        
+        logFile << getCurrentTimestamp() << " - Déplacement : " 
+                << couleur << " " << piece->getTypeName()
+                << " de (" << from.x << "," << from.y << "," << from.z << ")"
+                << " vers (" << to.x << "," << to.y << "," << to.z << ")\n";
+        logFile.flush();
+    }
+
+    void onPieceCaptured(Piece* captured) override {
+        // Journalisation des captures
+        // ...
+    }
+
+    void onGameStateChanged(bool isGameOver, const string& message) override {
+        // Journalisation des changements d'état du jeu
+        // ...
+    }
+};
+
+```
+
+Son fonctionnement:
+
+**Enregistrement des observateurs**: les objets intéressés par les événements du jeu s'enregistrent auprès du modèle via la méthode `addObserver`.
+
+**Notification des événements**: lorsqu'un événement important se produit (déplacement de pièce, capture, changement d'état du jeu), le modèle notifie tous les observateurs enregistrés en appelant les méthodes appropriées.
+
+**Traitement des notifications**: chaque observateur traite les notifications selon les besoins spécifiques (journalisation, mise à jour de l'interface, etc.).
+
+Le pattern Observer est utilisé pour notifier les événements importants du jeu, comme dans la méthode `movePieceCube` du `Model` 
+
+```cpp
+void Model::movePieceCube(Piece* p, const Cube& dest) {
+    // Sauvegarde de la position d'origine
+    Cube from = p->getPositionCube();
+    
+    // Vérifie si une pièce adverse occupe la destination
+    if (Piece* captured = getPieceAtCube(dest)) {
+        // Notifie les observateurs de la capture
+        notifyPieceCaptured(captured);
+        
+        // Supprime la pièce capturée
+        removePiece(captured);
+    }
+    
+    // Déplace la pièce
+    p->setPositionCube(dest);
+    
+    // Notifie les observateurs du déplacement
+    notifyPieceMoved(p, from, dest);
+    
+    // Passe au joueur suivant
+    nextPlayer();
+    
+    // Vérifie si la partie est terminée
+    verifierFinPartie();
+}
+
+```
 
 
 
-# **En résumé — point clé pour la suite**
+j'ai aussi implémenté un systèle d'affichage:
 
-- **La matrice SETUP sert UNIQUEMENT à l’initialisation du plateau** (pour poser les pièces de départ).
-- **TOUTE la logique de jeu, de sélection, de déplacement, doit utiliser les objets vivants** (cases, pièces, etc.), pas la matrice SETUP.
-- **Si ce que tu obtiens en sélection est correct (case, type, couleur), TU PEUX AVANCER SEREINEMENT** pour l’algorithme de déplacement.
+L'affichage des messages de coups joués s'inscrit dans l'architecture MVC (Modèle-Vue-Contrôleur) du jeu et implique principalement deux composants
+
+**La vue (YaltaChessView)**: responsable de l'affichage graphique des messages
+
+**Le contrôleur (Controller)**: responsable de la génération des messages en fonction des actions du joueur.
+
+La classe `YaltaChessView` déclare un attribut `eventText` pour stocker le message à afficher et une méthode `setEventMessage` pour mettre à jour ce message
+
+```cpp
+// Dans View.h
+class YaltaChessView
+{
+private:
+    // ...
+    Text eventText; // Texte pour afficher les événements du jeu
+    // ...
+
+public:
+    // ...
+    void setEventMessage(const string& message); // Méthode pour mettre à jour le message d'événement
+    // ...
+};
+```
+
+Le texte d'événement est initialisé dans le constructeur de `YaltaChessView` 
+
+```cpp
+// Dans View.cpp
+YaltaChessView::YaltaChessView(RenderWindow &win, const Model &mod)
+        : window(win), model(mod), eventText(tempFont)
+{
+    // ...
+    
+    // Configure le texte d'événement
+    eventText.setFont(coordFont);
+    eventText.setString("Bienvenue dans Yalta Chess !");
+    eventText.setCharacterSize(24);
+    eventText.setFillColor(Color::White);
+    eventText.setPosition(Vector2f(20.f, 20.f)); // Position en haut à gauche
+    
+    // ...
+}
+```
+
+La méthode `setEventMessage` permet de mettre à jour le contenu du message
+
+```cpp
+// Dans View.cpp
+void YaltaChessView::setEventMessage(const string& message) {
+    eventText.setString(message);
+}
+```
+
+La méthode `draw` de la vue s'occupe de rendre le texte à l'écran
+
+```cpp
+// Dans View.cpp
+void YaltaChessView::draw()
+{
+    // ...
+    
+    // Dessin du texte d'événement (en mode coordonnées fenêtre)
+    window.setView(window.getDefaultView());
+    window.draw(eventText);
+    window.setView(boardView);
+    
+    // ...
+}
+```
+
+Le contrôleur est responsable de la génération des messages en fonction des actions du joueur. Plusieurs types de messages sont générés
+
+```cpp
+// Messages d'erreur pour les coups invalides
+if (!pieceToMove->mouvementValide(clickedCase->getCubePos())) {
+    view.setEventMessage("Deplacement illegal : coup refuse.");
+    selectedCase = nullptr;
+    view.setSelectedCase(nullptr);
+    view.setHighlightedCases({});
+    return;   // on annule tout
+}
+
+```
 
 
 
-Les positions de départ sur l'échiquier:
+```cpp
+// Messages de confirmation pour les coups valides
+// Dans Controller.cpp
+// On déplace la pièce
+model.movePieceCube(pieceToMove, clickedCase->getCubePos());
 
-Noir (couleur = 1) côté gauche (side = 0) :
+// On met à jour le message d'événement
+string message = string("Le joueur ") +
+                 (pieceToMove->getCouleur() == BLANC ? "Blanc" :
+                  pieceToMove->getCouleur() == NOIR ? "Noir" : "Rouge") +
+                 " bouge son " + pieceToMove->getTypeName() +
+                 " de " + cubeToLabel(selectedCase->getCubePos()) +
+                 " vers " + cubeToLabel(clickedCase->getCubePos());
+view.setEventMessage(message);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```
 
 
 
+```cpp
+// Messages de fin de partie
+// Dans Controller.cpp
+if (model.isPartieTerminee()) {
+    view.setEventMessage(model.getMessageFinPartie());
+}
+```
+
+
+
+les messages des coups joués sont du type:
+
+L'identification du joueur "Le joueur Blanc/Noir/Rouge" +
+
+Le type de pièce déplacée "bouge son Roi/Dame/Tour/etc." +
+
+La position d'origine "de A1" +
+
+La position de destination "vers B2"
+
+
+
+## Diagramme de classes plus détaillé
+
+
+
+
+
+![yalta_uml_details](yalta_uml_details.png)
 
 
 
@@ -2013,8 +2797,39 @@ Noir (couleur = 1) côté gauche (side = 0) :
 
 
 
+### Conclusion
+
+**Réflexion personnelle sur le projet de jeu d'échecs à trois joueurs (Yalta)**
+
+Malgré les problèmes d'incohérences rencontrés au niveau des coordonnées cubiques et la non-finalisation de certaines fonctionnalités, ce projet de fin de semestre s'est révélé extrêmement enrichissant sur le plan pédagogique et technique.
 
 
+
+**Défis techniques et apprentissages**
+
+La mise en œuvre d'un système de coordonnées cubiques pour représenter un plateau hexagonal a constitué l'un des défis majeurs de ce projet. Bien que certaines incohérences persistent dans l'implémentation actuelle, ce travail m'a permis d'approfondir ma compréhension des systèmes de coordonnées non conventionnels et de leur application dans un contexte de jeu. La conversion entre différents systèmes de représentation (coordonnées cubiques, notation algébrique, coordonnées d'affichage) a nécessité une réflexion approfondie et m'a confronté à des problèmes mathématiques stimulants.
+
+
+
+**Application concrète du pattern MVC en C++**
+
+L'architecture Model-View-Controller (MVC) adoptée pour ce projet a considérablement amélioré ma compréhension de ce pattern de conception fondamental. Contrairement à son utilisation dans des frameworks web où le MVC est souvent imposé par l'infrastructure, l'implémentation manuelle en C++ m'a obligé à réfléchir attentivement à la séparation des responsabilités.
+
+
+
+**Exploration approfondie de SFML**
+
+L'utilisation de la bibliothèque SFML (Simple and Fast Multimedia Library) a été une expérience particulièrement formatrice. Au-delà des fonctionnalités de base pour l'affichage de formes et la gestion des événements, j'ai pu explorer des aspects plus avancés.
+
+
+
+**Implémentation de design patterns**
+
+L'intégration de design patterns comme Factory et Observer a renforcé ma compréhension de ces concepts théoriques en les appliquant à des problèmes concrets. La Factory pour la création des pièces et l'Observer pour la notification des événements du jeu ont démontré l'utilité de ces patterns pour créer un meilleur code.
+
+
+
+En définitive, ce projet illustre parfaitement comment les difficultés techniques peuvent se transformer en opportunités d'apprentissage significatives lorsqu'elles sont abordées avec persévérance et curiosité. L'utilistion de lIA m'a permis d'aller plus en profondeur dans les possibilités et réaliser des compléments d'informations au delà d'un outil de débogage.
 
 
 
